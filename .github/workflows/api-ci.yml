@@ -1,0 +1,56 @@
+name: API CI
+
+# Seth's stage covers the ASP.NET Core API and its CI. This workflow is scoped
+# to the /api folder so back-end pushes don't trigger the Android build and
+# vice versa. If the API lives in its own repository instead, move this file
+# there and delete it from this one.
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-ci.yml'
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ./api
+
+jobs:
+  build-and-test:
+    name: Build and unit test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build (Release, warnings not suppressed)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: api/**/TestResults/*.trx
+          retention-days: 14
+          if-no-files-found: ignore

@@ -1,0 +1,84 @@
+name: Android CI
+
+# Runs on every push to any branch, and on every PR into main or develop.
+# The rubric requires automated builds + unit tests on every remote push, so
+# the branch filter is deliberately wide rather than limited to main.
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - '.github/workflows/android-ci.yml'
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  # A new push to the same branch cancels the previous run rather than queueing it.
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and unit test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle (with dependency caching)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run Android Lint
+        run: ./gradlew --no-daemon lintDebug
+
+      - name: Run unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      # Uploaded even when tests fail, so the failure can be read without
+      # re-running the job locally.
+      - name: Upload unit test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: app/build/reports/tests/testDebugUnitTest/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-debug.html
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Assemble debug APK
+        run: ./gradlew --no-daemon assembleDebug
+
+      # Lets a marker download and install the build without opening Android Studio.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rentmate-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+          if-no-files-found: error
