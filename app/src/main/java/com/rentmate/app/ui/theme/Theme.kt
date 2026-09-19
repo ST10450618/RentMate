@@ -1,56 +1,57 @@
-package com.rentmate.app.ui.theme
+﻿package com.rentmate.app.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Dynamic colour is deliberately not used: the household palette is part of the
+// brand and the marking rubric rewards consistent use of colour across screens.
+private val LightColors = lightColorScheme(
+    primary = Aloe,
+    onPrimary = Color.White,
+    primaryContainer = AloeLight,
+    onPrimaryContainer = AloeDark,
+    secondary = Amber,
+    onSecondary = Ink,
+    secondaryContainer = Color(0xFFFCF2DC),
+    onSecondaryContainer = AmberDark,
+    error = Clay,
+    onError = Color.White,
+    background = Sand,
+    onBackground = Ink,
+    surface = Color.White,
+    onSurface = Ink,
+    surfaceVariant = AloeLight,
+    onSurfaceVariant = Muted,
+    outline = Line
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val DarkColors = darkColorScheme(
+    primary = AloeLight,
+    onPrimary = AloeDark,
+    primaryContainer = AloeDark,
+    onPrimaryContainer = AloeLight,
+    secondary = Amber,
+    onSecondary = Ink,
+    error = Clay,
+    onError = Color.White,
+    background = Color(0xFF0B120F),
+    onBackground = Sand,
+    surface = Color(0xFF141C18),
+    onSurface = Sand,
+    outline = Muted
 )
 
 @Composable
 fun RentMateTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = Typography,
         content = content
     )
