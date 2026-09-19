@@ -1,4 +1,4 @@
-package com.example.rentmate
+package com.example.app
 
 import org.junit.Test
 

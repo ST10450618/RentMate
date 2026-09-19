@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.rentmate"
+    namespace = "com.rentmate.app"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
 
     defaultConfig {
-        applicationId = "com.example.rentmate"
+        applicationId = "com.rentmate.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
