@@ -1,3 +1,23 @@
-<resources>
+﻿<resources>
     <string name="app_name">RentMate</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="section_notifications">Notify me about</string>
+    <string name="notif_bills">Bills due</string>
+    <string name="notif_chores">Chores assigned to me</string>
+    <string name="notif_shopping">Shopping list changes</string>
+    <string name="notif_maintenance">Maintenance updates</string>
+
+    <string name="section_language">Language</string>
+    <string name="lang_english">English</string>
+    <string name="lang_afrikaans">Afrikaans</string>
+    <string name="lang_xhosa">isiXhosa</string>
+
+    <string name="section_security">Security and display</string>
+    <string name="biometric_title">Unlock with biometrics</string>
+    <string name="biometric_desc">Fingerprint or face</string>
+    <string name="leaderboard_title">Show points leaderboard</string>
+    <string name="leaderboard_desc">Hides it for the whole household</string>
+
+    <string name="sign_out">Sign out</string>
 </resources>

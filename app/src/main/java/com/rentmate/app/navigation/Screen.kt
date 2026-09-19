@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,7 +44,8 @@ val bottomNavItems = listOf(
     BottomNavItem(Screen.Dashboard, Icons.Filled.Home),
     BottomNavItem(Screen.Bills, Icons.Filled.List),
     BottomNavItem(Screen.Chores, Icons.Filled.CheckCircle),
-    BottomNavItem(Screen.More, Icons.Filled.MoreHoriz)
+    BottomNavItem(Screen.More, Icons.Filled.Menu),
+            BottomNavItem(Screen.More, Icons.Filled.Menu)
 )
 
 /** Destinations reached from the More tab. */

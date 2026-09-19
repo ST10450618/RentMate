@@ -1,0 +1,21 @@
+﻿<resources>
+    <string name="settings_title">Instellings</string>
+    <string name="section_notifications">Stel my in kennis oor</string>
+    <string name="notif_bills">Rekeninge wat betaalbaar is</string>
+    <string name="notif_chores">Take wat aan my toegewys is</string>
+    <string name="notif_shopping">Veranderinge aan die inkopielys</string>
+    <string name="notif_maintenance">Opdaterings oor onderhoud</string>
+
+    <string name="section_language">Taal</string>
+    <string name="lang_english">Engels</string>
+    <string name="lang_afrikaans">Afrikaans</string>
+    <string name="lang_xhosa">isiXhosa</string>
+
+    <string name="section_security">Sekuriteit en vertoning</string>
+    <string name="biometric_title">Ontsluit met biometrie</string>
+    <string name="biometric_desc">Vingerafdruk of gesig</string>
+    <string name="leaderboard_title">Wys die puntelys</string>
+    <string name="leaderboard_desc">Versteek dit vir die hele huishouding</string>
+
+    <string name="sign_out">Teken uit</string>
+</resources>

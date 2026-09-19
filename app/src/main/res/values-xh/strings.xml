@@ -1,0 +1,21 @@
+﻿<resources>
+    <string name="settings_title">Useto</string>
+    <string name="section_notifications">Ndazise ngazo</string>
+    <string name="notif_bills">Iibhili ekufuneka zihlawulwe</string>
+    <string name="notif_chores">Imisebenzi endabelwe yona</string>
+    <string name="notif_shopping">Utshintsho kuluhlu lokuthenga</string>
+    <string name="notif_maintenance">Uhlaziyo ngolungiso</string>
+
+    <string name="section_language">Ulwimi</string>
+    <string name="lang_english">IsiNgesi</string>
+    <string name="lang_afrikaans">IsiBhulu</string>
+    <string name="lang_xhosa">IsiXhosa</string>
+
+    <string name="section_security">Ukhuseleko nomboniso</string>
+    <string name="biometric_title">Vula ngebhayometriki</string>
+    <string name="biometric_desc">Umnwe okanye ubuso</string>
+    <string name="leaderboard_title">Bonisa ibhodi yamanqaku</string>
+    <string name="leaderboard_desc">Iyifihla kuyo yonke indlu</string>
+
+    <string name="sign_out">Phuma</string>
+</resources>
