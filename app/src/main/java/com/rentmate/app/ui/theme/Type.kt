@@ -1,4 +1,4 @@
-package com.example.app.ui.theme
+package com.rentmate.app.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
