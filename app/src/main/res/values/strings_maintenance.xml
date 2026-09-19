@@ -1,0 +1,34 @@
+﻿<resources>
+    <string name="maintenance_title">Maintenance</string>
+    <string name="maintenance_new">New request</string>
+    <string name="maintenance_whats_wrong">What is wrong?</string>
+    <string name="maintenance_detail">More detail (optional)</string>
+    <string name="maintenance_category">Category</string>
+    <string name="maintenance_urgency">Urgency</string>
+    <string name="maintenance_photo">Attached photo</string>
+    <string name="maintenance_add_photo">Attach a photo</string>
+    <string name="maintenance_retake_photo">Replace photo</string>
+    <string name="maintenance_log_request">Log request</string>
+    <string name="maintenance_send_to_landlord">Send %1$d open request(s) to the landlord</string>
+    <string name="maintenance_logged">Logged requests</string>
+    <string name="maintenance_empty">Nothing logged yet. Add a request above.</string>
+    <string name="maintenance_mark_as">Mark as %1$s</string>
+
+    <string name="error_title_blank">Give the fault a short title</string>
+    <string name="error_title_long">Keep the title under 80 characters</string>
+
+    <string name="category_plumbing">Plumbing</string>
+    <string name="category_electrical">Electrical</string>
+    <string name="category_structural">Structural</string>
+    <string name="category_appliance">Appliance</string>
+    <string name="category_other">Other</string>
+
+    <string name="urgency_low">Low</string>
+    <string name="urgency_medium">Medium</string>
+    <string name="urgency_high">High</string>
+
+    <string name="status_open">Logged</string>
+    <string name="status_sent">Sent to landlord</string>
+    <string name="status_acknowledged">Acknowledged</string>
+    <string name="status_resolved">Resolved</string>
+</resources>
