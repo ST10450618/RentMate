@@ -1,4 +1,4 @@
-package com.example.rentmate
+package co.za.rentmate.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
