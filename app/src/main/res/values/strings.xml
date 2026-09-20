@@ -1,5 +1,5 @@
 ﻿<resources>
-    <string name="app_name">RentMate</string>
+    <string name="app_name" translatable="false">RentMate</string>
 
     <string name="settings_title">Settings</string>
     <string name="section_notifications">Notify me about</string>
