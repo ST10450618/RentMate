@@ -1,0 +1,21 @@
+## .NET
+bin/
+obj/
+out/
+*.user
+*.suo
+.vs/
+
+## Rider / VS Code
+.idea/
+*.DotSettings.user
+
+## Secrets - never commit these
+appsettings.Production.json
+appsettings.*.local.json
+**/firebase-service-account*.json
+*.pfx
+
+## OS
+.DS_Store
+Thumbs.db

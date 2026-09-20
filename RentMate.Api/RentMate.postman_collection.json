@@ -1,0 +1,264 @@
+{
+  "info": {
+    "name": "RentMate API",
+    "description": "Manual test collection for the RentMate REST API (PROG7314 Part 2, Seth's portion). Set baseUrl to http://localhost:5080 for local testing or your Azure URL once deployed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5080" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "householdId", "value": "" },
+    { "key": "inviteCode", "value": "" },
+    { "key": "billId", "value": "" },
+    { "key": "shareId", "value": "" },
+    { "key": "choreId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Google Sign-In",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"PASTE-A-REAL-GOOGLE-ID-TOKEN-HERE\",\n  \"fcmToken\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/google-signin", "host": ["{{baseUrl}}"], "path": ["api", "auth", "google-signin"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        },
+        {
+          "name": "Update My Settings",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"showLeaderboard\": false,\n  \"preferredLanguage\": \"af\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/me/settings", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me", "settings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Households",
+      "item": [
+        {
+          "name": "Create Household",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"12 Main Road\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/households", "host": ["{{baseUrl}}"], "path": ["api", "households"] }
+          }
+        },
+        {
+          "name": "Join Household",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"inviteCode\": \"{{inviteCode}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/households/join", "host": ["{{baseUrl}}"], "path": ["api", "households", "join"] }
+          }
+        },
+        {
+          "name": "My Households",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/mine", "host": ["{{baseUrl}}"], "path": ["api", "households", "mine"] }
+          }
+        },
+        {
+          "name": "Get Household",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}"] }
+          }
+        },
+        {
+          "name": "Set Landlord Contact",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"landlordName\": \"Mr Landlord\",\n  \"landlordEmail\": \"landlord@example.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/landlord", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "landlord"] }
+          }
+        },
+        {
+          "name": "Sync (pull changes since timestamp)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/households/{{householdId}}/sync?since=2026-01-01T00:00:00Z",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "households", "{{householdId}}", "sync"],
+              "query": [{ "key": "since", "value": "2026-01-01T00:00:00Z" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bills",
+      "item": [
+        {
+          "name": "Create Bill (Equal Split)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Electricity\",\n  \"amount\": 850.00,\n  \"dueDate\": \"2026-10-01T00:00:00Z\",\n  \"splitMethod\": \"Equal\",\n  \"shares\": [\n    { \"userId\": \"PASTE-USER-ID-1\", \"amountOrPercentage\": null },\n    { \"userId\": \"PASTE-USER-ID-2\", \"amountOrPercentage\": null }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/bills", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "bills"] }
+          }
+        },
+        {
+          "name": "List Bills",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/bills", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "bills"] }
+          }
+        },
+        {
+          "name": "Pay a Bill Share",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"clientTimestamp\": \"2026-09-18T10:00:00Z\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/bills/{{billId}}/shares/{{shareId}}/pay", "host": ["{{baseUrl}}"], "path": ["api", "bills", "{{billId}}", "shares", "{{shareId}}", "pay"] }
+          }
+        },
+        {
+          "name": "Settle Up Suggestions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/settle-up", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "settle-up"] }
+          }
+        },
+        {
+          "name": "Confirm Settlement",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"toUserId\": \"PASTE-USER-ID\",\n  \"amount\": 425.00\n}" },
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/settlements", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "settlements"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chores",
+      "item": [
+        {
+          "name": "Create Chore",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Take out bins\",\n  \"recurrence\": \"Weekly\",\n  \"pointValue\": 2,\n  \"rotationOrder\": [\"PASTE-USER-ID-1\", \"PASTE-USER-ID-2\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/chores", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "chores"] }
+          }
+        },
+        {
+          "name": "List Chores",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/chores", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "chores"] }
+          }
+        },
+        {
+          "name": "Complete Chore",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"offlineTimestamp\": null\n}" },
+            "url": { "raw": "{{baseUrl}}/api/chores/{{choreId}}/complete", "host": ["{{baseUrl}}"], "path": ["api", "chores", "{{choreId}}", "complete"] }
+          }
+        },
+        {
+          "name": "Leaderboard",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/leaderboard", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "leaderboard"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopping List",
+      "item": [
+        {
+          "name": "Add Item",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Milk\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/shopping-items", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "shopping-items"] }
+          }
+        },
+        {
+          "name": "List Items",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/shopping-items", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "shopping-items"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maintenance",
+      "item": [
+        {
+          "name": "Log Fault",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Leaking tap\",\n  \"description\": \"Kitchen tap won't stop dripping\",\n  \"photoUrl\": null,\n  \"category\": \"Plumbing\",\n  \"urgency\": \"Medium\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/maintenance", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "maintenance"] }
+          }
+        },
+        {
+          "name": "List Requests",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/maintenance", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "maintenance"] }
+          }
+        },
+        {
+          "name": "Send Open Requests to Landlord",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/households/{{householdId}}/maintenance/send-to-landlord", "host": ["{{baseUrl}}"], "path": ["api", "households", "{{householdId}}", "maintenance", "send-to-landlord"] }
+          }
+        }
+      ]
+    }
+  ]
+}
