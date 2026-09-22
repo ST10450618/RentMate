@@ -44,6 +44,14 @@ android {
             "String", "API_BASE_URL",
             "\"${localProps.getProperty("API_BASE_URL", "http://10.0.2.2:5000/")}\""
         )
+        buildConfigField(
+            "String", "SUPABASE_URL",
+            "\"${localProps.getProperty("SUPABASE_URL", "")}\""
+        )
+        buildConfigField(
+            "String", "SUPABASE_ANON_KEY",
+            "\"${localProps.getProperty("SUPABASE_ANON_KEY", "")}\""
+        )
     }
 
     signingConfigs {
@@ -102,14 +110,16 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.retrofit.core)
-    implementation(libs.retrofit.kotlinx.serialization)
-    implementation(libs.okhttp.core)
-    implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
 
     // Google Sign-In via Credential Manager (US-1)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.google.identity.googleid)
+
+    // Supabase: Postgres (via PostgREST) + Auth, replacing Seth's ASP.NET Core
+    // API and Azure SQL now that Azure hosting isn't available.
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.auth)
+    implementation(libs.ktor.client.okhttp)
 }
