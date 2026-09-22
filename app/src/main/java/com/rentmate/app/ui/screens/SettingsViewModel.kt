@@ -9,10 +9,11 @@ import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.SettingsRepository
 import com.rentmate.app.data.UserSettings
 import com.rentmate.app.data.applyLanguage
-import com.rentmate.app.network.AuthApi
-import com.rentmate.app.network.UpdateSettingsRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -21,10 +22,19 @@ import javax.inject.Inject
 
 private const val TAG = "SettingsViewModel"
 
+private val TOGGLE_COLUMN = mapOf(
+    SettingToggle.NOTIFY_BILLS to "notify_bills",
+    SettingToggle.NOTIFY_CHORES to "notify_chores",
+    SettingToggle.NOTIFY_SHOPPING to "notify_shopping_list",
+    SettingToggle.NOTIFY_MAINTENANCE to "notify_maintenance",
+    SettingToggle.BIOMETRIC_UNLOCK to "biometric_enabled",
+    SettingToggle.SHOW_LEADERBOARD to "show_leaderboard"
+)
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val authApi: AuthApi
+    private val supabase: SupabaseClient
 ) : ViewModel() {
 
     private val repository = SettingsRepository(context)
@@ -39,7 +49,7 @@ class SettingsViewModel @Inject constructor(
         Log.d(TAG, "setToggle ${toggle.name} = $value")
         viewModelScope.launch {
             repository.setToggle(toggle, value)
-            syncToAccount(toggle, value)
+            syncBoolean(TOGGLE_COLUMN.getValue(toggle), value)
         }
     }
 
@@ -48,22 +58,26 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.setLanguage(language)
             applyLanguage(context, language)
-            runCatching { authApi.updateSettings(UpdateSettingsRequest(preferredLanguage = language.tag)) }
-                .onFailure { Log.w(TAG, "settings sync failed: ${it.message}") }
+            syncString("preferred_language", language.tag)
         }
     }
 
-    /** US-3: preferences follow the user to a new device via PUT /api/auth/me/settings. */
-    private suspend fun syncToAccount(toggle: SettingToggle, value: Boolean) {
-        val request = when (toggle) {
-            SettingToggle.NOTIFY_BILLS -> UpdateSettingsRequest(notifyBills = value)
-            SettingToggle.NOTIFY_CHORES -> UpdateSettingsRequest(notifyChores = value)
-            SettingToggle.NOTIFY_SHOPPING -> UpdateSettingsRequest(notifyShoppingList = value)
-            SettingToggle.NOTIFY_MAINTENANCE -> UpdateSettingsRequest(notifyMaintenance = value)
-            SettingToggle.BIOMETRIC_UNLOCK -> UpdateSettingsRequest(biometricEnabled = value)
-            SettingToggle.SHOW_LEADERBOARD -> UpdateSettingsRequest(showLeaderboard = value)
-        }
-        runCatching { authApi.updateSettings(request) }
-            .onFailure { Log.w(TAG, "settings sync failed: ${it.message}") }
+    /** US-3: preferences follow the user to a new device via the profiles table. */
+    private suspend fun syncBoolean(column: String, value: Boolean) {
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return
+        runCatching {
+            supabase.from("profiles").update({ set(column, value) }) {
+                filter { eq("id", userId) }
+            }
+        }.onFailure { Log.w(TAG, "settings sync failed: ${it.message}") }
+    }
+
+    private suspend fun syncString(column: String, value: String) {
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return
+        runCatching {
+            supabase.from("profiles").update({ set(column, value) }) {
+                filter { eq("id", userId) }
+            }
+        }.onFailure { Log.w(TAG, "settings sync failed: ${it.message}") }
     }
 }
