@@ -10,11 +10,7 @@ plugins {
 
 android {
     namespace = "com.rentmate.app"
-    compileSdk {
-        version = release(37) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
     lint {
         // Afrikaans and isiXhosa cover the Settings screen; remaining screens are
         // translated for the final POE, where multi-language support is assessed.
