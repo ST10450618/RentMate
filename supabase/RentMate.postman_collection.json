@@ -1,0 +1,248 @@
+{
+  "info": {
+    "name": "RentMate (Supabase)",
+    "description": "REST calls against RentMate's live Supabase project: Postgrest CRUD plus the Postgres functions (RPC) that cover logic Postgrest can't. Set collection variables before running: base_url, apikey, access_token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://crmomoazxwrdsicfphav.supabase.co/rest/v1" },
+    { "key": "apikey", "value": "sb_publishable_qO9xPtTggI8XVLgPDRtQKw_ZPDyZs-L" },
+    { "key": "access_token", "value": "PASTE_A_REAL_USER_ACCESS_TOKEN_HERE" },
+    { "key": "household_id", "value": "PASTE_A_HOUSEHOLD_ID_HERE" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}" }]
+  },
+  "item": [
+    {
+      "name": "Households",
+      "item": [
+        {
+          "name": "List my households",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "apikey", "value": "{{apikey}}" }],
+            "url": { "raw": "{{base_url}}/households?select=*", "host": ["{{base_url}}"], "path": ["households"], "query": [{ "key": "select", "value": "*" }] }
+          }
+        },
+        {
+          "name": "RPC create_household",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"household_name\": \"Postman Test House\"\n}" },
+            "url": { "raw": "{{base_url}}/rpc/create_household", "host": ["{{base_url}}"], "path": ["rpc", "create_household"] }
+          }
+        },
+        {
+          "name": "RPC join_household",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"ABC123\"\n}" },
+            "url": { "raw": "{{base_url}}/rpc/join_household", "host": ["{{base_url}}"], "path": ["rpc", "join_household"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bills",
+      "item": [
+        {
+          "name": "List bills with shares",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "apikey", "value": "{{apikey}}" }],
+            "url": {
+              "raw": "{{base_url}}/bills?select=*,bill_shares(*,profiles(display_name))&household_id=eq.{{household_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["bills"],
+              "query": [
+                { "key": "select", "value": "*,bill_shares(*,profiles(display_name))" },
+                { "key": "household_id", "value": "eq.{{household_id}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create bill",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"household_id\": \"{{household_id}}\",\n  \"title\": \"Postman test bill\",\n  \"amount\": 100.00,\n  \"due_date\": \"2026-10-01T00:00:00Z\",\n  \"split_method\": \"Equal\",\n  \"issued_by_user_id\": \"PASTE_YOUR_USER_ID_HERE\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/bills", "host": ["{{base_url}}"], "path": ["bills"] }
+          }
+        },
+        {
+          "name": "RPC settle_up",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"household_id_in\": \"{{household_id}}\"\n}" },
+            "url": { "raw": "{{base_url}}/rpc/settle_up", "host": ["{{base_url}}"], "path": ["rpc", "settle_up"] }
+          }
+        },
+        {
+          "name": "RPC confirm_settlement",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"household_id_in\": \"{{household_id}}\",\n  \"to_user_id_in\": \"PASTE_A_USER_ID_HERE\",\n  \"amount_in\": 50.00\n}"
+            },
+            "url": { "raw": "{{base_url}}/rpc/confirm_settlement", "host": ["{{base_url}}"], "path": ["rpc", "confirm_settlement"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chores",
+      "item": [
+        {
+          "name": "List chores",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "apikey", "value": "{{apikey}}" }],
+            "url": {
+              "raw": "{{base_url}}/chores?select=*&household_id=eq.{{household_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["chores"],
+              "query": [
+                { "key": "select", "value": "*" },
+                { "key": "household_id", "value": "eq.{{household_id}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "RPC complete_chore",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"chore_id_in\": \"PASTE_A_CHORE_ID_HERE\"\n}" },
+            "url": { "raw": "{{base_url}}/rpc/complete_chore", "host": ["{{base_url}}"], "path": ["rpc", "complete_chore"] }
+          }
+        },
+        {
+          "name": "RPC leaderboard",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"household_id_in\": \"{{household_id}}\"\n}" },
+            "url": { "raw": "{{base_url}}/rpc/leaderboard", "host": ["{{base_url}}"], "path": ["rpc", "leaderboard"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopping list",
+      "item": [
+        {
+          "name": "List items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "apikey", "value": "{{apikey}}" }],
+            "url": {
+              "raw": "{{base_url}}/shopping_items?select=*&household_id=eq.{{household_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["shopping_items"],
+              "query": [
+                { "key": "select", "value": "*" },
+                { "key": "household_id", "value": "eq.{{household_id}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"household_id\": \"{{household_id}}\",\n  \"name\": \"Postman test item\",\n  \"added_by_user_id\": \"PASTE_YOUR_USER_ID_HERE\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/shopping_items", "host": ["{{base_url}}"], "path": ["shopping_items"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maintenance",
+      "item": [
+        {
+          "name": "List requests",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "apikey", "value": "{{apikey}}" }],
+            "url": {
+              "raw": "{{base_url}}/maintenance_requests?select=*&household_id=eq.{{household_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["maintenance_requests"],
+              "query": [
+                { "key": "select", "value": "*" },
+                { "key": "household_id", "value": "eq.{{household_id}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Log request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"household_id\": \"{{household_id}}\",\n  \"raised_by_user_id\": \"PASTE_YOUR_USER_ID_HERE\",\n  \"title\": \"Postman test fault\",\n  \"description\": \"Logged from Postman\",\n  \"category\": \"Other\",\n  \"urgency\": \"Low\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/maintenance_requests", "host": ["{{base_url}}"], "path": ["maintenance_requests"] }
+          }
+        },
+        {
+          "name": "RPC send_to_landlord",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "apikey", "value": "{{apikey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"household_id_in\": \"{{household_id}}\"\n}" },
+            "url": { "raw": "{{base_url}}/rpc/send_to_landlord", "host": ["{{base_url}}"], "path": ["rpc", "send_to_landlord"] }
+          }
+        }
+      ]
+    }
+  ]
+}
