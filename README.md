@@ -1,15 +1,15 @@
 # RentMate
 
 [![Android CI](https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml/badge.svg)](https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml)
-[![API CI](https://github.com/ST10450618/RentMate/actions/workflows/api-ci.yml/badge.svg)](https://github.com/ST10450618/RentMate/actions/workflows/api-ci.yml)
 
-**One household, one app.** RentMate consolidates bill splitting, chore rotation,
-a shared shopping list and landlord maintenance requests for people who share a
-home — and captures those actions offline, so a tenant on a depleted data bundle
-can still record what they did and have it reconcile later.
+**One household, one app.** RentMate puts bill splitting, chore rotation, a
+shared shopping list and landlord maintenance requests in one place for people
+who share a home. It also captures those actions offline, so a tenant on a
+depleted data bundle can still record what they did and sync it later.
 
-Native Android (Kotlin, Jetpack Compose) with a custom ASP.NET Core REST API
-hosted on Azure. Built for PROG7314 / OPSC7312 — Programming 3D, The IIE.
+It's a native Android app (Kotlin, Jetpack Compose) backed by Supabase
+(Postgres, PostgREST and Supabase Auth). Built for PROG7314 / OPSC7312,
+Programming 3D, at The IIE.
 
 ---
 
@@ -19,10 +19,11 @@ hosted on Azure. Built for PROG7314 / OPSC7312 — Programming 3D, The IIE.
 - [Features](#features)
 - [Screens](#screens)
 - [Architecture](#architecture)
+- [Why Supabase instead of Azure](#why-supabase-instead-of-azure)
 - [Technology stack](#technology-stack)
 - [Repository structure](#repository-structure)
 - [Getting started](#getting-started)
-- [REST API](#rest-api)
+- [Backend (Supabase)](#backend-supabase)
 - [Testing](#testing)
 - [Continuous integration](#continuous-integration)
 - [Version control workflow](#version-control-workflow)
@@ -36,24 +37,24 @@ hosted on Azure. Built for PROG7314 / OPSC7312 — Programming 3D, The IIE.
 
 ## Purpose and scope
 
-People sharing a home currently split household admin across three or four
+People sharing a home usually split household admin across three or four
 unrelated tools: a chat group for chores, a banking app for rent, a note for the
 shopping list, and a message thread with the landlord that nobody can find again.
 RentMate puts all four in one place.
 
-The competitive analysis in Part 1 established that no reviewed application covers
-this scope. Splitwise and Tricount handle money but not chores; Flatastic handles
-the household but not the tenant's relationship with a landlord. The maintenance
-request log is RentMate's clearest differentiator — none of the three reviewed
+The competitive analysis in Part 1 found that no reviewed app covers this scope.
+Splitwise and Tricount handle money but not chores. Flatastic handles the
+household but not the tenant's relationship with a landlord. The maintenance
+request log is RentMate's clearest differentiator: none of the three reviewed
 apps offers it.
 
 **In scope for this prototype:** SSO sign-in, household creation and membership,
 bills with configurable splits, chore rotation, shared shopping list, maintenance
-request log, settings, and a cloud-hosted REST API backed by Azure SQL.
+request log, settings, and a cloud-hosted REST API backed by Postgres.
 
 **Deferred to the final POE:** biometric unlock, offline mode with sync, push
-notifications, multi-language support, blob storage, NoSQL reads/writes, and
-production visual assets.
+notifications, multi-language support, blob storage for photos, and production
+visual assets.
 
 ## Features
 
@@ -61,10 +62,10 @@ Mandatory requirements from the module brief:
 
 | Feature | Story | Status |
 | --- | --- | --- |
-| SSO registration and sign-in | US-1 | <!-- ☐ / ☑ --> |
-| Settings menu | US-3 | |
-| Custom REST API connected to a database | US-5, US-6, US-9 | |
-| REST API integrated into the app | — | |
+| SSO registration and sign-in | US-1 | Done |
+| Settings menu | US-3 | Done |
+| Custom REST API connected to a database | US-5, US-6, US-9 | Done |
+| REST API integrated into the app | — | Done |
 | Biometric authentication | US-2 | Final POE |
 | Offline mode with sync | US-7 | Final POE |
 | Real-time push notifications | US-8 | Final POE |
@@ -74,14 +75,15 @@ Custom features defined during Part 1 design:
 
 | # | Feature | Story | What it does |
 | --- | --- | --- | --- |
-| 1 | **Maintenance request log** | US-10 | Photograph a fault, tag it by category and urgency, compile open items into a dated request to the landlord, then track each through open → sent → acknowledged → resolved. |
-| 2 | **Chore rotation and points** | US-9, US-12 | Resolves the rotation four cycles ahead so every housemate sees the same forward schedule. Points accrue silently on completion; the leaderboard can be hidden household-wide. |
-| 3 | **Settle-up** | US-11 | Applies debt simplification across outstanding balances to show the minimum set of payments that clears the household. |
+| 1 | **Maintenance request log** | US-10 | Photograph a fault, tag it by category and urgency, then let RentMate group open items into one dated request to the landlord. Each request moves through open → sent → acknowledged → resolved. |
+| 2 | **Chore rotation and points** | US-9, US-12 | Resolves the rotation four cycles ahead, so every housemate sees the same forward schedule instead of guessing whose turn it is. Points accrue quietly on completion, and the leaderboard can be hidden household-wide without affecting the points themselves. |
+| 3 | **Settle-up** | US-11 | Runs debt simplification across outstanding balances to show the smallest set of payments that clears the household, instead of everyone paying everyone back individually. |
 
 ## Screens
 
 Screen IDs match the navigation wireflow and UI mockups in the Part 1 design
-document, so a design decision can be traced from document to code.
+document, so you can trace a design decision from the document straight to the
+code that implements it.
 
 | ID | Screen | Delivers |
 | --- | --- | --- |
@@ -101,32 +103,60 @@ document, so a design decision can be traced from document to code.
 
 ## Architecture
 
-<!-- Export the UML component diagram to docs/architecture.png and embed it here:
-     ![RentMate architecture](docs/architecture.png) -->
+The client follows MVVM. ViewModels read and write directly against Supabase's
+Postgrest API, which is a real REST API generated from the Postgres schema
+(not the client talking to the database itself). Business logic that isn't
+plain CRUD, such as debt simplification and chore rotation, lives in Postgres
+functions and is called the same way, through `rpc()` calls over that same
+REST interface.
 
-The client follows MVVM with a local database as the UI's single source of truth.
-Screens observe ViewModel state; ViewModels read and write through repositories
-that hit Room first and the network second. A WorkManager sync worker is the only
-component permitted to replay queued offline writes.
+**Row Level Security is the access-control layer.** Every table checks "is the
+signed-in user a member of this household?" before returning or accepting a
+row. That check happens inside Postgres itself, driven by the JWT Supabase
+Auth issues on sign-in, so a client can't read or write another household's
+data no matter what it sends.
 
-The key constraint, visible in the component diagram: **no path runs from the
-Android client to the database.** All shared state passes through the REST API,
-which owns reconciliation and conflict resolution. Where the same record changes
-on two devices, the server-recorded timestamp wins and the losing device shows a
-non-blocking notice.
+A few structural decisions worth calling out:
 
-Structural decisions worth stating:
+- **No hand-rolled auth server.** Google Sign-In goes through Supabase Auth
+  directly (`signInWith(IDToken)`), which issues and refreshes the session.
+  Nothing in this app stores or validates a JWT itself.
+- **Server-side rotation resolution.** A Postgres function computes chore
+  rotation, rather than each device computing it independently. In plain
+  English: if every phone worked out "whose turn it is" on its own, two
+  housemates could easily end up disagreeing. Doing it once, server-side,
+  settles that.
+- **Four top-level destinations.** Dashboard, Bills, Chores and a More sheet.
+  Material 3 recommends three to five, and this keeps everything in one thumb
+  reach. Creation screens are modal and only reachable from their parent list,
+  so the back stack stays shallow.
 
-- **Local-first reads.** The UI never waits on the network to draw. This is what
-  makes the offline requirement an architectural property rather than a feature
-  bolted on at POE.
-- **Server-side rotation resolution.** Chore rotation is computed once by the API
-  rather than independently on each device, which is what prevents two housemates
-  disagreeing about whose turn it is.
-- **Four top-level destinations.** Dashboard, Bills, Chores and a More sheet — the
-  Material 3 recommendation is three to five, and everything stays in one thumb
-  reach. Creation screens are modal and reachable only from their parent list, so
-  the back stack stays shallow.
+Offline-first reads (Room as the local source of truth, with a WorkManager
+sync worker replaying queued writes) is designed but not yet built. It's
+explicitly Final POE scope per the brief, not something skipped by accident.
+
+## Why Supabase instead of Azure
+
+Part 1's design specified ASP.NET Core on Azure App Service with Azure SQL.
+That plan assumed Azure for Students credit, which turned out not to be
+available to this team, so Part 2 pivoted to Supabase instead. The RentMate.Api
+project (ASP.NET Core, Entity Framework Core, xUnit tests) still lives in this
+repo under `RentMate.Api/` as the record of that original design: its
+controllers, DTOs and two services (`DebtSimplificationService`,
+`ChoreRotationService`) are what the Postgres functions in `supabase/functions/`
+were ported from, so the algorithms specified in Part 1 are unchanged even
+though the runtime is not.
+
+What Supabase gives this project, mapped to the brief's mandatory
+requirements:
+
+- **A real REST API connected to a database.** Postgrest generates one
+  automatically from the Postgres schema, and Postgres functions cover the
+  logic Postgrest can't (`create_household`, `settle_up`, `complete_chore`,
+  and so on).
+- **No credit card required**, unlike Azure's free tier.
+- **Auth included.** Supabase Auth handles the Google OAuth exchange, which
+  replaces the JWT-issuing controller Part 1 designed.
 
 ## Technology stack
 
@@ -134,16 +164,14 @@ Structural decisions worth stating:
 | --- | --- |
 | Client | Kotlin, Jetpack Compose, Material 3 |
 | Client architecture | MVVM, Navigation Compose, Hilt |
-| Local persistence | Room |
-| Background work | WorkManager |
-| Networking | Retrofit + OkHttp, Kotlinx Serialization |
-| API | ASP.NET Core 8 Web API, Entity Framework Core |
-| Database | Azure SQL Database |
-| Hosting | Azure App Service (Azure for Students) |
-| Auth | Google SSO (OAuth 2.0), JWT bearer tokens |
-| Push | Firebase Cloud Messaging |
+| Local persistence | DataStore (settings only; Room + offline sync is Final POE) |
+| Networking | supabase-kt (Postgrest, Auth), Ktor |
+| Backend | Supabase: Postgres, PostgREST, Postgres functions (RPC) |
+| Database | Postgres (Supabase-managed) |
+| Auth | Google SSO (OAuth 2.0) via Supabase Auth |
+| Push | Firebase Cloud Messaging (Final POE) |
 | CI | GitHub Actions |
-| Testing | JUnit, MockK, Turbine (client); xUnit (API) |
+| Testing | JUnit (client) |
 
 ## Repository structure
 
@@ -154,8 +182,12 @@ Structural decisions worth stating:
 │       ├── main/java/...     # UI, ViewModels, repositories, data sources
 │       ├── main/res/         # Layouts, drawables, string resources
 │       └── test/             # Unit tests
-├── api/                      # ASP.NET Core Web API
-├── docs/                     # Diagrams, screenshots, design exports
+├── supabase/
+│   ├── migrations/           # Postgres schema + Row Level Security policies
+│   └── functions/            # Postgres functions (settle-up, rotation, etc.)
+├── keystore/                 # Shared debug keystore (see Getting started)
+├── RentMate.Api/             # Retired ASP.NET Core prototype - kept as the
+│                              # source the Postgres functions were ported from
 ├── .github/workflows/        # CI pipelines
 ├── CONTRIBUTING.md           # Branch and commit conventions
 └── README.md
@@ -163,98 +195,91 @@ Structural decisions worth stating:
 
 ## Getting started
 
-**Prerequisites:** Android Studio (Ladybug or newer), JDK 17, an Android device
-running 8.0+ with USB debugging enabled, .NET 8 SDK if you're working on the API.
+**Prerequisites:** Android Studio, JDK 17, an Android device running 8.0+ with
+USB debugging enabled, a Supabase project (free tier, no card needed).
 
 ```bash
 git clone https://github.com/ST10450618/RentMate.git
-cd REPO
+cd RentMate
 ```
 
-Create `local.properties` in the project root (it is gitignored) and add the API
-base URL:
+Create `local.properties` in the project root (it's gitignored) with:
 
 ```properties
-API_BASE_URL="https://<your-app-service>.azurewebsites.net/"
+sdk.dir=/path/to/your/Android/sdk
+SUPABASE_URL=https://<your-project>.supabase.co
+SUPABASE_ANON_KEY=<your-project's-anon-key>
+WEB_CLIENT_ID=<your-google-oauth-web-client-id>.apps.googleusercontent.com
 ```
 
-Then open the project in Android Studio, let Gradle sync, select your physical
-device and run. To build from the command line:
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are on your Supabase project's
+Settings → API page. `WEB_CLIENT_ID` is a **Web application** type OAuth
+client from Google Cloud Console (not Android, not Desktop) - the same one
+registered in Supabase's Google Auth provider.
+
+Debug builds sign with the keystore committed at `keystore/debug.keystore`,
+not the auto-generated per-machine one, so Google Sign-In's registered SHA-1
+stays valid no matter who builds the app or where.
+
+Then open the project in Android Studio, let Gradle sync, select your device
+and run. From the command line:
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-To run the API locally:
+## Backend (Supabase)
 
-```bash
-cd api
-dotnet run
-```
+The schema and business logic live in `supabase/migrations/` as plain SQL.
+Run them in order in your Supabase project's SQL Editor:
 
-## REST API
+1. `0001_init.sql` - tables and Row Level Security policies
+2. `0002_functions.sql` - `create_household`, `join_household`,
+   `complete_chore`, `forecast_chore`, `settle_up`, `confirm_settlement`,
+   `leaderboard`
+3. `0003_send_to_landlord.sql` - batches open maintenance requests
 
-Base URL: `https://<your-app-service>.azurewebsites.net/api`
-All endpoints except `/auth/*` require an `Authorization: Bearer <jwt>` header.
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| POST | `/auth/google` | Exchange a Google ID token for a RentMate JWT |
-| POST | `/households` | Create a household, returns an invite code |
-| POST | `/households/join` | Join using an invite code |
-| GET | `/households/{id}/bills` | List bills for a household |
-| POST | `/households/{id}/bills` | Create a bill and its splits |
-| GET | `/households/{id}/chores` | List chores and the rotation forecast |
-| POST | `/chores/{id}/complete` | Record a completion, advance the rotation |
-| GET / POST | `/households/{id}/shopping` | Shared shopping list |
-| GET / POST | `/households/{id}/maintenance` | Maintenance requests |
-| POST | `/notifications/register-device` | Register an FCM device token |
-
-<!-- Full payload schemas are in the Part 1 design document, Section 5. Consider
-     linking a Swagger/OpenAPI page here once the API is deployed. -->
+Every function is called through Postgrest's `rpc()` endpoint, so from the
+Android app's side it's still a normal REST call, just to a Postgres function
+instead of a hand-written controller action.
 
 ## Testing
 
 ```bash
 ./gradlew testDebugUnitTest      # client unit tests
 ./gradlew lintDebug              # static analysis
-cd api && dotnet test            # API unit tests
 ```
 
 Unit tests cover the logic worth protecting rather than chasing a coverage
-number: split calculations, rotation resolution, debt simplification, and the
-sync queue's conflict rules. Reports for every CI run are downloadable from the
-workflow's artifacts.
+number: chore rotation, and the maintenance request status/validation rules.
+The debt-simplification and rotation *algorithms* are also covered by the
+legacy `RentMate.Api.Tests` project (`cd RentMate.Api && dotnet test`), since
+that's where they were first written and tested before being ported into
+Postgres functions with the same logic.
 
 ## Continuous integration
 
-Two GitHub Actions workflows, each scoped by path so a client push doesn't
-trigger the back-end build:
-
-**`android-ci.yml`** — runs on every push to any branch and on every PR into
+**`android-ci.yml`** runs on every push to any branch and on every PR into
 `main` or `develop`. It checks out the code, sets up JDK 17 with Gradle
-dependency caching, runs Android Lint, runs the unit test suite, and assembles a
-debug APK. Test and lint reports upload as artifacts even when the job fails, so
-a failure can be diagnosed from the Actions tab without reproducing it locally.
-The APK is retained for 30 days, which means the current build can be installed
-straight from GitHub.
+dependency caching, runs Android Lint, runs the unit test suite, and assembles
+a debug APK. Test and lint reports upload as artifacts even when the job
+fails, so you can diagnose a failure from the Actions tab without reproducing
+it locally.
 
-**`api-ci.yml`** — the same idea for the ASP.NET Core API: restore, build in
-Release, run xUnit tests, upload results.
+**`api-ci.yml`** still builds and tests the retired `RentMate.Api` project.
+It's kept green because that code is still real (the Postgres functions were
+ported from it), just no longer what the app talks to at runtime.
 
 Both use a concurrency group keyed on the branch, so pushing twice in quick
-succession cancels the stale run instead of queueing it.
-
-The point of this setup is verification outside the machine that wrote the code.
-A build that only compiles on one laptop is not a build.
+succession cancels the stale run instead of queuing it.
 
 ## Version control workflow
 
-`main` always builds and is only merged into from `develop` at milestones.
+`main` always builds and only gets merged into from `develop`, at milestones.
 Feature work happens on `feature/<area>-<name>` branches and reaches `develop`
-through pull requests reviewed by another team member. Commits follow
-Conventional Commits — `feat(maintenance): add photo attachment to request form`.
-Full conventions are in [CONTRIBUTING.md](CONTRIBUTING.md).
+through pull requests, reviewed by another team member. Commits follow
+Conventional Commits, for example `feat(maintenance): add photo attachment to
+request form`. Full conventions are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Milestone tags: `part-2` for the prototype submission, `final-poe` for the final
 deployment commit.
@@ -264,18 +289,19 @@ deployment commit.
 <!-- Replace with the unlisted YouTube link before submission. -->
 **Watch the demo:** _link pending_
 
-Covers: SSO registration and login, changing and saving settings, live data
-round-trips against the hosted API, visual confirmation of data changing in the
-auth service, API and database, and each custom feature.
+Covers: SSO registration and login, changing and saving settings, live
+round-trips against Supabase's REST API, visual confirmation of data changing
+in Supabase Auth's Users tab, the Postgrest API, and the Table Editor, plus
+each custom feature.
 
 ## Team
 
 | Member | Part 2 responsibilities |
 | --- | --- |
 | James | Project setup, Compose navigation shell, Settings screen, maintenance log feature |
-| Seth | REST API — six controllers, Azure hosting, API tests and CI |
+| Seth | Original REST API design: six controllers, data model and the debt-simplification/rotation algorithms, later ported into Supabase's Postgres functions |
 | Michael | SSO sign-in, API integration into the app, settle-up feature |
-| Ali | UI build-out across all screens, chore rotation and points, demo video |
+| Ali | UI build-out across all screens, chore rotation and points, demo video, Supabase migration |
 
 ## Roadmap to final POE
 
@@ -284,7 +310,6 @@ auth service, API and database, and each custom feature.
 - Push notifications via Firebase Cloud Messaging (US-8)
 - Multi-language: English, Afrikaans, isiXhosa (US-4)
 - Blob storage for maintenance photos
-- NoSQL read/write path
 - Production icon and final visual assets
 - Signed release APK and Play Store screenshots
 
@@ -295,8 +320,8 @@ tooling was used during this phase, as required by the brief (maximum 500 words)
 
 ## References
 
-[1] Microsoft, "ASP.NET Core documentation." https://learn.microsoft.com/aspnet/core/
-[2] Microsoft, "Azure for Students." https://azure.microsoft.com/free/students/
+[1] Microsoft, "Azure for Students." https://azure.microsoft.com/free/students/
+[2] Supabase, "Supabase Docs." https://supabase.com/docs
 [3] Google, "Biometric authentication." https://developer.android.com/identity/sign-in/biometric-auth
 [4] Google, "Firebase Cloud Messaging." https://firebase.google.com/docs/cloud-messaging
 [5] Google, "Material Design 3." https://m3.material.io/
