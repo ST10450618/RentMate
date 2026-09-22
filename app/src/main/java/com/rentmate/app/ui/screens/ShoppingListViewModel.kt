@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import java.time.Instant
 import javax.inject.Inject
 
@@ -23,10 +22,13 @@ data class ShoppingListUiState(
     val error: String? = null
 )
 
-@Serializable
-private data class ShoppingItemInsert(val household_id: String, val name: String, val added_by_user_id: String)
-
-private val SHOPPING_ITEM_COLUMNS = Columns.raw("*, added_by_user_id(display_name), purchased_by_user_id(display_name)")
+// Explicit column list (no "*"): the raw FK columns would otherwise collide
+// with the aliased embeds below, since both want the same JSON key.
+private val SHOPPING_ITEM_COLUMNS = Columns.raw(
+    "id, household_id, name, is_purchased, purchased_at, converted_to_bill_id, created_at, " +
+        "added_by_user_id:profiles!added_by_user_id(display_name), " +
+        "purchased_by_user_id:profiles!purchased_by_user_id(display_name)"
+)
 
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
@@ -50,18 +52,6 @@ class ShoppingListViewModel @Inject constructor(
                     .decodeList<ShoppingItemRow>()
             }.onSuccess { _state.value = _state.value.copy(loading = false, items = it) }
                 .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
-        }
-    }
-
-    fun add(name: String) {
-        if (name.isBlank()) return
-        viewModelScope.launch {
-            val householdId = currentHousehold.id.first() ?: return@launch
-            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
-            runCatching {
-                supabase.from("shopping_items").insert(ShoppingItemInsert(householdId, name.trim(), userId))
-            }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
     }
 

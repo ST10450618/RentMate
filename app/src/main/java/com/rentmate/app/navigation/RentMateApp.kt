@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rentmate.app.ui.screens.AddBillScreen
 import com.rentmate.app.ui.screens.AddChoreScreen
+import com.rentmate.app.ui.screens.AddShoppingItemScreen
 import com.rentmate.app.ui.screens.BillsScreen
 import com.rentmate.app.ui.screens.ChoresScreen
 import com.rentmate.app.ui.screens.DashboardScreen
@@ -85,7 +86,12 @@ fun RentMateApp(navController: NavHostController = rememberNavController()) {
             composable(Screen.More.route) {
                 MoreScreen(onOpen = { screen -> navController.navigate(screen.route) })
             }
-            composable(Screen.ShoppingList.route) { ShoppingListScreen() }
+            composable(Screen.ShoppingList.route) {
+                ShoppingListScreen(onAddItem = { navController.navigate(Screen.AddShoppingItem.route) })
+            }
+            composable(Screen.AddShoppingItem.route) {
+                AddShoppingItemScreen(onClose = { navController.popBackStack() })
+            }
             composable(Screen.Maintenance.route) { MaintenanceScreen() }
             composable(Screen.Settings.route) { SettingsScreen() }
         }
