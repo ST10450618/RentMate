@@ -9,15 +9,20 @@ plugins {
 }
 
 android {
-    namespace = "co.za.rentmate.app"
+    namespace = "com.rentmate.app"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
-
+    lint {
+        // Afrikaans and isiXhosa cover the Settings screen; remaining screens are
+        // translated for the final POE, where multi-language support is assessed.
+        warningsAsErrors = false
+        disable += "MissingTranslation"
+    }
     defaultConfig {
-        applicationId = "co.za.rentmate.app"
+        applicationId = "com.rentmate.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -25,11 +30,24 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val props = Properties().apply {
-            load(rootProject.file("local.properties").inputStream())
+        // WEB_CLIENT_ID and API_BASE_URL are per-developer and per-environment,
+        // so they live in the gitignored local.properties rather than in source
+        // control. A default keeps the build runnable (e.g. in CI, which only
+        // needs the app to compile, not to actually reach the API) even before
+        // that file is created locally.
+        val localProps = Properties()
+        val localPropsFile = rootProject.file("local.properties")
+        if (localPropsFile.exists()) {
+            localProps.load(localPropsFile.inputStream())
         }
-        buildConfigField("String", "WEB_CLIENT_ID", "\"${props["WEB_CLIENT_ID"]}\"")
-        buildConfigField("String", "API_BASE_URL", "\"${props["API_BASE_URL"]}\"")
+        buildConfigField(
+            "String", "WEB_CLIENT_ID",
+            "\"${localProps.getProperty("WEB_CLIENT_ID", "")}\""
+        )
+        buildConfigField(
+            "String", "API_BASE_URL",
+            "\"${localProps.getProperty("API_BASE_URL", "http://10.0.2.2:5000/")}\""
+        )
     }
 
     buildTypes {
@@ -60,6 +78,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -70,16 +99,8 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
 
-    // Google Sign-In via Credential Manager
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // Google Sign-In via Credential Manager (US-1)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.identity.googleid)
 }

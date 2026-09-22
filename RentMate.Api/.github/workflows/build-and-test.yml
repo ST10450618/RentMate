@@ -1,0 +1,66 @@
+name: Build and Test RentMate API
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore RentMate.Api.sln
+
+      - name: Build
+        run: dotnet build RentMate.Api.sln --no-restore --configuration Release
+
+      - name: Run automated tests
+        run: dotnet test RentMate.Api.sln --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+
+      - name: Publish test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./TestResults
+
+  # This second job only runs on pushes to main (not on pull requests) and
+  # only after build-and-test has succeeded, so a broken build or a failing
+  # test can never reach Azure. It is disabled by default - see the README
+  # section "Deploying to Azure with GitHub Actions" for the two things you
+  # need to fill in (AZURE_WEBAPP_NAME and the publish profile secret)
+  # before removing the "if: false" guard below.
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish
+        run: dotnet publish RentMate.Api/RentMate.Api.csproj --configuration Release --output ./publish
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "<YOUR-AZURE-WEBAPP-NAME>"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
