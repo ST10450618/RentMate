@@ -35,7 +35,7 @@ fun HouseholdSetupScreen(
     var inviteCode by remember { mutableStateOf("") }
 
     LaunchedEffect(state) {
-        if (state is HouseholdSetupUiState.Done) onDone()
+        if (state is HouseholdSetupUiState.Joined) onDone()
     }
 
     Column(
@@ -76,12 +76,16 @@ fun HouseholdSetupScreen(
         ) { Text("Join household") }
 
         Spacer(Modifier.height(16.dp))
-        Row {
-            when (val s = state) {
-                is HouseholdSetupUiState.Loading -> CircularProgressIndicator()
-                is HouseholdSetupUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
-                else -> {}
+        when (val s = state) {
+            is HouseholdSetupUiState.Loading -> Row { CircularProgressIndicator() }
+            is HouseholdSetupUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
+            is HouseholdSetupUiState.Created -> {
+                Text("Household created. Invite code:", style = MaterialTheme.typography.bodyMedium)
+                Text(s.inviteCode, style = MaterialTheme.typography.headlineMedium)
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text("Continue") }
             }
+            else -> {}
         }
     }
 }

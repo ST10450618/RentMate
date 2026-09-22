@@ -1,5 +1,6 @@
 package com.rentmate.app.auth
 
+import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.network.AuthApi
 import com.rentmate.app.network.GoogleSignInRequest
 import com.rentmate.app.network.HouseholdsApi
@@ -12,7 +13,8 @@ class AuthRepository @Inject constructor(
     private val googleAuthManager: GoogleAuthManager,
     private val authApi: AuthApi,
     private val householdsApi: HouseholdsApi,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    private val currentHousehold: CurrentHousehold
 ) {
     suspend fun signIn(): Result<SignInResult> = runCatching {
         val idToken = googleAuthManager.signIn()
@@ -20,6 +22,7 @@ class AuthRepository @Inject constructor(
         tokenStore.save(auth.accessToken, auth.refreshToken)
 
         val households = householdsApi.mine()
+        households.firstOrNull()?.let { currentHousehold.set(it.id) }
         SignInResult(hasHousehold = households.isNotEmpty())
     }
 

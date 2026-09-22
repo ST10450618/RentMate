@@ -2,6 +2,7 @@ package com.rentmate.app.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.network.CreateHouseholdRequest
 import com.rentmate.app.network.HouseholdsApi
 import com.rentmate.app.network.JoinHouseholdRequest
@@ -14,13 +15,16 @@ import javax.inject.Inject
 sealed interface HouseholdSetupUiState {
     data object Idle : HouseholdSetupUiState
     data object Loading : HouseholdSetupUiState
-    data object Done : HouseholdSetupUiState
+    /** Created shows the invite code (S2's "generate code with share action") before continuing. */
+    data class Created(val inviteCode: String) : HouseholdSetupUiState
+    data object Joined : HouseholdSetupUiState
     data class Error(val message: String) : HouseholdSetupUiState
 }
 
 @HiltViewModel
 class HouseholdSetupViewModel @Inject constructor(
-    private val householdsApi: HouseholdsApi
+    private val householdsApi: HouseholdsApi,
+    private val currentHousehold: CurrentHousehold
 ) : ViewModel() {
     private val _state = MutableStateFlow<HouseholdSetupUiState>(HouseholdSetupUiState.Idle)
     val state: StateFlow<HouseholdSetupUiState> = _state
@@ -30,7 +34,10 @@ class HouseholdSetupViewModel @Inject constructor(
         _state.value = HouseholdSetupUiState.Loading
         viewModelScope.launch {
             runCatching { householdsApi.create(CreateHouseholdRequest(name)) }
-                .onSuccess { _state.value = HouseholdSetupUiState.Done }
+                .onSuccess {
+                    currentHousehold.set(it.id)
+                    _state.value = HouseholdSetupUiState.Created(it.inviteCode)
+                }
                 .onFailure { _state.value = HouseholdSetupUiState.Error(it.message ?: "Could not create household") }
         }
     }
@@ -40,7 +47,10 @@ class HouseholdSetupViewModel @Inject constructor(
         _state.value = HouseholdSetupUiState.Loading
         viewModelScope.launch {
             runCatching { householdsApi.join(JoinHouseholdRequest(inviteCode)) }
-                .onSuccess { _state.value = HouseholdSetupUiState.Done }
+                .onSuccess {
+                    currentHousehold.set(it.id)
+                    _state.value = HouseholdSetupUiState.Joined
+                }
                 .onFailure { _state.value = HouseholdSetupUiState.Error(it.message ?: "Invalid invite code") }
         }
     }
