@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import java.util.Locale
 @Composable
 fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
     val requests by viewModel.requests.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { viewModel.refresh() }
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }

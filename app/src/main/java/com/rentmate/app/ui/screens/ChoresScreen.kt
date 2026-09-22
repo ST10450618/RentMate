@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,15 +10,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,13 +28,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ChoreRow
 import com.rentmate.app.data.LeaderboardRow
+import com.rentmate.app.ui.components.ScreenHeader
 
 // S6 - roster, four-week rotation forecast and points (US-9, US-12).
 @Composable
 fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
+    LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
+        topBar = { ScreenHeader(title = "Chores", subtitle = "This week's roster") },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddChore) {
                 Icon(Icons.Filled.Add, contentDescription = "Add chore")
@@ -39,8 +45,6 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
-            Text("Chores", style = MaterialTheme.typography.headlineSmall)
-
             if (state.loading) CircularProgressIndicator()
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
@@ -58,7 +62,11 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
 
 @Composable
 private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComplete: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(chore.title, style = MaterialTheme.typography.titleMedium)
@@ -83,7 +91,11 @@ private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComple
 
 @Composable
 private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text("Leaderboard", style = MaterialTheme.typography.titleMedium)
             leaderboard.sortedByDescending { it.month_points }.forEach { entry ->

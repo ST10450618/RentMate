@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,28 +12,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.BillWithSharesRow
+import com.rentmate.app.ui.components.ScreenHeader
 
 // S4 - bills by status, with settle-up (US-6, US-11).
 @Composable
 fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
+    LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
+        topBar = { ScreenHeader(title = "Bills", subtitle = "${state.bills.size} bill(s)") },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddBill) {
                 Icon(Icons.Filled.Add, contentDescription = "Add bill")
@@ -40,8 +46,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Bills", style = MaterialTheme.typography.headlineSmall)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Button(onClick = { viewModel.loadSettleUp() }) { Text("Settle Up") }
             }
 
@@ -88,7 +93,11 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 
 @Composable
 private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(bill.title, style = MaterialTheme.typography.titleMedium)
             Text("R${"%.2f".format(bill.amount)} - due ${bill.due_date.take(10)}", style = MaterialTheme.typography.bodySmall)
