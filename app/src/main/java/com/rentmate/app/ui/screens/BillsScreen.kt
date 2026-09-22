@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -23,9 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import com.rentmate.app.network.BillResponse
+import com.rentmate.app.data.BillWithSharesRow
 
 // S4 - bills by status, with settle-up (US-6, US-11).
 @Composable
@@ -62,15 +62,15 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                 if (state.settleUpLoading) {
                     CircularProgressIndicator()
                 } else {
-                    val suggestions = state.settleUp?.suggestions.orEmpty()
+                    val suggestions = state.settleUp.orEmpty()
                     if (suggestions.isEmpty()) {
                         Text("The household is already settled.")
                     } else {
                         Column {
                             suggestions.forEach { s ->
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text("${s.fromDisplayName} -> ${s.toDisplayName}: R${"%.2f".format(s.amount)}")
-                                    OutlinedButton(onClick = { viewModel.confirmSettlement(s.toUserId, s.amount) }) {
+                                    Text("${s.from_display_name} -> ${s.to_display_name}: R${"%.2f".format(s.amount)}")
+                                    OutlinedButton(onClick = { viewModel.confirmSettlement(s.to_user_id, s.amount) }) {
                                         Text("Confirm")
                                     }
                                 }
@@ -87,18 +87,18 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 }
 
 @Composable
-private fun BillRow(bill: BillResponse, onPay: (String, String) -> Unit) {
+private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(bill.title, style = MaterialTheme.typography.titleMedium)
-            Text("R${"%.2f".format(bill.amount)} - due ${bill.dueDate.take(10)}", style = MaterialTheme.typography.bodySmall)
-            bill.shares.forEach { share ->
+            Text("R${"%.2f".format(bill.amount)} - due ${bill.due_date.take(10)}", style = MaterialTheme.typography.bodySmall)
+            bill.bill_shares.forEach { share ->
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("${share.displayName}: R${"%.2f".format(share.amountOwed)}")
-                    if (share.isPaid) {
+                    Text("${share.profiles?.display_name ?: "?"}: R${"%.2f".format(share.amount_owed)}")
+                    if (share.is_paid) {
                         Text("Paid", color = MaterialTheme.colorScheme.primary)
                     } else {
-                        OutlinedButton(onClick = { onPay(bill.id, share.id) }) { Text("Mark paid") }
+                        OutlinedButton(onClick = { onPay(share.id) }) { Text("Mark paid") }
                     }
                 }
             }
