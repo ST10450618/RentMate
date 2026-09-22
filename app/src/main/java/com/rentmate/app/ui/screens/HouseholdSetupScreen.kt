@@ -1,18 +1,87 @@
-﻿package com.rentmate.app.ui.screens
+package com.rentmate.app.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.rentmate.app.navigation.Screen
-import com.rentmate.app.ui.components.StubScreen
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 
-// Owner: Michael (Stage 2) - create household, join by invite code.
+// US-5: create a household or join one with a six-character invite code.
 @Composable
-fun HouseholdSetupScreen(onDone: () -> Unit) {
-    StubScreen(
-        id = Screen.HouseholdSetup.id,
-        title = Screen.HouseholdSetup.title,
-        stories = Screen.HouseholdSetup.stories,
-        purpose = "Create a household or join an existing one with a six-character code.",
-        actionLabel = "Continue to dashboard (stub)",
-        onAction = onDone
-    )
+fun HouseholdSetupScreen(
+    onDone: () -> Unit,
+    viewModel: HouseholdSetupViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    var householdName by remember { mutableStateOf("") }
+    var inviteCode by remember { mutableStateOf("") }
+
+    LaunchedEffect(state) {
+        if (state is HouseholdSetupUiState.Done) onDone()
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Set up your household", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = householdName,
+            onValueChange = { householdName = it },
+            label = { Text("Household name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+        Button(
+            onClick = { viewModel.create(householdName) },
+            enabled = householdName.isNotBlank() && state !is HouseholdSetupUiState.Loading,
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Create household") }
+
+        Spacer(Modifier.height(24.dp))
+        Text("or join an existing one", style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = inviteCode,
+            onValueChange = { inviteCode = it },
+            label = { Text("Invite code") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+        Button(
+            onClick = { viewModel.join(inviteCode) },
+            enabled = inviteCode.isNotBlank() && state !is HouseholdSetupUiState.Loading,
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Join household") }
+
+        Spacer(Modifier.height(16.dp))
+        Row {
+            when (val s = state) {
+                is HouseholdSetupUiState.Loading -> CircularProgressIndicator()
+                is HouseholdSetupUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
+                else -> {}
+            }
+        }
+    }
 }
