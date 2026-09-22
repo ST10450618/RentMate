@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 @Serializable
 data class GoogleSignInRequest(val idToken: String, val fcmToken: String? = null)
@@ -23,6 +24,18 @@ data class UserResponse(
     val notifyChores: Boolean,
     val notifyShoppingList: Boolean,
     val notifyMaintenance: Boolean
+)
+
+@Serializable
+data class UpdateSettingsRequest(
+    val preferredLanguage: String? = null,
+    val showLeaderboard: Boolean? = null,
+    val notifyBills: Boolean? = null,
+    val notifyChores: Boolean? = null,
+    val notifyShoppingList: Boolean? = null,
+    val notifyMaintenance: Boolean? = null,
+    val biometricEnabled: Boolean? = null,
+    val fcmToken: String? = null
 )
 
 @Serializable
@@ -46,4 +59,7 @@ interface AuthApi {
 
     @GET("api/auth/me")
     suspend fun me(): UserResponse
+
+    @PUT("api/auth/me/settings")
+    suspend fun updateSettings(@Body request: UpdateSettingsRequest): UserResponse
 }

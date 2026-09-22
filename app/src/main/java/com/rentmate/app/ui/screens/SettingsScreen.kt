@@ -19,8 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.SettingGroup
@@ -32,7 +32,7 @@ import com.rentmate.app.data.UserSettings
  * biometric opt-in for US-2.
  */
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
+fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.state.collectAsStateWithLifecycle()
 
     SettingsContent(
