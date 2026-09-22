@@ -2,10 +2,10 @@
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,9 +43,9 @@ data class BottomNavItem(val screen: Screen, val icon: ImageVector)
 /** The four top-level destinations. Material 3 recommends three to five. */
 val bottomNavItems = listOf(
     BottomNavItem(Screen.Dashboard, Icons.Filled.Home),
-    BottomNavItem(Screen.Bills, Icons.Filled.List),
-    BottomNavItem(Screen.Chores, Icons.Filled.CheckCircle),
-    BottomNavItem(Screen.More, Icons.Filled.Menu)
+    BottomNavItem(Screen.Bills, Icons.Filled.Receipt),
+    BottomNavItem(Screen.Chores, Icons.Filled.Checklist),
+    BottomNavItem(Screen.More, Icons.Filled.MoreHoriz)
 )
 
 /** Destinations reached from the More tab. */
