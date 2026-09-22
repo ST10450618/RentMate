@@ -53,3 +53,4 @@ TestResults/
 .vscode/
 Thumbs.db
 *~
+.mockup-extract/
