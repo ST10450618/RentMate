@@ -22,7 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rentmate.app.network.ShoppingItemResponse
+import com.rentmate.app.data.ShoppingItemRow
 
 // S8 - shared shopping list, tick off as bought (US-13).
 @Composable
@@ -59,12 +59,12 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun ShoppingItemRow(item: ShoppingItemResponse, onToggle: () -> Unit) {
+private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Checkbox(checked = item.isPurchased, onCheckedChange = { onToggle() })
+        Checkbox(checked = item.is_purchased, onCheckedChange = { onToggle() })
         Column {
             Text(item.name, style = MaterialTheme.typography.bodyLarge)
-            Text("added by ${item.addedByDisplayName}", style = MaterialTheme.typography.bodySmall)
+            Text("added by ${item.added_by_user_id?.display_name ?: "?"}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }

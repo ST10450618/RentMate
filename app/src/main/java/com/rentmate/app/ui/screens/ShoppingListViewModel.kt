@@ -3,27 +3,34 @@ package com.rentmate.app.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
-import com.rentmate.app.network.AddShoppingItemRequest
-import com.rentmate.app.network.PurchaseShoppingItemRequest
-import com.rentmate.app.network.ShoppingItemResponse
-import com.rentmate.app.network.ShoppingListApi
+import com.rentmate.app.data.ShoppingItemRow
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import java.time.Instant
 import javax.inject.Inject
 
 data class ShoppingListUiState(
-    val items: List<ShoppingItemResponse> = emptyList(),
+    val items: List<ShoppingItemRow> = emptyList(),
     val loading: Boolean = false,
     val error: String? = null
 )
 
+@Serializable
+private data class ShoppingItemInsert(val household_id: String, val name: String, val added_by_user_id: String)
+
+private val SHOPPING_ITEM_COLUMNS = Columns.raw("*, added_by_user_id(display_name), purchased_by_user_id(display_name)")
+
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
-    private val api: ShoppingListApi,
+    private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShoppingListUiState())
@@ -37,8 +44,11 @@ class ShoppingListViewModel @Inject constructor(
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching { api.list(householdId) }
-                .onSuccess { _state.value = _state.value.copy(loading = false, items = it) }
+            runCatching {
+                supabase.from("shopping_items")
+                    .select(columns = SHOPPING_ITEM_COLUMNS) { filter { eq("household_id", householdId) } }
+                    .decodeList<ShoppingItemRow>()
+            }.onSuccess { _state.value = _state.value.copy(loading = false, items = it) }
                 .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
         }
     }
@@ -47,17 +57,25 @@ class ShoppingListViewModel @Inject constructor(
         if (name.isBlank()) return
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
-            runCatching { api.add(householdId, AddShoppingItemRequest(name.trim())) }
-                .onSuccess { refresh() }
+            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
+            runCatching {
+                supabase.from("shopping_items").insert(ShoppingItemInsert(householdId, name.trim(), userId))
+            }.onSuccess { refresh() }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
     }
 
-    /** US-13: an item bought can optionally become a bill with the buyer as payer. */
-    fun purchase(id: String, convertToBill: Boolean = false) {
+    fun purchase(id: String) {
         viewModelScope.launch {
+            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             runCatching {
-                api.purchase(id, PurchaseShoppingItemRequest(Instant.now().toString(), convertToBill))
+                supabase.from("shopping_items").update({
+                    set("is_purchased", true)
+                    set("purchased_by_user_id", userId)
+                    set("purchased_at", Instant.now().toString())
+                }) {
+                    filter { eq("id", id) }
+                }
             }.onSuccess { refresh() }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
