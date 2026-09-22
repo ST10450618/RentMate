@@ -22,6 +22,10 @@ class MaintenanceViewModel @Inject constructor(
     val requests: StateFlow<List<MaintenanceRequest>> = repository.requests
 
     init {
+        refresh()
+    }
+
+    fun refresh() {
         viewModelScope.launch { repository.refresh() }
     }
 

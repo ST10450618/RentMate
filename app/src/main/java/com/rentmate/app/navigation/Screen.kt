@@ -32,6 +32,7 @@ sealed class Screen(
     data object Chores : Screen("chores", "S6", "Chores", "US-9, US-12")
     data object AddChore : Screen("add_chore", "S7", "Add chore", "US-9, US-12")
     data object ShoppingList : Screen("shopping", "S8", "Shopping list", "US-13")
+    data object AddShoppingItem : Screen("add_shopping_item", "S8", "Add item", "US-13")
     data object Maintenance : Screen("maintenance", "S9", "Maintenance", "US-10")
     data object Settings : Screen("settings", "S10", "Settings", "US-2, US-3, US-4")
     data object More : Screen("more", "-", "More", "-")
@@ -44,8 +45,7 @@ val bottomNavItems = listOf(
     BottomNavItem(Screen.Dashboard, Icons.Filled.Home),
     BottomNavItem(Screen.Bills, Icons.Filled.List),
     BottomNavItem(Screen.Chores, Icons.Filled.CheckCircle),
-    BottomNavItem(Screen.More, Icons.Filled.Menu),
-            BottomNavItem(Screen.More, Icons.Filled.Menu)
+    BottomNavItem(Screen.More, Icons.Filled.Menu)
 )
 
 /** Destinations reached from the More tab. */

@@ -43,7 +43,7 @@ class HouseholdSetupViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 supabase.postgrest.rpc("create_household", CreateHouseholdParams(name).toRpcParams())
-                    .decodeSingle<HouseholdRow>()
+                    .decodeAs<HouseholdRow>()
             }.onSuccess {
                 currentHousehold.set(it.id)
                 _state.value = HouseholdSetupUiState.Created(it.invite_code)
@@ -59,7 +59,7 @@ class HouseholdSetupViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 supabase.postgrest.rpc("join_household", JoinHouseholdParams(inviteCode).toRpcParams())
-                    .decodeSingle<HouseholdRow>()
+                    .decodeAs<HouseholdRow>()
             }.onSuccess {
                 currentHousehold.set(it.id)
                 _state.value = HouseholdSetupUiState.Joined

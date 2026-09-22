@@ -21,11 +21,18 @@ fun MoreScreen(onOpen: (Screen) -> Unit) {
         moreItems.forEach { item ->
             ListItem(
                 headlineContent = { Text(item.screen.title) },
-                supportingContent = { Text(item.screen.id) },
+                supportingContent = { Text(moreScreenDescription(item.screen)) },
                 leadingContent = { Icon(item.icon, contentDescription = null) },
                 modifier = Modifier.clickable { onOpen(item.screen) }
             )
             HorizontalDivider()
         }
     }
+}
+
+private fun moreScreenDescription(screen: Screen): String = when (screen) {
+    Screen.ShoppingList -> "Shared items to buy"
+    Screen.Maintenance -> "Log and track faults"
+    Screen.Settings -> "Notifications, language, account"
+    else -> ""
 }
