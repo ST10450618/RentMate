@@ -23,8 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rentmate.app.network.ChoreResponse
-import com.rentmate.app.network.LeaderboardResponse
+import com.rentmate.app.data.ChoreRow
+import com.rentmate.app.data.LeaderboardRow
 
 // S6 - roster, four-week rotation forecast and points (US-9, US-12).
 @Composable
@@ -46,7 +46,7 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
 
             LazyColumn {
                 items(state.chores, key = { it.id }) { chore ->
-                    ChoreRow(chore, onComplete = { viewModel.complete(chore.id) })
+                    ChoreRow(chore, state.memberNames, onComplete = { viewModel.complete(chore.id) })
                 }
                 if (state.showLeaderboard) {
                     state.leaderboard?.let { item { LeaderboardCard(it) } }
@@ -57,21 +57,21 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
 }
 
 @Composable
-private fun ChoreRow(chore: ChoreResponse, onComplete: () -> Unit) {
+private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComplete: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(chore.title, style = MaterialTheme.typography.titleMedium)
-                Text("${chore.pointValue} pt", style = MaterialTheme.typography.bodySmall)
+                Text("${chore.point_value} pt", style = MaterialTheme.typography.bodySmall)
             }
-            Text(
-                "This cycle: ${chore.currentAssigneeDisplayName ?: "unassigned"}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            if (chore.nextFourCycles.isNotEmpty()) {
+            val current = chore.currentAssignee()?.let { memberNames[it] ?: it }
+            Text("This cycle: ${current ?: "unassigned"}", style = MaterialTheme.typography.bodyMedium)
+
+            val forecast = chore.forecast()
+            if (forecast.isNotEmpty()) {
                 Text("Next 4 cycles:", style = MaterialTheme.typography.labelMedium)
-                chore.nextFourCycles.forEach {
-                    Text("  ${it.cycleNumber}. ${it.assigneeDisplayName}", style = MaterialTheme.typography.bodySmall)
+                forecast.forEach { (cycle, userId) ->
+                    Text("  $cycle. ${memberNames[userId] ?: userId}", style = MaterialTheme.typography.bodySmall)
                 }
             }
             OutlinedButton(onClick = onComplete, modifier = Modifier.fillMaxWidth()) {
@@ -82,14 +82,14 @@ private fun ChoreRow(chore: ChoreResponse, onComplete: () -> Unit) {
 }
 
 @Composable
-private fun LeaderboardCard(leaderboard: LeaderboardResponse) {
+private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("Leaderboard - ${leaderboard.month}/${leaderboard.year}", style = MaterialTheme.typography.titleMedium)
-            leaderboard.entries.sortedByDescending { it.monthPoints }.forEach { entry ->
+            Text("Leaderboard", style = MaterialTheme.typography.titleMedium)
+            leaderboard.sortedByDescending { it.month_points }.forEach { entry ->
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(entry.displayName)
-                    Text("${entry.monthPoints} pts this month (${entry.totalPoints} total)")
+                    Text(entry.display_name)
+                    Text("${entry.month_points} pts this month (${entry.total_points} total)")
                 }
             }
         }

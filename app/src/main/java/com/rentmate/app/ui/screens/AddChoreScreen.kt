@@ -24,7 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rentmate.app.network.ChoreRecurrence
+
+private val RECURRENCE_OPTIONS = listOf("Once", "Weekly", "Monthly")
 
 // US-9/US-12: chore title, recurrence and point value; rotation order follows household membership.
 @Composable
@@ -33,7 +34,7 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
     val state by viewModel.state.collectAsState()
 
     var title by remember { mutableStateOf("") }
-    var recurrence by remember { mutableStateOf(ChoreRecurrence.Weekly) }
+    var recurrence by remember { mutableStateOf("Weekly") }
     var pointValue by remember { mutableStateOf("1") }
 
     LaunchedEffect(state) {
@@ -54,11 +55,11 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
 
         Text("Recurrence", style = MaterialTheme.typography.labelMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ChoreRecurrence.entries.forEach { option ->
+            RECURRENCE_OPTIONS.forEach { option ->
                 FilterChip(
                     selected = recurrence == option,
                     onClick = { recurrence = option },
-                    label = { Text(option.name) }
+                    label = { Text(option) }
                 )
             }
         }
