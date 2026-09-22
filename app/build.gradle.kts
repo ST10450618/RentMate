@@ -46,6 +46,19 @@ android {
         )
     }
 
+    signingConfigs {
+        // Shared debug keystore, checked into the repo so every machine (and
+        // CI) that builds this project signs debug builds with the same
+        // certificate. Fixes the SHA-1 registered for Google Sign-In staying
+        // valid no matter who builds it.
+        getByName("debug") {
+            storeFile = rootProject.file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

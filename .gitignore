@@ -19,9 +19,13 @@ app/build/
 *.dex
 *.class
 
-# Signing material — never commit these
+# Signing material - never commit release keystores. The shared debug
+# keystore is the one exception: it's checked in on purpose so every
+# machine (and CI) signs debug builds with the same certificate, which is
+# what keeps Google Sign-In's registered SHA-1 valid for everyone.
 *.jks
 *.keystore
+!keystore/debug.keystore
 keystore.properties
 
 #  Firebase 
