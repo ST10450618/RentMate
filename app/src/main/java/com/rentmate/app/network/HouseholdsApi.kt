@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 @Serializable
 data class CreateHouseholdRequest(val name: String)
@@ -34,4 +35,7 @@ interface HouseholdsApi {
 
     @GET("api/households/mine")
     suspend fun mine(): List<HouseholdResponse>
+
+    @GET("api/households/{id}")
+    suspend fun getById(@Path("id") id: String): HouseholdResponse
 }

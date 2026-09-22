@@ -1,18 +1,107 @@
-﻿package com.rentmate.app.ui.screens
+package com.rentmate.app.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.rentmate.app.navigation.Screen
-import com.rentmate.app.ui.components.StubScreen
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import com.rentmate.app.network.BillResponse
 
-// Owner: Michael (Stage 2) - bill list, filters, settle-up.
+// S4 - bills by status, with settle-up (US-6, US-11).
 @Composable
-fun BillsScreen(onAddBill: () -> Unit) {
-    StubScreen(
-        id = Screen.Bills.id,
-        title = Screen.Bills.title,
-        stories = Screen.Bills.stories,
-        purpose = "Bills by status, with settle-up showing the minimum set of payments.",
-        actionLabel = "Add a bill",
-        onAction = onAddBill
-    )
+fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsState()
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddBill) {
+                Icon(Icons.Filled.Add, contentDescription = "Add bill")
+            }
+        }
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Bills", style = MaterialTheme.typography.headlineSmall)
+                Button(onClick = { viewModel.loadSettleUp() }) { Text("Settle Up") }
+            }
+
+            if (state.loading) CircularProgressIndicator()
+            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+
+            LazyColumn {
+                items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }
+            }
+        }
+    }
+
+    if (state.settleUp != null || state.settleUpLoading) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissSettleUp() },
+            title = { Text("Settle up") },
+            text = {
+                if (state.settleUpLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    val suggestions = state.settleUp?.suggestions.orEmpty()
+                    if (suggestions.isEmpty()) {
+                        Text("The household is already settled.")
+                    } else {
+                        Column {
+                            suggestions.forEach { s ->
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("${s.fromDisplayName} -> ${s.toDisplayName}: R${"%.2f".format(s.amount)}")
+                                    OutlinedButton(onClick = { viewModel.confirmSettlement(s.toUserId, s.amount) }) {
+                                        Text("Confirm")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { viewModel.dismissSettleUp() }) { Text("Close") }
+            }
+        )
+    }
+}
+
+@Composable
+private fun BillRow(bill: BillResponse, onPay: (String, String) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(bill.title, style = MaterialTheme.typography.titleMedium)
+            Text("R${"%.2f".format(bill.amount)} - due ${bill.dueDate.take(10)}", style = MaterialTheme.typography.bodySmall)
+            bill.shares.forEach { share ->
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("${share.displayName}: R${"%.2f".format(share.amountOwed)}")
+                    if (share.isPaid) {
+                        Text("Paid", color = MaterialTheme.colorScheme.primary)
+                    } else {
+                        OutlinedButton(onClick = { onPay(bill.id, share.id) }) { Text("Mark paid") }
+                    }
+                }
+            }
+        }
+    }
 }
