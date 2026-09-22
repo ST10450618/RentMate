@@ -32,8 +32,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.MaintenanceCategory
 import com.rentmate.app.data.MaintenanceRequest
@@ -49,7 +49,7 @@ import java.util.Locale
  * the landlord as one itemised message, and track each through to resolved.
  */
 @Composable
-fun MaintenanceScreen(viewModel: MaintenanceViewModel = viewModel()) {
+fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
     val requests by viewModel.requests.collectAsStateWithLifecycle()
 
     var title by remember { mutableStateOf("") }
