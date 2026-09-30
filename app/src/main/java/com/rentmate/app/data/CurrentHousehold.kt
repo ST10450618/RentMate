@@ -14,4 +14,8 @@ class CurrentHousehold @Inject constructor() {
     fun set(householdId: String) {
         _id.value = householdId
     }
+
+    fun clear() {
+        _id.value = null
+    }
 }

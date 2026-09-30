@@ -32,13 +32,14 @@ import com.rentmate.app.data.UserSettings
  * biometric opt-in for US-2.
  */
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(onSignedOut: () -> Unit = {}, viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.state.collectAsStateWithLifecycle()
 
     SettingsContent(
         settings = settings,
         onToggle = viewModel::setToggle,
-        onLanguage = viewModel::setLanguage
+        onLanguage = viewModel::setLanguage,
+        onSignOut = { viewModel.signOut(onSignedOut) }
     )
 }
 
@@ -48,6 +49,7 @@ fun SettingsContent(
     settings: UserSettings,
     onToggle: (SettingToggle, Boolean) -> Unit,
     onLanguage: (AppLanguage) -> Unit,
+    onSignOut: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -89,7 +91,7 @@ fun SettingsContent(
         }
 
         OutlinedButton(
-            onClick = { /* Michael wires this to sign-out in Stage 2 */ },
+            onClick = onSignOut,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.sign_out))

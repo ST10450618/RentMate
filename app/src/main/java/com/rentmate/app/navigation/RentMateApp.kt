@@ -93,7 +93,15 @@ fun RentMateApp(navController: NavHostController = rememberNavController()) {
                 AddShoppingItemScreen(onClose = { navController.popBackStack() })
             }
             composable(Screen.Maintenance.route) { MaintenanceScreen() }
-            composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    onSignedOut = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }

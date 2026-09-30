@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.AppLanguage
+import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.SettingsRepository
 import com.rentmate.app.data.UserSettings
@@ -34,7 +35,8 @@ private val TOGGLE_COLUMN = mapOf(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient,
+    private val currentHousehold: CurrentHousehold
 ) : ViewModel() {
 
     private val repository = SettingsRepository(context)
@@ -59,6 +61,15 @@ class SettingsViewModel @Inject constructor(
             repository.setLanguage(language)
             applyLanguage(context, language)
             syncString("preferred_language", language.tag)
+        }
+    }
+
+    fun signOut(onSignedOut: () -> Unit) {
+        viewModelScope.launch {
+            runCatching { supabase.auth.signOut() }
+                .onFailure { Log.w(TAG, "sign-out failed: ${it.message}") }
+            currentHousehold.clear()
+            onSignedOut()
         }
     }
 
