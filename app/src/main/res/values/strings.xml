@@ -73,4 +73,19 @@
     <string name="household_invite_code">Invite code</string>
     <string name="household_create">Create household</string>
     <string name="household_join">Join household</string>
+
+    <!-- RM-0035: list screen states -->
+    <string name="state_error_generic">Something went wrong. Check your connection and try again.</string>
+    <string name="state_retry">Try again</string>
+    <string name="empty_bills_title">No bills yet</string>
+    <string name="empty_bills_body">Add the first bill and RentMate will split it for everyone.</string>
+    <string name="empty_bills_action">Add a bill</string>
+    <string name="empty_chores_title">No chores yet</string>
+    <string name="empty_chores_body">Add a chore and RentMate will rotate it fairly between housemates.</string>
+    <string name="empty_chores_action">Add a chore</string>
+    <string name="empty_shopping_title">Your shopping list is empty</string>
+    <string name="empty_shopping_body">Add what the house needs and everyone can tick it off when it is bought.</string>
+    <string name="empty_shopping_action">Add an item</string>
+    <string name="empty_dashboard_title">No household yet</string>
+    <string name="empty_dashboard_body">Create or join a household to see bills, chores and balances here.</string>
 </resources>
