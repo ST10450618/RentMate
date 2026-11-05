@@ -4,6 +4,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import com.rentmate.app.network.toRpcParams
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,8 +25,20 @@ private data class MaintenanceRow(
     val created_at: String,
     val sent_to_landlord_at: String? = null,
     val acknowledged_at: String? = null,
-    val resolved_at: String? = null
+    val resolved_at: String? = null,
+    val raised_by_user_id: String? = null,
+    val sent_by_user_id: String? = null
 )
+
+@Serializable
+private data class HouseholdLandlordRow(
+    val name: String,
+    val landlord_name: String? = null,
+    val landlord_email: String? = null
+)
+
+@Serializable
+private data class AdvanceStatusParams(val request_id_in: String)
 
 @Serializable
 private data class MaintenanceInsert(
@@ -36,9 +49,6 @@ private data class MaintenanceInsert(
     val category: String,
     val urgency: String
 )
-
-@Serializable
-private data class MaintenanceStatusUpdate(val status: String)
 
 @Serializable
 private data class SendToLandlordParams(val household_id_in: String)
@@ -66,6 +76,15 @@ interface MaintenanceRepository {
 
     /** Sends every open request to the landlord; returns how many were sent. */
     suspend fun sendOpenRequests(): Int
+
+    /** The signed-in user's ID, used to decide who may change a request's status. */
+    val currentUserId: String?
+
+    /** RM-0009: the household's name and landlord, or null when no household is selected. */
+    suspend fun landlordContact(): LandlordContact?
+
+    /** RM-0009: stores the landlord's address on the household so every housemate can use it. */
+    suspend fun saveLandlordEmail(email: String)
 }
 
 /** Supabase-backed [MaintenanceRepository] used by the app. */
@@ -76,6 +95,9 @@ class SupabaseMaintenanceRepository @Inject constructor(
 ) : MaintenanceRepository {
     private val _requests = MutableStateFlow<List<MaintenanceRequest>>(emptyList())
     override val requests: StateFlow<List<MaintenanceRequest>> = _requests.asStateFlow()
+
+    override val currentUserId: String?
+        get() = supabase.auth.currentUserOrNull()?.id
 
     override suspend fun refresh() {
         val householdId = currentHousehold.id.first() ?: return
@@ -101,15 +123,13 @@ class SupabaseMaintenanceRepository @Inject constructor(
         _requests.value = listOf(created.toLocal()) + _requests.value
     }
 
-    /** Advances one request through open -> sent -> acknowledged -> resolved. */
+    /**
+     * Advances one request through open -> sent -> acknowledged -> resolved.
+     * RM-0009: goes through an RPC that refuses callers who neither logged nor sent it.
+     */
     override suspend fun advance(id: String) {
-        val next = _requests.value.firstOrNull { it.id == id }?.status?.next() ?: return
-        val updated = supabase.from("maintenance_requests").update(
-            MaintenanceStatusUpdate(next.toDto())
-        ) {
-            filter { eq("id", id) }
-            select()
-        }.decodeSingle<MaintenanceRow>()
+        val updated = supabase.postgrest.rpc("advance_maintenance_status", AdvanceStatusParams(id).toRpcParams())
+            .decodeAs<MaintenanceRow>()
         _requests.value = _requests.value.map { if (it.id == id) updated.toLocal() else it }
     }
 
@@ -120,6 +140,21 @@ class SupabaseMaintenanceRepository @Inject constructor(
             .decodeAs<Int>()
         refresh()
         return count
+    }
+
+    override suspend fun landlordContact(): LandlordContact? {
+        val householdId = currentHousehold.id.first() ?: return null
+        val row = supabase.from("households")
+            .select(columns = Columns.raw("name, landlord_name, landlord_email")) { filter { eq("id", householdId) } }
+            .decodeSingle<HouseholdLandlordRow>()
+        return LandlordContact(row.name, row.landlord_name, row.landlord_email)
+    }
+
+    override suspend fun saveLandlordEmail(email: String) {
+        val householdId = currentHousehold.id.first() ?: return
+        supabase.from("households").update({ set("landlord_email", email.trim()) }) {
+            filter { eq("id", householdId) }
+        }
     }
 }
 
@@ -180,5 +215,7 @@ private fun MaintenanceRow.toLocal() = MaintenanceRequest(
     createdAt = parseMillis(created_at) ?: System.currentTimeMillis(),
     sentAt = parseMillis(sent_to_landlord_at),
     acknowledgedAt = parseMillis(acknowledged_at),
-    resolvedAt = parseMillis(resolved_at)
+    resolvedAt = parseMillis(resolved_at),
+    raisedBy = raised_by_user_id,
+    sentBy = sent_by_user_id
 )
