@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.HouseholdRow
 import com.rentmate.app.ui.components.ScreenHeader
+import androidx.compose.ui.res.stringResource
 
 // S3 - dashboard: household switcher, overdue-bill alert, next chore, balance summary (US-3).
 @Composable
@@ -59,7 +60,7 @@ fun DashboardScreen(
             }
 
             if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            state.error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
 
             if (state.overdueBills.isNotEmpty()) {
                 DashboardCard(borderColor = MaterialTheme.colorScheme.secondary) {

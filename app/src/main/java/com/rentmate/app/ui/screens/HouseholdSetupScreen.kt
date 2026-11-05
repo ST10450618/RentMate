@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
 
 // US-5: create a household or join one with a six-character invite code.
 @Composable
@@ -78,7 +79,7 @@ fun HouseholdSetupScreen(
         Spacer(Modifier.height(16.dp))
         when (val s = state) {
             is HouseholdSetupUiState.Loading -> Row { CircularProgressIndicator() }
-            is HouseholdSetupUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
+            is HouseholdSetupUiState.Error -> Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
             is HouseholdSetupUiState.Created -> {
                 Text("Household created. Invite code:", style = MaterialTheme.typography.bodyMedium)
                 Text(s.inviteCode, style = MaterialTheme.typography.headlineMedium)

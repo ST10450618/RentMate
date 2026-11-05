@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
 
 // US-13: name only; the list records who added it.
 @Composable
@@ -54,7 +55,7 @@ fun AddShoppingItemScreen(onClose: () -> Unit, viewModel: AddShoppingItemViewMod
 
         when (val s = state) {
             is AddShoppingItemUiState.Loading -> Row { CircularProgressIndicator() }
-            is AddShoppingItemUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
+            is AddShoppingItemUiState.Error -> Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
             else -> {}
         }
     }

@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import com.rentmate.app.ui.error.ErrorMapper
 
 sealed interface HouseholdSetupUiState {
     data object Idle : HouseholdSetupUiState
@@ -20,7 +23,7 @@ sealed interface HouseholdSetupUiState {
     /** Created shows the invite code (S2's "generate code with share action") before continuing. */
     data class Created(val inviteCode: String) : HouseholdSetupUiState
     data object Joined : HouseholdSetupUiState
-    data class Error(val message: String) : HouseholdSetupUiState
+    data class Error(@StringRes val messageRes: Int) : HouseholdSetupUiState
 }
 
 @Serializable
@@ -48,7 +51,7 @@ class HouseholdSetupViewModel @Inject constructor(
                 currentHousehold.set(it.id)
                 _state.value = HouseholdSetupUiState.Created(it.invite_code)
             }.onFailure {
-                _state.value = HouseholdSetupUiState.Error(it.message ?: "Could not create household")
+                _state.value = HouseholdSetupUiState.Error(ErrorMapper.toMessage(it))
             }
         }
     }
@@ -64,7 +67,7 @@ class HouseholdSetupViewModel @Inject constructor(
                 currentHousehold.set(it.id)
                 _state.value = HouseholdSetupUiState.Joined
             }.onFailure {
-                _state.value = HouseholdSetupUiState.Error(it.message ?: "Invalid invite code")
+                _state.value = HouseholdSetupUiState.Error(ErrorMapper.toMessage(it, fallback = R.string.error_invalid_invite_code))
             }
         }
     }

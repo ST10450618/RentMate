@@ -12,12 +12,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import com.rentmate.app.ui.error.ErrorMapper
 
 sealed interface AddChoreUiState {
     data object Idle : AddChoreUiState
     data object Loading : AddChoreUiState
     data object Saved : AddChoreUiState
-    data class Error(val message: String) : AddChoreUiState
+    data class Error(@StringRes val messageRes: Int) : AddChoreUiState
 }
 
 @Serializable
@@ -57,7 +60,7 @@ class AddChoreViewModel @Inject constructor(
     /** US-9/US-12: rotation order is every household member, in the order they're listed. */
     fun create(title: String, recurrence: String, pointValue: Int) {
         if (title.isBlank()) {
-            _state.value = AddChoreUiState.Error("Title can't be blank.")
+            _state.value = AddChoreUiState.Error(R.string.error_chore_title_blank)
             return
         }
         viewModelScope.launch {
@@ -68,7 +71,7 @@ class AddChoreViewModel @Inject constructor(
                     ChoreInsert(householdId, title, recurrence, pointValue, _members.value)
                 )
             }.onSuccess { _state.value = AddChoreUiState.Saved }
-                .onFailure { _state.value = AddChoreUiState.Error(it.message ?: "Could not create chore") }
+                .onFailure { _state.value = AddChoreUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
 
 private val RECURRENCE_OPTIONS = listOf("Once", "Weekly", "Monthly")
 
@@ -85,7 +86,7 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
 
         when (val s = state) {
             is AddChoreUiState.Loading -> Row { CircularProgressIndicator() }
-            is AddChoreUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
+            is AddChoreUiState.Error -> Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
             else -> {}
         }
     }

@@ -25,4 +25,15 @@
     <string name="maintenance_error_send">Kon nie aan die verhuurder stuur nie. Gaan jou verbinding na en probeer weer.</string>
     <string name="action_retry">Probeer weer</string>
     <string name="action_dismiss">Maak toe</string>
+
+    <string name="error_no_connection">Jy is vanlyn. Gaan jou verbinding na en probeer weer.</string>
+    <string name="error_session_expired">Jou sessie het verval. Teken asseblief weer in.</string>
+    <string name="error_not_allowed">Jy het nie toestemming om dit te doen nie.</string>
+    <string name="error_already_exists">Dit bestaan reeds.</string>
+    <string name="error_generic">Iets het verkeerd geloop. Probeer asseblief weer.</string>
+    <string name="error_invalid_invite_code">Daardie uitnodigingskode is ongeldig. Gaan dit na en probeer weer.</string>
+    <string name="error_sign_in_failed">Aanmelding het nie gewerk nie. Probeer asseblief weer.</string>
+    <string name="error_amount_positive">Die bedrag moet meer as 0 wees.</string>
+    <string name="error_chore_title_blank">Gee die taak \'n titel.</string>
+    <string name="error_item_name_blank">Gee die item \'n naam.</string>
 </resources>

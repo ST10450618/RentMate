@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ShoppingItemRow
 import com.rentmate.app.ui.components.ScreenHeader
+import androidx.compose.ui.res.stringResource
 
 // S8 - shared shopping list, tick off as bought (US-13).
 @Composable
@@ -41,7 +42,7 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
             if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            state.error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
 
             LazyColumn {
                 items(state.items, key = { it.id }) { item ->

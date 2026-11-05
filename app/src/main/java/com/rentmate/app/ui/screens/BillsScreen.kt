@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.ui.components.ScreenHeader
+import androidx.compose.ui.res.stringResource
 
 // S4 - bills by status, with settle-up (US-6, US-11).
 @Composable
@@ -51,7 +52,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
             }
 
             if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            state.error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
 
             LazyColumn {
                 items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }

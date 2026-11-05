@@ -88,10 +88,10 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
             item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
         }
 
-        uiState.error?.let { failure ->
+        uiState.error?.let { messageRes ->
             item {
                 ErrorCard(
-                    message = stringResource(failure.messageRes),
+                    message = stringResource(messageRes),
                     onRetry = viewModel::refresh,
                     onDismiss = viewModel::dismissError
                 )

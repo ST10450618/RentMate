@@ -21,10 +21,12 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.time.Instant
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.ui.error.ErrorMapper
 
 data class DashboardUiState(
     val loading: Boolean = false,
-    val error: String? = null,
+    @StringRes val error: Int? = null,
     val myUserId: String? = null,
     val households: List<HouseholdRow> = emptyList(),
     val currentHouseholdId: String? = null,
@@ -67,7 +69,7 @@ class DashboardViewModel @Inject constructor(
             // RLS already scopes this to households the signed-in user belongs to.
             val households = runCatching { supabase.from("households").select().decodeList<HouseholdRow>() }
                 .getOrElse {
-                    _state.value = _state.value.copy(loading = false, error = it.message)
+                    _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it))
                     return@launch
                 }
 
@@ -106,7 +108,7 @@ class DashboardViewModel @Inject constructor(
                     owedToYou = settleUp.filter { it.to_user_id == myId }.sumOf { it.amount }
                 )
             }.onFailure {
-                _state.value = _state.value.copy(loading = false, error = it.message)
+                _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it))
             }
         }
     }

@@ -20,4 +20,16 @@
     <string name="leaderboard_desc">Hides it for the whole household</string>
 
     <string name="sign_out">Sign out</string>
+
+    <!-- RM-0004: friendly errors shown instead of raw exception text -->
+    <string name="error_no_connection">You\'re offline. Check your connection and try again.</string>
+    <string name="error_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_not_allowed">You don\'t have permission to do that.</string>
+    <string name="error_already_exists">That already exists.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_invalid_invite_code">That invite code isn\'t valid. Check it and try again.</string>
+    <string name="error_sign_in_failed">Sign-in didn\'t work. Please try again.</string>
+    <string name="error_amount_positive">Amount must be greater than 0.</string>
+    <string name="error_chore_title_blank">Give the chore a title.</string>
+    <string name="error_item_name_blank">Give the item a name.</string>
 </resources>

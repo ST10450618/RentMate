@@ -13,12 +13,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import com.rentmate.app.ui.error.ErrorMapper
 
 sealed interface AddShoppingItemUiState {
     data object Idle : AddShoppingItemUiState
     data object Loading : AddShoppingItemUiState
     data object Saved : AddShoppingItemUiState
-    data class Error(val message: String) : AddShoppingItemUiState
+    data class Error(@StringRes val messageRes: Int) : AddShoppingItemUiState
 }
 
 @Serializable
@@ -35,7 +38,7 @@ class AddShoppingItemViewModel @Inject constructor(
     // US-13: any member can add an item; the list records who added it.
     fun add(name: String) {
         if (name.isBlank()) {
-            _state.value = AddShoppingItemUiState.Error("Item name can't be blank.")
+            _state.value = AddShoppingItemUiState.Error(R.string.error_item_name_blank)
             return
         }
         viewModelScope.launch {
@@ -45,7 +48,7 @@ class AddShoppingItemViewModel @Inject constructor(
             runCatching {
                 supabase.from("shopping_items").insert(ShoppingItemInsert(householdId, name.trim(), userId))
             }.onSuccess { _state.value = AddShoppingItemUiState.Saved }
-                .onFailure { _state.value = AddShoppingItemUiState.Error(it.message ?: "Could not add item") }
+                .onFailure { _state.value = AddShoppingItemUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
 }

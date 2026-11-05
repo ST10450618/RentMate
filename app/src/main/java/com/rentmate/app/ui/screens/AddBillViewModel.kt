@@ -18,12 +18,15 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import com.rentmate.app.ui.error.ErrorMapper
 
 sealed interface AddBillUiState {
     data object Idle : AddBillUiState
     data object Loading : AddBillUiState
     data object Saved : AddBillUiState
-    data class Error(val message: String) : AddBillUiState
+    data class Error(@StringRes val messageRes: Int) : AddBillUiState
 }
 
 @Serializable
@@ -70,7 +73,7 @@ class AddBillViewModel @Inject constructor(
     /** US-6: equal split across every household member; amount must be greater than 0. */
     fun createEqualSplit(title: String, amount: Double, dueDate: LocalDate) {
         if (amount <= 0) {
-            _state.value = AddBillUiState.Error("Amount must be greater than 0.")
+            _state.value = AddBillUiState.Error(R.string.error_amount_positive)
             return
         }
         viewModelScope.launch {
@@ -93,7 +96,7 @@ class AddBillViewModel @Inject constructor(
                     .map { (memberId, share) -> BillShareInsert(bill.id, memberId, share) }
                 supabase.from("bill_shares").insert(shares)
             }.onSuccess { _state.value = AddBillUiState.Saved }
-                .onFailure { _state.value = AddBillUiState.Error(it.message ?: "Could not create bill") }
+                .onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
 

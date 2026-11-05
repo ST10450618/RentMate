@@ -25,4 +25,15 @@
     <string name="maintenance_error_send">Asikwazanga ukuthumela kumnini-ndlu. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
     <string name="action_retry">Zama kwakhona</string>
     <string name="action_dismiss">Vala</string>
+
+    <string name="error_no_connection">Awuqhagamshelwanga. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="error_session_expired">Iseshoni yakho iphelelwe lixesha. Nceda ungene kwakhona.</string>
+    <string name="error_not_allowed">Awunamvume yokwenza oko.</string>
+    <string name="error_already_exists">Oko sele kukhona.</string>
+    <string name="error_generic">Kukho into engahambanga kakuhle. Nceda uzame kwakhona.</string>
+    <string name="error_invalid_invite_code">Elo khowudi yesimemo ayisebenzi. Yijonge uzame kwakhona.</string>
+    <string name="error_sign_in_failed">Ukungena akuphumelelanga. Nceda uzame kwakhona.</string>
+    <string name="error_amount_positive">Isixa kufuneka sibe ngaphezu ko-0.</string>
+    <string name="error_chore_title_blank">Nika umsebenzi isihloko.</string>
+    <string name="error_item_name_blank">Nika into igama.</string>
 </resources>

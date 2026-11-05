@@ -62,7 +62,7 @@ class MaintenanceViewModelTest {
     fun `loading offline shows the load error instead of crashing`() {
         val viewModel = MaintenanceViewModel(FakeMaintenanceRepository(offline = true))
 
-        assertEquals(MaintenanceError.LOAD, viewModel.state.value.error)
+        assertEquals(MaintenanceError.LOAD.messageRes, viewModel.state.value.error)
         assertFalse(viewModel.state.value.loading)
     }
 
@@ -73,7 +73,7 @@ class MaintenanceViewModelTest {
         val titleError = viewModel.log("Leaking tap", "", MaintenanceCategory.PLUMBING, Urgency.HIGH, null)
 
         assertNull(titleError)
-        assertEquals(MaintenanceError.SAVE, viewModel.state.value.error)
+        assertEquals(MaintenanceError.SAVE.messageRes, viewModel.state.value.error)
     }
 
     @Test
@@ -81,17 +81,17 @@ class MaintenanceViewModelTest {
         val viewModel = MaintenanceViewModel(FakeMaintenanceRepository(offline = true))
 
         viewModel.advance("any-id")
-        assertEquals(MaintenanceError.UPDATE, viewModel.state.value.error)
+        assertEquals(MaintenanceError.UPDATE.messageRes, viewModel.state.value.error)
 
         viewModel.sendOpenRequests()
-        assertEquals(MaintenanceError.SEND, viewModel.state.value.error)
+        assertEquals(MaintenanceError.SEND.messageRes, viewModel.state.value.error)
     }
 
     @Test
     fun `retry after reconnecting clears the error`() {
         val repository = FakeMaintenanceRepository(offline = true)
         val viewModel = MaintenanceViewModel(repository)
-        assertEquals(MaintenanceError.LOAD, viewModel.state.value.error)
+        assertEquals(MaintenanceError.LOAD.messageRes, viewModel.state.value.error)
 
         repository.offline = false
         viewModel.refresh()

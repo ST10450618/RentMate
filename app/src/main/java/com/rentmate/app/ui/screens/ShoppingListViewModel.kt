@@ -15,11 +15,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.ui.error.ErrorMapper
 
 data class ShoppingListUiState(
     val items: List<ShoppingItemRow> = emptyList(),
     val loading: Boolean = false,
-    val error: String? = null
+    @StringRes val error: Int? = null
 )
 
 // Explicit column list (no "*"): the raw FK columns would otherwise collide
@@ -51,7 +53,7 @@ class ShoppingListViewModel @Inject constructor(
                     .select(columns = SHOPPING_ITEM_COLUMNS) { filter { eq("household_id", householdId) } }
                     .decodeList<ShoppingItemRow>()
             }.onSuccess { _state.value = _state.value.copy(loading = false, items = it) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
+                .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
         }
     }
 
@@ -67,7 +69,7 @@ class ShoppingListViewModel @Inject constructor(
                     filter { eq("id", id) }
                 }
             }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = it.message) }
+                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 }

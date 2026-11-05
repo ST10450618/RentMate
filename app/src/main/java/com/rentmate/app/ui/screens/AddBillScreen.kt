@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.LocalDate
+import androidx.compose.ui.res.stringResource
 
 // US-6: title, amount in ZAR, due date; split equally across the household.
 @Composable
@@ -82,7 +83,7 @@ fun AddBillScreen(onClose: () -> Unit, viewModel: AddBillViewModel = hiltViewMod
 
         when (val s = state) {
             is AddBillUiState.Loading -> Row { CircularProgressIndicator() }
-            is AddBillUiState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
+            is AddBillUiState.Error -> Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
             else -> {}
         }
     }

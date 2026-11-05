@@ -11,6 +11,8 @@ import com.rentmate.app.data.MaintenanceRequest
 import com.rentmate.app.data.TitleError
 import com.rentmate.app.data.Urgency
 import com.rentmate.app.data.validateTitle
+import com.rentmate.app.ui.error.AppError
+import com.rentmate.app.ui.error.ErrorMapper
 import com.rentmate.app.ui.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,10 +31,14 @@ enum class MaintenanceError(@StringRes val messageRes: Int) {
     SEND(R.string.maintenance_error_send)
 }
 
-/** Loading and error state for S9. The requests themselves come from [MaintenanceViewModel.requests]. */
+/**
+ * Loading and error state for S9. The requests themselves come from [MaintenanceViewModel.requests].
+ * [error] is a string resource: the action-specific message when offline, otherwise the
+ * [ErrorMapper] message (e.g. not allowed, session expired).
+ */
 data class MaintenanceUiState(
     val loading: Boolean = false,
-    val error: MaintenanceError? = null
+    @StringRes val error: Int? = null
 )
 
 /**
@@ -56,7 +62,7 @@ class MaintenanceViewModel @Inject constructor(
     fun refresh() {
         Log.d(TAG, "refresh")
         _state.update { it.copy(loading = true, error = null) }
-        launchSafely(TAG, onError = { fail(MaintenanceError.LOAD) }) {
+        launchSafely(TAG, onError = { fail(it, MaintenanceError.LOAD) }) {
             repository.refresh()
             _state.update { it.copy(loading = false) }
         }
@@ -73,7 +79,7 @@ class MaintenanceViewModel @Inject constructor(
         if (error != null) return error
 
         Log.d(TAG, "log request")
-        launchSafely(TAG, onError = { fail(MaintenanceError.SAVE) }) {
+        launchSafely(TAG, onError = { fail(it, MaintenanceError.SAVE) }) {
             repository.add(
                 MaintenanceRequest(
                     title = title.trim(),
@@ -89,12 +95,12 @@ class MaintenanceViewModel @Inject constructor(
 
     fun advance(id: String) {
         Log.d(TAG, "advance $id")
-        launchSafely(TAG, onError = { fail(MaintenanceError.UPDATE) }) { repository.advance(id) }
+        launchSafely(TAG, onError = { fail(it, MaintenanceError.UPDATE) }) { repository.advance(id) }
     }
 
     fun sendOpenRequests() {
         Log.d(TAG, "sendOpenRequests")
-        launchSafely(TAG, onError = { fail(MaintenanceError.SEND) }) { repository.sendOpenRequests() }
+        launchSafely(TAG, onError = { fail(it, MaintenanceError.SEND) }) { repository.sendOpenRequests() }
     }
 
     /** Hides the error card. */
@@ -102,7 +108,12 @@ class MaintenanceViewModel @Inject constructor(
         _state.update { it.copy(error = null) }
     }
 
-    private fun fail(error: MaintenanceError) {
-        _state.update { it.copy(loading = false, error = error) }
+    /** [launchSafely] has already logged [cause]; this only picks the message. */
+    private fun fail(cause: Throwable, action: MaintenanceError) {
+        val message = when (ErrorMapper.classify(cause)) {
+            AppError.NO_CONNECTION, AppError.GENERIC -> action.messageRes
+            else -> ErrorMapper.classify(cause).messageRes
+        }
+        _state.update { it.copy(loading = false, error = message) }
     }
 }

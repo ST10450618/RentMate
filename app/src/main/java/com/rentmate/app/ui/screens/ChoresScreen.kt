@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ChoreRow
 import com.rentmate.app.data.LeaderboardRow
 import com.rentmate.app.ui.components.ScreenHeader
+import androidx.compose.ui.res.stringResource
 
 // S6 - roster, four-week rotation forecast and points (US-9, US-12).
 @Composable
@@ -46,7 +47,7 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
             if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            state.error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
 
             LazyColumn {
                 items(state.chores, key = { it.id }) { chore ->

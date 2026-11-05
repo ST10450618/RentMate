@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.auth.AuthUiState
 import com.rentmate.app.auth.AuthViewModel
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun LoginScreen(
@@ -44,7 +45,7 @@ fun LoginScreen(
         when (val s = state) {
             is AuthUiState.Loading -> CircularProgressIndicator()
             is AuthUiState.Error -> {
-                Text(s.message, color = MaterialTheme.colorScheme.error)
+                Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.height(8.dp))
                 Button(onClick = { viewModel.signIn() }) { Text("Try again") }
             }
