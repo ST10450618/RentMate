@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.ProfileSettingsSync
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.SettingsRepository
 import com.rentmate.app.data.UserSettings
@@ -40,10 +41,16 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
-    private val localCache: LocalCache
+    private val localCache: LocalCache,
+    private val profileSettingsSync: ProfileSettingsSync
 ) : ViewModel() {
 
     private val repository = SettingsRepository(context)
+
+    init {
+        // RM-0005: pick up changes made on another device since sign-in.
+        launchSafely(TAG) { profileSettingsSync.pull() }
+    }
 
     val state: StateFlow<UserSettings> = repository.settings.stateIn(
         scope = viewModelScope,
