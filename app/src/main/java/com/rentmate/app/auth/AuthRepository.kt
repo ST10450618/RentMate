@@ -2,6 +2,7 @@ package com.rentmate.app.auth
 
 import android.util.Log
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.ProfileSettingsSync
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
@@ -22,7 +23,8 @@ private data class HouseholdMembershipRow(val household_id: String)
 class AuthRepository @Inject constructor(
     private val googleAuthManager: GoogleAuthManager,
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val profileSettingsSync: ProfileSettingsSync
 ) : SessionRepository {
     suspend fun signIn(): Result<SignInResult> = runCatching {
         val idToken = googleAuthManager.signIn()
@@ -34,7 +36,10 @@ class AuthRepository @Inject constructor(
         val userId = supabase.auth.currentUserOrNull()?.id
             ?: error("Signed in but no user id was returned")
 
-        SignInResult(hasHousehold = loadHousehold(userId))
+        val hasHousehold = loadHousehold(userId)
+        // RM-0005: bring this account's settings onto this device. Never fails sign-in.
+        profileSettingsSync.pull()
+        SignInResult(hasHousehold = hasHousehold)
     }
 
     /**
