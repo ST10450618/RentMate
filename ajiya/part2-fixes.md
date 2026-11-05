@@ -3,6 +3,21 @@
 
 Goal: Every issue in the Part 2 lecturer feedback is fixed and verifiable on device
 
+Owner split: Michael RM-0001..0004, Seth RM-0006/0007/0008/0010/0012, James RM-0005/0009/0011.
+
+RM-0001: wrap every repository call in runCatching (or try/catch) inside viewModelScope.launch; expose an error field on each UiState; never let an exception escape a coroutine. Add a CoroutineExceptionHandler as a last resort. Unit-test MaintenanceViewModel with a fake repository that throws IOException.
+RM-0002: install Supabase Auth with autoLoadFromStorage = true and alwaysAutoRefresh = true; on app start await auth.awaitInitialization() / sessionStatus and choose startDestination = Dashboard when Authenticated, else Login. Show a splash/loading state while deciding.
+RM-0003: after sign-in navigate with popUpTo(Screen.Login.route) { inclusive = true } and launchSingleTop = true, same for HouseholdSetup -> Dashboard. Back on a bottom-nav root must finish the activity.
+RM-0004: create ErrorMapper.toMessage(Throwable): Int (string resource) mapping IOException/HttpRequestTimeout -> no connection, RestException 401 -> session expired, 403/RLS -> not allowed, 409/unique -> already exists, else generic. Log the raw exception with Log.e; show only the mapped string.
+RM-0005: SettingsRepository.load() selects the caller's profiles row on sign-in and on Settings open; seed local state from it; write-through on change.
+RM-0006: new migration 0007. Drop the 'join a household' INSERT policy so joining only happens through the SECURITY DEFINER join_household(code) RPC. Split bills 'for all' into select (members), insert (members, created_by = auth.uid()), update/delete (created_by = auth.uid()). bill_shares: select for members, no direct update; marking paid goes through an RPC. Add supabase/tests/rls_test.sql that proves each rule.
+RM-0007: call rpc('get_chore_forecast', {chore_id}) (or whichever forecast function exists in 0002) and render its rows; delete ChoreRow.forecast().
+RM-0008: complete_chore RPC checks assigned user = auth.uid() and that no completion exists for the current cycle; points awarded inside the RPC only. Add households.hide_leaderboard boolean, read by every member.
+RM-0009: build an ACTION_SENDTO mailto: intent with subject 'Maintenance request - <household>' and an itemised body (category, urgency, description, date, photo links later). Landlord email stored on households. Only the request creator (or the sender) may change status; enforce in an RPC.
+RM-0010: settlements confirmed by the creditor (to_user_id = auth.uid()) via confirm_settlement RPC, which marks the matching shares paid. Bills get split_mode (equal | percent | exact) and per-member inputs; validate sums server-side and client-side.
+RM-0011: KeyboardOptions(keyboardType = KeyboardType.Decimal) on every amount field; replace any user_id shown on screen with display_name (fallback: 'Housemate').
+RM-0012: run ./gradlew testDebugUnitTest locally until green; fix or replace broken tests; make sure workflows trigger on push to every branch and the badge in README is green.
+
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
 | RM-0001 | android | Catch all repository errors; Maintenance screen never crashes offline | Airplane mode on every screen shows a friendly error state, no crash; unit test covers MaintenanceViewModel failure path | - | - | 🟥 Pending |

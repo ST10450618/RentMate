@@ -3,6 +3,10 @@
 
 Goal: A signed, store-ready build is tagged Final POE with full documentation and video
 
+Owner: Ali, with everyone on the video and commits.
+
+RM-0039: signingConfigs.release reads keystore path and passwords from local.properties / environment (never committed); isMinifyEnabled and isShrinkResources true with ProGuard keep rules for kotlinx.serialization, Supabase and Firebase; versionCode 2, versionName 1.0.0; test the release build on a physical phone. RM-0040: workflow on tags 'v*' and 'final-poe' decodes the keystore from a base64 GitHub secret and uploads app-release.apk/aab as an artefact. RM-0041: docs/store/ with 4-8 phone screenshots, 512px icon, 1024x500 feature graphic, short and full description, content rating notes, privacy policy published at a public URL. RM-0042: README restructured as a technical report (purpose, design considerations, architecture diagram, data model, offline sync design, DevOps and CI, screenshots, Release Notes since prototype listing every new feature, demo video link). RM-0043: AI_USAGE.md under 500 words naming tools, what they produced, how the team verified it, with citations. RM-0044: video on a physical phone covering every point in the brief. RM-0046: git tag -a final-poe -m 'Final POE' on the submitted commit and push the tag before the deadline.
+
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
 | RM-0039 | android | Release build: signing config from secrets, R8 minify, versionCode bump | assembleRelease produces a signed APK/AAB that installs and runs on a physical phone | RM-0037 | - | 🟥 Pending |
