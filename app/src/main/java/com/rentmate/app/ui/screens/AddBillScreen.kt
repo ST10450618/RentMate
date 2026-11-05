@@ -1,5 +1,7 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,6 +56,7 @@ fun AddBillScreen(onClose: () -> Unit, viewModel: AddBillViewModel = hiltViewMod
             value = amount,
             onValueChange = { amount = it },
             label = { Text("Amount (ZAR)") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))

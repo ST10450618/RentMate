@@ -30,5 +30,5 @@ RM-0012: run ./gradlew testDebugUnitTest locally until green; fix or replace bro
 | RM-0008 | supabase | Chore completion only by assignee, points once per cycle; leaderboard hide stored household-wide | RPC rejects non-assignee and duplicate completions; hiding leaderboard on one phone hides it for all | - | - | 🟥 Pending |
 | RM-0009 | android | Send to landlord builds an itemised email to the landlord; only the sender records landlord responses | Tapping Send opens a prefilled email with all open faults; other housemates cannot change status | RM-0001 | - | 🟥 Pending |
 | RM-0010 | supabase | Settle-up: creditor confirms payment; bills support equal, percentage and exact splits | Only the creditor can confirm; split validation rejects totals that do not add up; Add Bill offers all three modes | RM-0006 | - | 🟥 Pending |
-| RM-0011 | android | Number keypad for amounts; never show raw user IDs | Amount fields open decimal keypad; no UUIDs visible on any screen | - | - | 🟥 Pending |
+| RM-0011 | android | Number keypad for amounts; never show raw user IDs | Amount fields open decimal keypad; no UUIDs visible on any screen | - | - | 🟨 In progress |
 | RM-0012 | infra | Fix CI so unit tests run and pass on every push | Green Android CI and API CI runs on GitHub for the latest push | - | - | 🟥 Pending |

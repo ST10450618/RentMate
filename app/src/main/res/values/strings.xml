@@ -20,4 +20,5 @@
     <string name="leaderboard_desc">Hides it for the whole household</string>
 
     <string name="sign_out">Sign out</string>
+    <string name="housemate_fallback">Housemate</string>
 </resources>

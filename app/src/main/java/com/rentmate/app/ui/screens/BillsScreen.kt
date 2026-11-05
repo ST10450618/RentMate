@@ -1,5 +1,7 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -103,7 +105,7 @@ private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
             Text("R${"%.2f".format(bill.amount)} - due ${bill.due_date.take(10)}", style = MaterialTheme.typography.bodySmall)
             bill.bill_shares.forEach { share ->
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("${share.profiles?.display_name ?: "?"}: R${"%.2f".format(share.amount_owed)}")
+                    Text("${share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)}: R${"%.2f".format(share.amount_owed)}")
                     if (share.is_paid) {
                         Text("Paid", color = MaterialTheme.colorScheme.primary)
                     } else {

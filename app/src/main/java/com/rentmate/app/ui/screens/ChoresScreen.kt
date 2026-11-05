@@ -1,5 +1,7 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -72,14 +74,15 @@ private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComple
                 Text(chore.title, style = MaterialTheme.typography.titleMedium)
                 Text("${chore.point_value} pt", style = MaterialTheme.typography.bodySmall)
             }
-            val current = chore.currentAssignee()?.let { memberNames[it] ?: it }
+            val housemate = stringResource(R.string.housemate_fallback)
+            val current = chore.currentAssignee()?.let { memberNames[it] ?: housemate }
             Text("This cycle: ${current ?: "unassigned"}", style = MaterialTheme.typography.bodyMedium)
 
             val forecast = chore.forecast()
             if (forecast.isNotEmpty()) {
                 Text("Next 4 cycles:", style = MaterialTheme.typography.labelMedium)
                 forecast.forEach { (cycle, userId) ->
-                    Text("  $cycle. ${memberNames[userId] ?: userId}", style = MaterialTheme.typography.bodySmall)
+                    Text("  $cycle. ${memberNames[userId] ?: housemate}", style = MaterialTheme.typography.bodySmall)
                 }
             }
             OutlinedButton(onClick = onComplete, modifier = Modifier.fillMaxWidth()) {
