@@ -36,4 +36,14 @@
     <string name="error_amount_positive">Isixa kufuneka sibe ngaphezu ko-0.</string>
     <string name="error_chore_title_blank">Nika umsebenzi isihloko.</string>
     <string name="error_item_name_blank">Nika into igama.</string>
+
+    <string name="lock_prompt_title">Vula i-RentMate</string>
+    <string name="lock_prompt_subtitle">Qinisekisa ukuba nguwe ukuze uqhubeke</string>
+    <string name="lock_prompt_cancel">Rhoxisa</string>
+    <string name="lock_locked">I-RentMate ibhlokiwe</string>
+    <string name="lock_unlock">Vula</string>
+    <string name="lock_error_cancelled">Ukuvula kurhoxisiwe. Zama kwakhona ukuze uqhubeke.</string>
+    <string name="lock_error_lockout">Iimvavanyo ezininzi kakhulu. Linda kancinci uze uzame kwakhona.</string>
+    <string name="lock_error_no_credentials">Akukho mnwe, buso okanye ukhiye wesikrini osetiweyo kule ndlela yokusebenza.</string>
+    <string name="lock_error_other">Kukho into engahambanga kakuhle ekuvuleni. Zama kwakhona.</string>
 </resources>

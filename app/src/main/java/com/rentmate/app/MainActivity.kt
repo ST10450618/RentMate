@@ -2,9 +2,10 @@
 
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.fragment.app.FragmentActivity
+import com.rentmate.app.auth.BiometricLockHost
 import com.rentmate.app.navigation.RentMateApp
 import com.rentmate.app.ui.theme.RentMateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -12,14 +13,14 @@ import dagger.hilt.android.AndroidEntryPoint
 private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
         enableEdgeToEdge()
         setContent {
             RentMateTheme {
-                RentMateApp()
+                BiometricLockHost { RentMateApp() }
             }
         }
     }

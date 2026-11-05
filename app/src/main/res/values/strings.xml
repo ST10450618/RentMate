@@ -32,4 +32,14 @@
     <string name="error_amount_positive">Amount must be greater than 0.</string>
     <string name="error_chore_title_blank">Give the chore a title.</string>
     <string name="error_item_name_blank">Give the item a name.</string>
+
+    <string name="lock_prompt_title">Unlock RentMate</string>
+    <string name="lock_prompt_subtitle">Confirm it\'s you to continue</string>
+    <string name="lock_prompt_cancel">Cancel</string>
+    <string name="lock_locked">RentMate is locked</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_error_cancelled">Unlock cancelled. Try again to continue.</string>
+    <string name="lock_error_lockout">Too many attempts. Wait a moment, then try again.</string>
+    <string name="lock_error_no_credentials">No fingerprint, face or screen lock is set up on this device.</string>
+    <string name="lock_error_other">Something went wrong while unlocking. Try again.</string>
 </resources>
