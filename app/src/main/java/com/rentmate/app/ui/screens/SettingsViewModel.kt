@@ -10,6 +10,7 @@ import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.SettingsRepository
 import com.rentmate.app.data.UserSettings
 import com.rentmate.app.data.applyLanguage
+import com.rentmate.app.ui.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
@@ -49,7 +50,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setToggle(toggle: SettingToggle, value: Boolean) {
         Log.d(TAG, "setToggle ${toggle.name} = $value")
-        viewModelScope.launch {
+        launchSafely(TAG) {
             repository.setToggle(toggle, value)
             syncBoolean(TOGGLE_COLUMN.getValue(toggle), value)
         }
@@ -57,7 +58,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setLanguage(language: AppLanguage) {
         Log.d(TAG, "setLanguage ${language.tag}")
-        viewModelScope.launch {
+        launchSafely(TAG) {
             repository.setLanguage(language)
             applyLanguage(context, language)
             syncString("preferred_language", language.tag)

@@ -31,4 +31,11 @@
     <string name="status_sent">Sent to landlord</string>
     <string name="status_acknowledged">Acknowledged</string>
     <string name="status_resolved">Resolved</string>
+
+    <string name="maintenance_error_load">Couldn\'t load maintenance requests. Check your connection and try again.</string>
+    <string name="maintenance_error_save">Couldn\'t save your request. Check your connection and log it again.</string>
+    <string name="maintenance_error_update">Couldn\'t update the request status. Check your connection and try again.</string>
+    <string name="maintenance_error_send">Couldn\'t send to the landlord. Check your connection and try again.</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_dismiss">Dismiss</string>
 </resources>
