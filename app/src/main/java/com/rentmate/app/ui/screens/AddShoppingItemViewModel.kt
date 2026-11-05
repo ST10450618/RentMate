@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import com.rentmate.app.ui.validation.Limits
+import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
 
 sealed interface AddShoppingItemUiState {
@@ -34,10 +36,8 @@ class AddShoppingItemViewModel @Inject constructor(
 
     // US-13: any member can add an item; the list records who added it.
     fun add(name: String) {
-        if (name.isBlank()) {
-            _state.value = AddShoppingItemUiState.Error("Item name can't be blank.")
-            return
-        }
+        // Last guard behind the screen's inline validation (RM-0036).
+        if (validateRequiredText(name, Limits.ITEM_NAME_MAX) != null) return
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch

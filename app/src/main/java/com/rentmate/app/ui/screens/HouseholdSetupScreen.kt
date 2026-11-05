@@ -29,7 +29,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import com.rentmate.app.R
 import com.rentmate.app.ui.components.BrandMark
+import com.rentmate.app.ui.components.PrimaryButton
+import com.rentmate.app.ui.components.SecondaryButton
+import com.rentmate.app.ui.components.ValidatedTextField
+import com.rentmate.app.ui.validation.Limits
+import com.rentmate.app.ui.validation.normaliseInviteCode
+import com.rentmate.app.ui.validation.validateInviteCode
+import com.rentmate.app.ui.validation.validateRequiredText
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.theme.Spacing
@@ -43,6 +55,11 @@ fun HouseholdSetupScreen(
     val state by viewModel.state.collectAsState()
     var householdName by remember { mutableStateOf("") }
     var inviteCode by remember { mutableStateOf("") }
+    var createTried by remember { mutableStateOf(false) }
+    var joinTried by remember { mutableStateOf(false) }
+    val nameError = validateRequiredText(householdName, Limits.HOUSEHOLD_NAME_MAX, Limits.HOUSEHOLD_NAME_MIN)
+    val codeError = validateInviteCode(inviteCode)
+    val busy = state is HouseholdSetupUiState.Loading
 
     LaunchedEffect(state) {
         if (state is HouseholdSetupUiState.Joined) onDone()
@@ -74,35 +91,52 @@ fun HouseholdSetupScreen(
         SectionLabel("New household")
         Spacer(Modifier.height(Spacing.sm))
 
-        OutlinedTextField(
+        ValidatedTextField(
             value = householdName,
             onValueChange = { householdName = it },
-            label = { Text("Household name") },
+            label = stringResource(R.string.household_name),
+            error = nameError,
+            showErrors = createTried,
+            maxLength = Limits.HOUSEHOLD_NAME_MAX + 10,
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Done
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        PrimaryButton(
+            text = stringResource(R.string.household_create),
+            enabled = !busy,
+            onClick = {
+                createTried = true
+                if (nameError == null) viewModel.create(householdName.trim())
+            },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = { viewModel.create(householdName) },
-            enabled = householdName.isNotBlank() && state !is HouseholdSetupUiState.Loading,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Create household") }
 
         Spacer(Modifier.height(24.dp))
         SectionLabel("Join an existing one")
         Spacer(Modifier.height(Spacing.sm))
 
-        OutlinedTextField(
+        ValidatedTextField(
             value = inviteCode,
-            onValueChange = { inviteCode = it },
-            label = { Text("Invite code") },
+            onValueChange = { inviteCode = it.uppercase() },
+            label = stringResource(R.string.household_invite_code),
+            error = codeError,
+            showErrors = joinTried,
+            maxLength = Limits.INVITE_CODE_LENGTH + 2,
+            keyboardType = KeyboardType.Ascii,
+            capitalization = KeyboardCapitalization.Characters,
+            imeAction = ImeAction.Done
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        SecondaryButton(
+            text = stringResource(R.string.household_join),
+            enabled = !busy,
+            onClick = {
+                joinTried = true
+                if (codeError == null) viewModel.join(normaliseInviteCode(inviteCode))
+            },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = { viewModel.join(inviteCode) },
-            enabled = inviteCode.isNotBlank() && state !is HouseholdSetupUiState.Loading,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Join household") }
 
         Spacer(Modifier.height(16.dp))
         when (val s = state) {

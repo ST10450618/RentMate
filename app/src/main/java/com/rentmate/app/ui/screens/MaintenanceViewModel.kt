@@ -11,6 +11,7 @@ import com.rentmate.app.data.Urgency
 import com.rentmate.app.data.validateTitle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import com.rentmate.app.ui.validation.Limits
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,7 +44,7 @@ class MaintenanceViewModel @Inject constructor(
             repository.add(
                 MaintenanceRequest(
                     title = title.trim(),
-                    description = description.trim(),
+                    description = description.trim().take(Limits.DESCRIPTION_MAX),
                     category = category,
                     urgency = urgency,
                     photo = photo

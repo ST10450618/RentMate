@@ -17,7 +17,14 @@ import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import android.util.Log
+import com.rentmate.app.ui.validation.Limits
+import com.rentmate.app.ui.validation.validateAmount
+import com.rentmate.app.ui.validation.validateDueDate
+import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
+
+private const val TAG = "AddBillViewModel"
 
 sealed interface AddBillUiState {
     data object Idle : AddBillUiState
@@ -67,10 +74,19 @@ class AddBillViewModel @Inject constructor(
         }
     }
 
-    /** US-6: equal split across every household member; amount must be greater than 0. */
+    /**
+     * US-6: equal split across every household member.
+     *
+     * The screen validates first; these checks are a last guard so an invalid
+     * bill can never reach Supabase even if the UI is bypassed (RM-0036).
+     */
     fun createEqualSplit(title: String, amount: Double, dueDate: LocalDate) {
-        if (amount <= 0) {
-            _state.value = AddBillUiState.Error("Amount must be greater than 0.")
+        if (validateRequiredText(title, Limits.TITLE_MAX) != null ||
+            validateAmount(amount.toBigDecimal().toPlainString()) != null ||
+            validateDueDate(dueDate) != null ||
+            _members.value.isEmpty()
+        ) {
+            Log.w(TAG, "createEqualSplit rejected invalid input")
             return
         }
         viewModelScope.launch {

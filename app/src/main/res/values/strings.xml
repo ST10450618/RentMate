@@ -29,4 +29,48 @@
     <string name="login_signing_in">Signing you in…</string>
     <string name="login_error">We couldn\'t sign you in. Check your connection and try again.</string>
     <string name="login_privacy_note">We only use your Google name and email to set up your profile.</string>
+    <!-- Form validation (RM-0036) -->
+    <string name="error_required">This field is required</string>
+    <string name="error_too_short">Too short</string>
+    <string name="error_too_long">Too long, please shorten it</string>
+    <string name="error_not_a_number">Enter a number, e.g. 1250.50</string>
+    <string name="error_must_be_positive">Must be more than zero</string>
+    <string name="error_amount_too_large">Amount can\'t be more than R1,000,000</string>
+    <string name="error_too_many_decimals">Use at most 2 decimal places</string>
+    <string name="error_points_range">Points must be a whole number from 1 to 100</string>
+    <string name="error_date_past">Date can\'t be more than a year ago</string>
+    <string name="error_date_future">Date can\'t be more than two years ahead</string>
+    <string name="error_invite_code">Invite codes are 6 letters and numbers, e.g. K7M3QX</string>
+    <string name="error_no_members">No housemates found yet. Try again in a moment.</string>
+    <string name="pick_date">Pick a date</string>
+    <string name="save">Save</string>
+
+    <string name="add_bill_title">Add bill</string>
+    <string name="add_bill_name">What is the bill for?</string>
+    <string name="add_bill_amount">Amount (R)</string>
+    <string name="add_bill_due">Due date</string>
+    <plurals name="add_bill_split">
+        <item quantity="one">Split equally with %d housemate</item>
+        <item quantity="other">Split equally across %d housemates</item>
+    </plurals>
+
+    <string name="add_chore_title">Add chore</string>
+    <string name="add_chore_name">Chore name</string>
+    <string name="add_chore_recurrence">How often?</string>
+    <string name="recurrence_once">Once</string>
+    <string name="recurrence_weekly">Weekly</string>
+    <string name="recurrence_monthly">Monthly</string>
+    <string name="add_chore_points">Points (1–100)</string>
+    <plurals name="add_chore_rotation">
+        <item quantity="one">Rotates across %d housemate</item>
+        <item quantity="other">Rotates across %d housemates</item>
+    </plurals>
+
+    <string name="add_item_title">Add item</string>
+    <string name="add_item_name">Item name</string>
+
+    <string name="household_name">Household name</string>
+    <string name="household_invite_code">Invite code</string>
+    <string name="household_create">Create household</string>
+    <string name="household_join">Join household</string>
 </resources>

@@ -40,7 +40,11 @@ import com.rentmate.app.data.MaintenanceRequest
 import com.rentmate.app.data.RequestStatus
 import com.rentmate.app.data.TitleError
 import com.rentmate.app.data.Urgency
+import androidx.compose.ui.text.input.ImeAction
 import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.components.ValidatedTextField
+import com.rentmate.app.ui.validation.Limits
+import com.rentmate.app.ui.validation.validateOptionalText
 import com.rentmate.app.ui.theme.Spacing
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -91,7 +95,7 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
 
                     OutlinedTextField(
                         value = title,
-                        onValueChange = { title = it; error = null },
+                        onValueChange = { title = it.take(Limits.TITLE_MAX + 10); error = null },
                         label = { Text(stringResource(R.string.maintenance_whats_wrong)) },
                         isError = error != null,
                         supportingText = {
@@ -105,12 +109,17 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    OutlinedTextField(
+                    ValidatedTextField(
                         value = description,
                         onValueChange = { description = it },
-                        label = { Text(stringResource(R.string.maintenance_detail)) },
+                        label = stringResource(R.string.maintenance_detail),
+                        error = validateOptionalText(description, Limits.DESCRIPTION_MAX),
+                        showErrors = true,
+                        maxLength = Limits.DESCRIPTION_MAX + 20,
+                        singleLine = false,
                         minLines = 2,
-                        modifier = Modifier.fillMaxWidth()
+                        imeAction = ImeAction.Default,
+                        supportingText = "${description.length} / ${Limits.DESCRIPTION_MAX}"
                     )
 
                     Text(

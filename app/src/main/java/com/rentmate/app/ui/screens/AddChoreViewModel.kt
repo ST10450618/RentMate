@@ -11,7 +11,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import android.util.Log
+import com.rentmate.app.ui.validation.Limits
+import com.rentmate.app.ui.validation.validatePoints
+import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
+
+private const val TAG = "AddChoreViewModel"
 
 sealed interface AddChoreUiState {
     data object Idle : AddChoreUiState
@@ -56,8 +62,12 @@ class AddChoreViewModel @Inject constructor(
 
     /** US-9/US-12: rotation order is every household member, in the order they're listed. */
     fun create(title: String, recurrence: String, pointValue: Int) {
-        if (title.isBlank()) {
-            _state.value = AddChoreUiState.Error("Title can't be blank.")
+        // Last guard behind the screen's inline validation (RM-0036).
+        if (validateRequiredText(title, Limits.TITLE_MAX) != null ||
+            validatePoints(pointValue.toString()) != null ||
+            _members.value.isEmpty()
+        ) {
+            Log.w(TAG, "create rejected invalid input")
             return
         }
         viewModelScope.launch {

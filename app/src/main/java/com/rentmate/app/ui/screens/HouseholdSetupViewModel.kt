@@ -1,5 +1,8 @@
 package com.rentmate.app.ui.screens
 
+import com.rentmate.app.ui.validation.Limits
+import com.rentmate.app.ui.validation.validateInviteCode
+import com.rentmate.app.ui.validation.validateRequiredText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
@@ -39,6 +42,8 @@ class HouseholdSetupViewModel @Inject constructor(
 
     /** US-5: create_household RPC generates the 6-character invite code. */
     fun create(name: String) {
+        // Last guard behind the screen's inline validation (RM-0036).
+        if (validateRequiredText(name, Limits.HOUSEHOLD_NAME_MAX, Limits.HOUSEHOLD_NAME_MIN) != null) return
         _state.value = HouseholdSetupUiState.Loading
         viewModelScope.launch {
             runCatching {
@@ -55,6 +60,7 @@ class HouseholdSetupViewModel @Inject constructor(
 
     /** US-5: join_household RPC fails without creating a membership row for an invalid code. */
     fun join(inviteCode: String) {
+        if (validateInviteCode(inviteCode) != null) return
         _state.value = HouseholdSetupUiState.Loading
         viewModelScope.launch {
             runCatching {
