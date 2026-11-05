@@ -1,5 +1,8 @@
 package com.rentmate.app.ui.screens
 
+import com.rentmate.app.ui.components.StatusPill
+import com.rentmate.app.ui.components.PillTone
+import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,9 +76,34 @@ private fun ActivityContent(state: ActivityUiState, now: Instant = Instant.now()
                     textAlign = TextAlign.Center
                 )
             }
-            is ActivityUiState.Events ->
+            is ActivityUiState.Events -> {
+                if (state.isSample) SampleDataBanner()
                 if (state.events.isEmpty()) ActivityEmpty() else ActivityList(state.events, now)
+            }
         }
+    }
+}
+
+/**
+ * Shown while the feed uses the stand-in repository (until RM-0032), so the sample
+ * housemates and events are never mistaken for the household's real activity.
+ */
+@Composable
+private fun SampleDataBanner() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = Spacing.screen, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        StatusPill(stringResource(R.string.activity_sample_pill), PillTone.Attention)
+        Text(
+            stringResource(R.string.activity_sample_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(start = Spacing.sm)
+        )
     }
 }
 

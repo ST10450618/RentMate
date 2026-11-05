@@ -38,7 +38,7 @@
     <string name="error_too_long">Too long, please shorten it</string>
     <string name="error_not_a_number">Enter a number, e.g. 1250.50</string>
     <string name="error_must_be_positive">Must be more than zero</string>
-    <string name="error_amount_too_large">Amount can\'t be more than R1,000,000</string>
+    <string name="error_amount_too_large">Amount can\'t be more than R999,999.99</string>
     <string name="error_too_many_decimals">Use at most 2 decimal places</string>
     <string name="error_points_range">Points must be a whole number from 1 to 100</string>
     <string name="error_date_past">Date can\'t be more than a year ago</string>
@@ -167,4 +167,6 @@
     <string name="bills_confirm_received">Confirm received</string>
     <string name="bills_waiting_for">Waiting for %1$s to confirm</string>
     <string name="bills_ask_to_confirm">Ask %1$s to confirm you paid</string>
+    <string name="activity_sample_pill">Sample</string>
+    <string name="activity_sample_body">Example activity. Your household\'s real feed appears here once it\'s connected.</string>
 </resources>
