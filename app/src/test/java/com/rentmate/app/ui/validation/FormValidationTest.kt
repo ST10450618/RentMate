@@ -52,12 +52,23 @@ class FormValidationTest {
         assertEquals(FieldError.NOT_A_NUMBER, validateAmount("twelve"))
         assertEquals(FieldError.MUST_BE_POSITIVE, validateAmount("0"))
         assertEquals(FieldError.MUST_BE_POSITIVE, validateAmount("-50"))
-        assertEquals(FieldError.AMOUNT_TOO_LARGE, validateAmount("1000000.01"))
+        assertEquals(FieldError.AMOUNT_TOO_LARGE, validateAmount("1000000"))
         assertEquals(FieldError.TOO_MANY_DECIMALS, validateAmount("10.999"))
-        assertNull(validateAmount("1000000"))
+        assertNull(validateAmount("999999.99"))
         assertNull(validateAmount("0.01"))
         assertNull(validateAmount("10.50"))
         assertNull(validateAmount("10.500"))
+    }
+
+    @Test fun `every amount the field accepts is accepted by the bill split`() {
+        // Regression: R1,000,000 used to pass the field but fail BillSplit (Seth's PR #2 review).
+        listOf("0.01", "10.50", "999999.99").forEach { raw ->
+            assertNull(validateAmount(raw))
+            val split = com.rentmate.app.data.BillSplit.compute(
+                com.rentmate.app.data.SplitMode.Equal, parseAmount(raw), listOf("a", "b"), emptyMap()
+            )
+            assert(split is com.rentmate.app.data.SplitResult.Valid) { "$raw rejected by BillSplit: $split" }
+        }
     }
 
     // --- points ---

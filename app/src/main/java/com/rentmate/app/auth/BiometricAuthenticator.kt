@@ -18,16 +18,26 @@ private const val TAG = "BiometricAuth"
  */
 object BiometricAuthenticator {
 
+    /** What this device accepts: see [authenticatorsFor]. */
+    val authenticators: Int = authenticatorsFor(Build.VERSION.SDK_INT)
+
     /**
-     * Strong biometric or the screen-lock PIN/pattern. That combination is only
-     * supported on API 30+; on API 26-29 we use strong biometrics alone.
+     * Fingerprint/face, or the screen-lock PIN/pattern/password, on every API level,
+     * so a phone that only has a PIN can still lock the app.
+     *
+     * androidx.biometric does not support BIOMETRIC_STRONG | DEVICE_CREDENTIAL on
+     * API 28-29, so before API 30 we use BIOMETRIC_WEAK | DEVICE_CREDENTIAL, which is
+     * supported everywhere. Weak (class 2) biometrics are fine here: this is an app
+     * lock, not a crypto key. Because DEVICE_CREDENTIAL is always included, the
+     * prompt never has a Cancel button; the user backs out instead.
      */
-    val authenticators: Int =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    fun authenticatorsFor(sdkInt: Int): Int =
+        if (sdkInt >= Build.VERSION_CODES.R) {
             BiometricManager.Authenticators.BIOMETRIC_STRONG or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL
         } else {
-            BiometricManager.Authenticators.BIOMETRIC_STRONG
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
         }
 
     /** Asks the system what this device can do right now. Never throws. */
