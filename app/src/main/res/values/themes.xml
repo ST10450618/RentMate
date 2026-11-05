@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.RentMate" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.RentMate" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/rentmate_sand</item>
+    </style>
+
+    <!-- Launch theme (RM-0037): aloe background with the house mark, then hands
+         over to Theme.RentMate. See https://developer.android.com/develop/ui/views/launch/splash-screen -->
+    <style name="Theme.RentMate.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/rentmate_aloe</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.RentMate</item>
+    </style>
 </resources>
