@@ -18,4 +18,5 @@
     <string name="leaderboard_desc">Versteek dit vir die hele huishouding</string>
 
     <string name="sign_out">Teken uit</string>
+    <string name="housemate_fallback">Huisgenoot</string>
 </resources>

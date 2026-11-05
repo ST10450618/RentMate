@@ -1,5 +1,7 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,6 +71,7 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
             value = pointValue,
             onValueChange = { pointValue = it },
             label = { Text("Points") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))

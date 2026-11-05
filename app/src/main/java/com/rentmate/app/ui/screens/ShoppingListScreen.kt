@@ -1,5 +1,7 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,7 +60,7 @@ private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit) {
         Checkbox(checked = item.is_purchased, onCheckedChange = { onToggle() })
         Column {
             Text(item.name, style = MaterialTheme.typography.bodyLarge)
-            Text("added by ${item.added_by_user_id?.display_name ?: "?"}", style = MaterialTheme.typography.bodySmall)
+            Text("added by ${item.added_by_user_id?.display_name ?: stringResource(R.string.housemate_fallback)}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
