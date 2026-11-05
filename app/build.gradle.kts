@@ -87,7 +87,14 @@ android {
     testOptions {
         // Lets unit tests call android.util.Log (used for logging in view models).
         unitTests.isReturnDefaultValues = true
+        // Robolectric needs merged resources/manifest for the Room DAO tests.
+        unitTests.isIncludeAndroidResources = true
     }
+}
+
+ksp {
+    // Export Room schema JSON so migrations can be verified/reviewed in git.
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -102,6 +109,8 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -117,6 +126,11 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    // Room: local offline cache (RM-0015)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Google Sign-In via Credential Manager (US-1)
     implementation(libs.androidx.credentials)
