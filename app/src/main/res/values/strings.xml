@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="app_name" translatable="false">RentMate</string>
 
     <string name="settings_title">Settings</string>
@@ -20,4 +20,13 @@
     <string name="leaderboard_desc">Hides it for the whole household</string>
 
     <string name="sign_out">Sign out</string>
+    <string name="login_tagline">Bills, chores and repairs for your shared home, sorted.</string>
+    <string name="login_feature_bills">Split bills and settle up in fewer payments</string>
+    <string name="login_feature_chores">Fair chore rotation, planned four weeks ahead</string>
+    <string name="login_feature_maintenance">Log faults and send them to your landlord</string>
+    <string name="login_continue_google">Continue with Google</string>
+    <string name="login_try_again">Try again with Google</string>
+    <string name="login_signing_in">Signing you in…</string>
+    <string name="login_error">We couldn\'t sign you in. Check your connection and try again.</string>
+    <string name="login_privacy_note">We only use your Google name and email to set up your profile.</string>
 </resources>
