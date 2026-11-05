@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,11 +11,19 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.rentmate.app.ui.components.rememberHasStartedLoading
+import com.rentmate.app.ui.components.RefreshingIndicator
+import com.rentmate.app.ui.components.LoadingState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -33,6 +42,8 @@ import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.Spacing
 
+private const val TAG = "DashboardScreen"
+
 // S3 - dashboard: household switcher, overdue-bill alert, next chore, balance summary (US-3).
 @Composable
 fun DashboardScreen(
@@ -48,6 +59,19 @@ fun DashboardScreen(
             subtitle = if (state.households.isNotEmpty()) "${state.households.size} household(s)" else null
         )
 
+        val hasStarted = rememberHasStartedLoading(state.loading)
+        LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
+        val genericError = stringResource(R.string.state_error_generic)
+        val noData = state.households.isEmpty()
+        when {
+            noData && state.error != null -> ErrorState(message = genericError, onRetry = viewModel::refresh)
+            noData && (state.loading || !hasStarted) -> LoadingState()
+            noData -> EmptyState(
+                illustration = R.drawable.illus_empty_activity,
+                title = stringResource(R.string.empty_dashboard_title),
+                body = stringResource(R.string.empty_dashboard_body)
+            )
+            else -> {
         Column(
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.screen),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
@@ -60,8 +84,8 @@ fun DashboardScreen(
                 )
             }
 
-            if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            if (state.loading) RefreshingIndicator()
+            if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
 
             if (state.overdueBills.isNotEmpty()) {
                 RentMateCard(accent = MaterialTheme.colorScheme.secondary) {
@@ -111,6 +135,8 @@ fun DashboardScreen(
                         Text(state.members.joinToString(", "), modifier = Modifier.padding(start = 8.dp))
                     }
                 }
+            }
+        }
             }
         }
     }

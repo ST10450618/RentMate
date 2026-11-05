@@ -1,5 +1,14 @@
 package com.rentmate.app.ui.screens
 
+import android.util.Log
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
+import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.LoadingState
+import com.rentmate.app.ui.components.RefreshingIndicator
+import com.rentmate.app.ui.components.rememberHasStartedLoading
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +44,8 @@ import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.Spacing
 
+private const val TAG = "BillsScreen"
+
 // S4 - bills by status, with settle-up (US-6, US-11).
 @Composable
 fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel()) {
@@ -54,14 +65,30 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                 PrimaryButton("Settle up", onClick = { viewModel.loadSettleUp() })
             }
 
-            if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            LazyColumn(
-                modifier = Modifier.padding(top = Spacing.md),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-            ) {
-                items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }
+            val hasStarted = rememberHasStartedLoading(state.loading)
+            LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
+            val genericError = stringResource(R.string.state_error_generic)
+            when {
+                state.bills.isEmpty() && state.error != null ->
+                    ErrorState(message = genericError, onRetry = viewModel::refresh)
+                state.bills.isEmpty() && (state.loading || !hasStarted) -> LoadingState()
+                state.bills.isEmpty() -> EmptyState(
+                    illustration = R.drawable.illus_empty_bills,
+                    title = stringResource(R.string.empty_bills_title),
+                    body = stringResource(R.string.empty_bills_body),
+                    actionLabel = stringResource(R.string.empty_bills_action),
+                    onAction = onAddBill
+                )
+                else -> {
+                    if (state.loading) RefreshingIndicator()
+                    if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
+                    LazyColumn(
+                        modifier = Modifier.padding(top = Spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                    ) {
+                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }
+                    }
+                }
             }
         }
     }

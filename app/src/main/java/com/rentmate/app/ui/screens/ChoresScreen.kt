@@ -1,5 +1,14 @@
 package com.rentmate.app.ui.screens
 
+import android.util.Log
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
+import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.LoadingState
+import com.rentmate.app.ui.components.RefreshingIndicator
+import com.rentmate.app.ui.components.rememberHasStartedLoading
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +43,8 @@ import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.theme.Spacing
 
+private const val TAG = "ChoresScreen"
+
 // S6 - roster, four-week rotation forecast and points (US-9, US-12).
 @Composable
 fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewModel()) {
@@ -49,15 +60,31 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
-            if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                items(state.chores, key = { it.id }) { chore ->
-                    ChoreRow(chore, state.memberNames, onComplete = { viewModel.complete(chore.id) })
-                }
-                if (state.showLeaderboard) {
-                    state.leaderboard?.let { item { LeaderboardCard(it) } }
+            val hasStarted = rememberHasStartedLoading(state.loading)
+            LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
+            val genericError = stringResource(R.string.state_error_generic)
+            when {
+                state.chores.isEmpty() && state.error != null ->
+                    ErrorState(message = genericError, onRetry = viewModel::refresh)
+                state.chores.isEmpty() && (state.loading || !hasStarted) -> LoadingState()
+                state.chores.isEmpty() -> EmptyState(
+                    illustration = R.drawable.illus_empty_chores,
+                    title = stringResource(R.string.empty_chores_title),
+                    body = stringResource(R.string.empty_chores_body),
+                    actionLabel = stringResource(R.string.empty_chores_action),
+                    onAction = onAddChore
+                )
+                else -> {
+                    if (state.loading) RefreshingIndicator()
+                    if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        items(state.chores, key = { it.id }) { chore ->
+                            ChoreRow(chore, state.memberNames, onComplete = { viewModel.complete(chore.id) })
+                        }
+                        if (state.showLeaderboard) {
+                            state.leaderboard?.let { item { LeaderboardCard(it) } }
+                        }
+                    }
                 }
             }
         }
