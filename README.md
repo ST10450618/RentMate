@@ -1,6 +1,6 @@
 # RentMate
 
-[![Android CI](https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml/badge.svg)](https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml)
+[![Android CI](https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml/badge.svg)](https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml) [![API CI](https://github.com/ST10450618/RentMate/actions/workflows/api-ci.yml/badge.svg)](https://github.com/ST10450618/RentMate/actions/workflows/api-ci.yml)
 
 **One household, one app.** RentMate puts bill splitting, chore rotation, a
 shared shopping list and landlord maintenance requests in one place for people

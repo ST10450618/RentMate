@@ -1,15 +1,11 @@
 name: API CI
 
-# Seth's stage covers the ASP.NET Core API and its CI. This workflow is scoped
-# to the /api folder so back-end pushes don't trigger the Android build and
-# vice versa. If the API lives in its own repository instead, move this file
-# there and delete it from this one.
+# Builds and tests the ASP.NET Core API in RentMate.Api/ on every push to any
+# branch, and on every PR into main or develop. Like Android CI, there is no
+# paths filter, so the latest commit on every branch has a result.
 on:
   push:
     branches: ['**']
-    paths:
-      - 'api/**'
-      - '.github/workflows/api-ci.yml'
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -20,7 +16,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: ./api
+    working-directory: ./RentMate.Api
 
 jobs:
   build-and-test:
@@ -51,6 +47,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-test-results
-          path: api/**/TestResults/*.trx
+          path: RentMate.Api/**/TestResults/*.trx
           retention-days: 14
           if-no-files-found: ignore
