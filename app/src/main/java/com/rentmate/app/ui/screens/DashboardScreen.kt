@@ -1,9 +1,6 @@
 package com.rentmate.app.ui.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,24 +9,29 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.HouseholdRow
+import com.rentmate.app.ui.components.MemberAvatar
+import com.rentmate.app.ui.components.PillTone
+import com.rentmate.app.ui.components.PrimaryButton
+import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
+import com.rentmate.app.ui.components.SecondaryButton
+import com.rentmate.app.ui.components.SectionLabel
+import com.rentmate.app.ui.components.StatusPill
+import com.rentmate.app.ui.components.formatRand
+import com.rentmate.app.ui.theme.Spacing
 
 // S3 - dashboard: household switcher, overdue-bill alert, next chore, balance summary (US-3).
 @Composable
@@ -47,8 +49,8 @@ fun DashboardScreen(
         )
 
         Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.screen),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             if (state.households.size > 1) {
                 HouseholdSwitcher(
@@ -62,29 +64,25 @@ fun DashboardScreen(
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             if (state.overdueBills.isNotEmpty()) {
-                DashboardCard(borderColor = MaterialTheme.colorScheme.secondary) {
-                    Text(
-                        "${state.overdueBills.size} overdue bill(s)",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    state.overdueBills.forEach { Text(it.title) }
-                    Button(onClick = onOpenBills) { Text("View bills") }
+                RentMateCard(accent = MaterialTheme.colorScheme.secondary) {
+                    StatusPill("${state.overdueBills.size} overdue", PillTone.Attention)
+                    state.overdueBills.forEach { Text(it.title, style = MaterialTheme.typography.titleMedium) }
+                    PrimaryButton("View bills", onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
                 }
             }
 
-            DashboardCard {
-                Text("YOUR BALANCE", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            RentMateCard {
+                SectionLabel("Your balance")
                 if (state.owedToYou > 0) {
                     Text(
-                        "You're owed R${"%.2f".format(state.owedToYou)}",
+                        "You're owed ${formatRand(state.owedToYou)}",
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (state.youOwe > 0) {
                     Text(
-                        "You owe R${"%.2f".format(state.youOwe)}",
+                        "You owe ${formatRand(state.youOwe)}",
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -92,23 +90,23 @@ fun DashboardScreen(
                 if (state.owedToYou == 0.0 && state.youOwe == 0.0) {
                     Text("You're all settled up", style = MaterialTheme.typography.titleMedium)
                 }
-                Button(onClick = onOpenBills) { Text("Settle up") }
+                SecondaryButton("Settle up", onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
             }
 
-            DashboardCard {
-                Text("YOUR NEXT CHORE", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            RentMateCard {
+                SectionLabel("Your next chore")
                 val chore = state.nextChore
                 Text(
                     chore?.title ?: "Nothing assigned to you right now.",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Button(onClick = onOpenChores) { Text("View chores") }
+                SecondaryButton("View chores", onClick = onOpenChores, modifier = Modifier.padding(top = Spacing.sm))
             }
 
             if (state.members.isNotEmpty()) {
-                DashboardCard {
-                    Text("HOUSEHOLD", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                RentMateCard {
+                    SectionLabel("Household", color = MaterialTheme.colorScheme.primary)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                         state.members.forEach { name -> MemberAvatar(name) }
                         Text(state.members.joinToString(", "), modifier = Modifier.padding(start = 8.dp))
                     }
@@ -118,35 +116,7 @@ fun DashboardScreen(
     }
 }
 
-@Composable
-private fun MemberAvatar(name: String) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            name.take(1).uppercase(),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
 
-@Composable
-private fun DashboardCard(
-    borderColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.outline,
-    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit
-) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        border = BorderStroke(1.dp, borderColor),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp), content = content)
-    }
-}
 
 @Composable
 private fun HouseholdSwitcher(

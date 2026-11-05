@@ -1,6 +1,5 @@
 package com.rentmate.app.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,25 +10,30 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.BillWithSharesRow
+import com.rentmate.app.ui.components.MemberAvatar
+import com.rentmate.app.ui.components.PillTone
+import com.rentmate.app.ui.components.PrimaryButton
+import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
+import com.rentmate.app.ui.components.SecondaryButton
+import com.rentmate.app.ui.components.StatusPill
+import com.rentmate.app.ui.components.formatRand
+import com.rentmate.app.ui.theme.Spacing
 
 // S4 - bills by status, with settle-up (US-6, US-11).
 @Composable
@@ -45,15 +49,18 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                Button(onClick = { viewModel.loadSettleUp() }) { Text("Settle Up") }
+                PrimaryButton("Settle up", onClick = { viewModel.loadSettleUp() })
             }
 
             if (state.loading) CircularProgressIndicator()
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.padding(top = Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
                 items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }
             }
         }
@@ -74,10 +81,11 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         Column {
                             suggestions.forEach { s ->
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text("${s.from_display_name} -> ${s.to_display_name}: R${"%.2f".format(s.amount)}")
-                                    OutlinedButton(onClick = { viewModel.confirmSettlement(s.to_user_id, s.amount) }) {
-                                        Text("Confirm")
-                                    }
+                                    Text(
+                                        "${s.from_display_name} \u2192 ${s.to_display_name}: ${formatRand(s.amount)}",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    SecondaryButton("Confirm", onClick = { viewModel.confirmSettlement(s.to_user_id, s.amount) })
                                 }
                             }
                         }
@@ -85,7 +93,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                 }
             },
             confirmButton = {
-                Button(onClick = { viewModel.dismissSettleUp() }) { Text("Close") }
+                PrimaryButton("Close", onClick = { viewModel.dismissSettleUp() })
             }
         )
     }
@@ -93,22 +101,37 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 
 @Composable
 private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(bill.title, style = MaterialTheme.typography.titleMedium)
-            Text("R${"%.2f".format(bill.amount)} - due ${bill.due_date.take(10)}", style = MaterialTheme.typography.bodySmall)
-            bill.bill_shares.forEach { share ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("${share.profiles?.display_name ?: "?"}: R${"%.2f".format(share.amount_owed)}")
-                    if (share.is_paid) {
-                        Text("Paid", color = MaterialTheme.colorScheme.primary)
-                    } else {
-                        OutlinedButton(onClick = { onPay(share.id) }) { Text("Mark paid") }
-                    }
+    val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { it.is_paid }
+    RentMateCard {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(bill.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            Text(formatRand(bill.amount), style = MaterialTheme.typography.titleMedium)
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Due ${bill.due_date.take(10)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (allPaid) StatusPill("Paid", PillTone.Positive) else StatusPill("Outstanding", PillTone.Attention)
+        }
+        bill.bill_shares.forEach { share ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val name = share.profiles?.display_name ?: "Housemate"
+                MemberAvatar(name, size = 28.dp)
+                Text(
+                    "$name \u00B7 ${formatRand(share.amount_owed)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f).padding(start = Spacing.sm)
+                )
+                if (share.is_paid) {
+                    StatusPill("Paid", PillTone.Positive)
+                } else {
+                    SecondaryButton("Mark paid", onClick = { onPay(share.id) })
                 }
             }
         }

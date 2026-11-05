@@ -50,11 +50,14 @@ import java.util.Locale
  *
  * @param accent border colour; pass the secondary (amber) colour for cards that
  *   need a decision from the user, e.g. an overdue bill.
+ * @param contentPadding inner padding; list-style cards (Settings rows) pass a
+ *   smaller value because each row pads itself.
  */
 @Composable
 fun RentMateCard(
     modifier: Modifier = Modifier,
     accent: Color = MaterialTheme.colorScheme.outline,
+    contentPadding: PaddingValues = PaddingValues(Spacing.card),
     content: @Composable ColumnScope.() -> Unit
 ) {
     OutlinedCard(
@@ -64,7 +67,7 @@ fun RentMateCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
-            modifier = Modifier.padding(Spacing.card),
+            modifier = Modifier.padding(contentPadding),
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             content = content
         )
