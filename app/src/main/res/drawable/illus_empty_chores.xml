@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Empty-state illustration (RM-0037), RentMate palette: aloe #14564B,
+     aloe-light #D9E8E3, amber #E8B23A, sand #F5F1E6. Used by EmptyState (RM-0035). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="120dp"
+    android:viewportWidth="160" android:viewportHeight="120">
+    <path android:fillColor="#D9E8E3" android:pathData="M80,60m-56,0a56,56 0,1 1,112 0a56,56 0,1 1,-112 0"/>
+    <path android:fillColor="#E8B23A" android:pathData="M60,96 L76,56 L92,56 L108,96 Z"/>
+    <path android:strokeColor="#14564B" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M84,56 L84,18"/>
+    <path android:strokeColor="#14564B" android:strokeWidth="3" android:strokeLineCap="round" android:pathData="M68,96 L74,80 M84,96 L84,78 M100,96 L94,80"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M40,40m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0 M120,32m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0 M118,62m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+</vector>
