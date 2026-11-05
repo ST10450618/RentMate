@@ -19,6 +19,7 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,6 +56,7 @@ class SettingsViewModel @Inject constructor(
         launchSafely(TAG) {
             repository.setToggle(toggle, value)
             syncBoolean(TOGGLE_COLUMN.getValue(toggle), value)
+            if (toggle == SettingToggle.SHOW_LEADERBOARD) syncHouseholdLeaderboard(!value)
         }
     }
 
@@ -87,6 +89,16 @@ class SettingsViewModel @Inject constructor(
                 filter { eq("id", userId) }
             }
         }.onFailure { Log.w(TAG, "settings sync failed: ${it.message}") }
+    }
+
+    /** RM-0008: leaderboard visibility is shared by the whole household. */
+    private suspend fun syncHouseholdLeaderboard(hide: Boolean) {
+        val householdId = currentHousehold.id.first() ?: return
+        runCatching {
+            supabase.from("households").update({ set("hide_leaderboard", hide) }) {
+                filter { eq("id", householdId) }
+            }
+        }.onFailure { Log.w(TAG, "household leaderboard sync failed: ${it.message}") }
     }
 
     private suspend fun syncString(column: String, value: String) {

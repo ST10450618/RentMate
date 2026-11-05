@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
 import com.rentmate.app.data.LeaderboardRow
 import com.rentmate.app.ui.components.MemberAvatar
@@ -80,7 +81,7 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
                     if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         items(state.chores, key = { it.id }) { chore ->
-                            ChoreRow(chore, state.memberNames, onComplete = { viewModel.complete(chore.id) })
+                            ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), onComplete = { viewModel.complete(chore.id) })
                         }
                         if (state.showLeaderboard) {
                             state.leaderboard?.let { item { LeaderboardCard(it) } }
@@ -93,7 +94,12 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
 }
 
 @Composable
-private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComplete: () -> Unit) {
+private fun ChoreRow(
+    chore: ChoreRow,
+    memberNames: Map<String, String>,
+    forecast: List<ChoreForecastRow>,
+    onComplete: () -> Unit
+) {
     RentMateCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -114,11 +120,11 @@ private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComple
             )
         }
 
-        val forecast = chore.forecast()
+        // Forecast comes from the server's forecast_chore RPC (RM-0007), so every phone shows the same schedule.
         if (forecast.isNotEmpty()) {
             SectionLabel("Next 4 cycles")
-            forecast.forEach { (cycle, userId) ->
-                Text("$cycle. ${memberNames[userId] ?: housemate}", style = MaterialTheme.typography.bodySmall)
+            forecast.forEach { row ->
+                Text("${row.cycle_number}. ${memberNames[row.assignee_user_id] ?: housemate}", style = MaterialTheme.typography.bodySmall)
             }
         }
         SecondaryButton("Mark done", onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))

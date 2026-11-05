@@ -4,16 +4,10 @@ name: Android CI
 # The rubric requires automated builds + unit tests on every remote push, so
 # the branch filter is deliberately wide rather than limited to main.
 on:
+  # No paths filter: a push that only touches docs, the plan or Supabase
+  # still gets a run, so the latest commit on every branch has a result.
   push:
     branches: ['**']
-    paths:
-      - 'app/**'
-      - 'gradle/**'
-      - '*.gradle'
-      - '*.gradle.kts'
-      - 'gradle.properties'
-      - 'gradlew'
-      - '.github/workflows/android-ci.yml'
   pull_request:
     branches: [main, develop]
   workflow_dispatch:

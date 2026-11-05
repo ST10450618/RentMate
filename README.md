@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml"><img src="https://github.com/ST10450618/RentMate/actions/workflows/android-ci.yml/badge.svg" alt="Android CI" /></a>
+  <a href="https://github.com/ST10450618/RentMate/actions/workflows/api-ci.yml"><img src="https://github.com/ST10450618/RentMate/actions/workflows/api-ci.yml/badge.svg" alt="API CI" /></a>
   <img src="https://img.shields.io/badge/version-1.0.0-14564B" alt="Version 1.0.0" />
   <img src="https://img.shields.io/badge/Android-8.0%2B-14564B" alt="Android 8.0+" />
   <img src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-E8B23A" alt="Kotlin and Jetpack Compose" />

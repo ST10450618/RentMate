@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.ProfileNameRow
+import com.rentmate.app.data.SplitMode
+import com.rentmate.app.data.SplitShare
+import com.rentmate.app.network.toRpcParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +18,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 import android.util.Log
 import com.rentmate.app.ui.validation.Limits
@@ -40,20 +42,17 @@ sealed interface AddBillUiState {
 data class HouseholdMemberWithProfile(val user_id: String, val profiles: ProfileNameRow? = null)
 
 @Serializable
-private data class BillInsert(
-    val household_id: String,
-    val title: String,
-    val amount: Double,
-    val due_date: String,
-    val split_method: String,
-    val issued_by_user_id: String
+private data class CreateBillShareParam(val user_id: String, val value: Double)
+
+@Serializable
+private data class CreateBillParams(
+    val household_id_in: String,
+    val title_in: String,
+    val amount_in: Double,
+    val due_date_in: String,
+    val split_method_in: String,
+    val shares_in: List<CreateBillShareParam>
 )
-
-@Serializable
-private data class BillIdRow(val id: String)
-
-@Serializable
-private data class BillShareInsert(val bill_id: String, val user_id: String, val amount_owed: Double)
 
 @HiltViewModel
 class AddBillViewModel @Inject constructor(
@@ -78,54 +77,37 @@ class AddBillViewModel @Inject constructor(
     }
 
     /**
-     * US-6: equal split across every household member.
+     * US-6: creates the bill and its shares in one create_bill call. The server
+     * re-checks the split (RM-0010), so a bad client cannot store shares that
+     * do not add up. [shares] come from BillSplit.compute.
      *
      * The screen validates first; these checks are a last guard so an invalid
-     * bill can never reach Supabase even if the UI is bypassed (RM-0036).
+     * bill never reaches Supabase even if the UI is bypassed (RM-0036).
      */
-    fun createEqualSplit(title: String, amount: Double, dueDate: LocalDate) {
+    fun createBill(title: String, amount: BigDecimal, dueDate: LocalDate, mode: SplitMode, shares: List<SplitShare>) {
         if (validateRequiredText(title, Limits.TITLE_MAX) != null ||
-            validateAmount(amount.toBigDecimal().toPlainString()) != null ||
+            validateAmount(amount.toPlainString()) != null ||
             validateDueDate(dueDate) != null ||
-            _members.value.isEmpty()
+            shares.isEmpty()
         ) {
-            Log.w(TAG, "createEqualSplit rejected invalid input")
+            Log.w(TAG, "createBill rejected invalid input")
             return
         }
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
-            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             _state.value = AddBillUiState.Loading
             runCatching {
-                val bill = supabase.from("bills").insert(
-                    BillInsert(
-                        household_id = householdId,
-                        title = title,
-                        amount = amount,
-                        due_date = "${dueDate}T00:00:00Z",
-                        split_method = "Equal",
-                        issued_by_user_id = userId
-                    )
-                ) { select() }.decodeSingle<BillIdRow>()
-
-                val shares = equalShares(amount, _members.value.map { it.user_id })
-                    .map { (memberId, share) -> BillShareInsert(bill.id, memberId, share) }
-                supabase.from("bill_shares").insert(shares)
+                val params = CreateBillParams(
+                    household_id_in = householdId,
+                    title_in = title,
+                    amount_in = amount.toDouble(),
+                    due_date_in = "${dueDate}T00:00:00Z",
+                    split_method_in = mode.wire,
+                    shares_in = shares.map { CreateBillShareParam(it.userId, it.value.toDouble()) }
+                )
+                supabase.postgrest.rpc("create_bill", params.toRpcParams())
             }.onSuccess { _state.value = AddBillUiState.Saved }
                 .onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
-        }
-    }
-
-    /** Same rounding rule as the API's C# version: last share absorbs the remainder. */
-    private fun equalShares(amount: Double, memberIds: List<String>): List<Pair<String, Double>> {
-        if (memberIds.isEmpty()) return emptyList()
-        val total = BigDecimal.valueOf(amount)
-        val each = total.divide(BigDecimal(memberIds.size), 2, RoundingMode.HALF_UP)
-        var running = BigDecimal.ZERO
-        return memberIds.mapIndexed { index, id ->
-            val share = if (index == memberIds.lastIndex) total.subtract(running) else each
-            running = running.add(share)
-            id to share.toDouble()
         }
     }
 }
