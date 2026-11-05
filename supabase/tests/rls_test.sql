@@ -122,10 +122,23 @@ begin
     raise notice 'PASS: member cannot create a bill in someone else''s name';
   end;
 
-  insert into public.bills (household_id, title, amount, due_date, issued_by_user_id)
-  values ('10000000-0000-0000-0000-00000000000a', 'Internet', 600, now(),
-          '00000000-0000-0000-0000-00000000000b');
-  raise notice 'PASS: member can create their own bill';
+  -- RM-0010: direct inserts are gone; bills are created through create_bill.
+  begin
+    insert into public.bills (household_id, title, amount, due_date, issued_by_user_id)
+    values ('10000000-0000-0000-0000-00000000000a', 'Internet', 600, now(),
+            '00000000-0000-0000-0000-00000000000b');
+    raise exception 'FAIL: member inserted a bill directly, skipping split validation';
+  exception when insufficient_privilege then
+    raise notice 'PASS: member cannot insert a bill directly (must use create_bill)';
+  end;
+
+  perform public.create_bill('10000000-0000-0000-0000-00000000000a', 'Internet', 600, now(),
+    'Equal', '[{"user_id":"00000000-0000-0000-0000-00000000000a"},{"user_id":"00000000-0000-0000-0000-00000000000b"}]'::jsonb);
+  if not exists (select 1 from public.bills
+                 where title = 'Internet' and issued_by_user_id = '00000000-0000-0000-0000-00000000000b') then
+    raise exception 'FAIL: create_bill did not issue the bill as the caller';
+  end if;
+  raise notice 'PASS: member can create their own bill through create_bill';
 end $$;
 
 do $$
@@ -217,17 +230,22 @@ begin
   end;
 end $$;
 
+-- RM-0010: only the creditor (the bill's issuer) can mark a share paid.
 do $$
 declare paid boolean;
 begin
   perform set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true),
                  set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
-  perform public.mark_share_paid('30000000-0000-0000-0000-00000000000b');
+  begin
+    perform public.mark_share_paid('30000000-0000-0000-0000-00000000000b');
+    raise exception 'FAIL: debtor marked their own share paid';
+  exception when insufficient_privilege then
+    raise notice 'PASS: share owner (debtor) cannot mark their own share paid';
+  end;
   select is_paid into paid from public.bill_shares where id = '30000000-0000-0000-0000-00000000000b';
-  if not paid then
-    raise exception 'FAIL: owner could not mark their share paid';
+  if paid then
+    raise exception 'FAIL: debtor''s share ended up paid';
   end if;
-  raise notice 'PASS: share owner can mark their share paid through the RPC';
 end $$;
 
 do $$

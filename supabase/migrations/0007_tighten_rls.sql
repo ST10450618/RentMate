@@ -63,9 +63,8 @@ create policy "bill_shares: issuer adds" on public.bill_shares
 -- No update or delete policy: with RLS on, direct updates and deletes match
 -- no rows. Marking a share paid goes through this function instead.
 --
--- The person who owes the share can mark it paid, and so can the bill's
--- issuer (the person who is owed). RM-0010 narrows settle-up confirmation to
--- the creditor.
+-- Only the bill's issuer (the person who is owed) can mark a share paid. The
+-- debtor cannot confirm their own payment.
 create function public.mark_share_paid(share_id_in uuid)
 returns public.bill_shares
 language plpgsql
@@ -81,7 +80,7 @@ begin
 
   -- Same error for "missing" and "not yours", so ids can't be probed.
   if target.id is null or auth.uid() is null
-     or (target.user_id <> auth.uid() and issuer <> auth.uid()) then
+     or issuer <> auth.uid() then
     raise exception 'Share not found or not yours to mark paid'
       using errcode = '42501';
   end if;
