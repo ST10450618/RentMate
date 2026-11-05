@@ -57,6 +57,7 @@ fun MoreScreen(onOpen: (Screen) -> Unit) {
 private fun moreScreenDescription(screen: Screen): String = when (screen) {
     Screen.ShoppingList -> "Shared items to buy"
     Screen.Maintenance -> "Log and track faults"
+    Screen.Activity -> "Household activity"
     Screen.Settings -> "Notifications, language, account"
     else -> ""
 }

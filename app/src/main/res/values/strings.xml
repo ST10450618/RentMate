@@ -73,4 +73,24 @@
     <string name="household_invite_code">Invite code</string>
     <string name="household_create">Create household</string>
     <string name="household_join">Join household</string>
+    <string name="activity_title">Activity</string>
+    <string name="activity_subtitle">What your housemates have been up to</string>
+    <string name="activity_today">Today</string>
+    <string name="activity_yesterday">Yesterday</string>
+    <string name="activity_just_now">Just now</string>
+    <string name="activity_empty_title">No activity yet</string>
+    <string name="activity_empty_body">Bills, chores, shopping and repairs will show up here as your household uses RentMate.</string>
+    <string name="activity_error">Could not load activity. Please try again later.</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%d min ago</item>
+        <item quantity="other">%d min ago</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
 </resources>
