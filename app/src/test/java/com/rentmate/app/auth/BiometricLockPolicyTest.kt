@@ -94,4 +94,27 @@ class BiometricLockPolicyTest {
         assertEquals(AuthFailure.NO_CREDENTIALS, failureFromErrorCode(BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL))
         assertEquals(AuthFailure.OTHER, failureFromErrorCode(BiometricPrompt.ERROR_HW_UNAVAILABLE))
     }
+
+    // Seth's review: a PIN-only phone on Android 8-10 must still be able to lock the app.
+    @Test
+    fun `every API level accepts the screen-lock PIN`() {
+        for (sdk in 26..36) {
+            val allowed = BiometricAuthenticator.authenticatorsFor(sdk)
+            assertTrue("API $sdk", allowed and BiometricManager.Authenticators.DEVICE_CREDENTIAL != 0)
+        }
+    }
+
+    @Test
+    fun `Android 8 to 10 use a combination androidx biometric supports`() {
+        val weakOrPin = BiometricManager.Authenticators.BIOMETRIC_WEAK or
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        for (sdk in 26..29) assertEquals("API $sdk", weakOrPin, BiometricAuthenticator.authenticatorsFor(sdk))
+    }
+
+    @Test
+    fun `Android 11 and later use strong biometrics or PIN`() {
+        val strongOrPin = BiometricManager.Authenticators.BIOMETRIC_STRONG or
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        for (sdk in 30..36) assertEquals("API $sdk", strongOrPin, BiometricAuthenticator.authenticatorsFor(sdk))
+    }
 }
