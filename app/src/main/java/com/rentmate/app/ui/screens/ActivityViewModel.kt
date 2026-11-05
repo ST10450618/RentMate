@@ -22,7 +22,11 @@ import javax.inject.Inject
 /** What the Activity screen shows. */
 sealed interface ActivityUiState {
     data object Loading : ActivityUiState
-    data class Events(val events: List<ActivityEvent>) : ActivityUiState
+    data class Events(
+        val events: List<ActivityEvent>,
+        /** Events are sample data (stand-in repository); the screen shows a label. */
+        val isSample: Boolean = false
+    ) : ActivityUiState
     data class Error(val message: String?) : ActivityUiState
 }
 
@@ -40,7 +44,7 @@ class ActivityViewModel @Inject constructor(
                 flowOf<ActivityUiState>(ActivityUiState.Loading)
             } else {
                 repository.observe(householdId)
-                    .map<List<ActivityEvent>, ActivityUiState> { ActivityUiState.Events(it) }
+                    .map<List<ActivityEvent>, ActivityUiState> { ActivityUiState.Events(it, repository.isSampleData) }
                     .onStart { emit(ActivityUiState.Loading) }
                     .catch { e ->
                         Log.w(TAG, "Activity feed failed", e)

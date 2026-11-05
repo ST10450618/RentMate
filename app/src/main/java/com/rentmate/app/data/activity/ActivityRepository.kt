@@ -20,6 +20,12 @@ import javax.inject.Singleton
 interface ActivityRepository {
     /** Emits the newest [limit] events of [householdId], newest first, and again on every change. */
     fun observe(householdId: String, limit: Int = 50): Flow<List<ActivityEvent>>
+
+    /**
+     * True when the events are made-up sample data rather than the household's real
+     * activity. The screen labels sample data so nobody mistakes it for real housemates.
+     */
+    val isSampleData: Boolean get() = false
 }
 
 /**
@@ -29,6 +35,8 @@ interface ActivityRepository {
  */
 @Singleton
 class InMemoryActivityRepository @Inject constructor() : ActivityRepository {
+
+    override val isSampleData: Boolean = true
 
     override fun observe(householdId: String, limit: Int): Flow<List<ActivityEvent>> =
         flowOf(sampleEvents(Instant.now()).take(limit))
