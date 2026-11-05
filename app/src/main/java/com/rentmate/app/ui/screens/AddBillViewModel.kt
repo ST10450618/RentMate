@@ -23,6 +23,9 @@ import com.rentmate.app.ui.validation.validateAmount
 import com.rentmate.app.ui.validation.validateDueDate
 import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import com.rentmate.app.ui.error.ErrorMapper
 
 private const val TAG = "AddBillViewModel"
 
@@ -30,7 +33,7 @@ sealed interface AddBillUiState {
     data object Idle : AddBillUiState
     data object Loading : AddBillUiState
     data object Saved : AddBillUiState
-    data class Error(val message: String) : AddBillUiState
+    data class Error(@StringRes val messageRes: Int) : AddBillUiState
 }
 
 @Serializable
@@ -109,7 +112,7 @@ class AddBillViewModel @Inject constructor(
                     .map { (memberId, share) -> BillShareInsert(bill.id, memberId, share) }
                 supabase.from("bill_shares").insert(shares)
             }.onSuccess { _state.value = AddBillUiState.Saved }
-                .onFailure { _state.value = AddBillUiState.Error(it.message ?: "Could not create bill") }
+                .onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
 

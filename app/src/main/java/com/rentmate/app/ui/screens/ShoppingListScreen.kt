@@ -59,7 +59,7 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
             val hasStarted = rememberHasStartedLoading(state.loading)
             LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
-            val genericError = stringResource(R.string.state_error_generic)
+            val genericError = state.error?.let { stringResource(it) } ?: stringResource(R.string.state_error_generic)
             when {
                 state.items.isEmpty() && state.error != null ->
                     ErrorState(message = genericError, onRetry = viewModel::refresh)

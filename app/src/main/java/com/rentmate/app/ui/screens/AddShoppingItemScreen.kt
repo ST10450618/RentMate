@@ -68,7 +68,7 @@ fun AddShoppingItemScreen(onClose: () -> Unit, viewModel: AddShoppingItemViewMod
         )
 
         (state as? AddShoppingItemUiState.Error)?.let {
-            Text(it.message, color = MaterialTheme.colorScheme.error)
+            Text(stringResource(it.messageRes), color = MaterialTheme.colorScheme.error)
         }
     }
 }

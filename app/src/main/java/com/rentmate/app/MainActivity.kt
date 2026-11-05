@@ -5,12 +5,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
+import com.rentmate.app.auth.BiometricLockHost
 import com.rentmate.app.navigation.RentMateApp
 import com.rentmate.app.ui.theme.RentMateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +33,7 @@ private const val KEY_ASKED_NOTIFICATIONS = "asked_notification_permission"
  * working and they can enable notifications later in system settings.
  */
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
         maybeAskForNotificationPermission()
         setContent {
             RentMateTheme {
-                RentMateApp()
+                BiometricLockHost { RentMateApp() }
             }
         }
     }

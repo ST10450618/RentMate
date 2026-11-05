@@ -119,7 +119,7 @@ fun AddBillScreen(onClose: () -> Unit, viewModel: AddBillViewModel = hiltViewMod
         )
 
         (state as? AddBillUiState.Error)?.let {
-            Text(it.message, color = MaterialTheme.colorScheme.error)
+            Text(stringResource(it.messageRes), color = MaterialTheme.colorScheme.error)
         }
     }
 }

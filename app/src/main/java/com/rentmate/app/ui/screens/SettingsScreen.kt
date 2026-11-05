@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rentmate.app.R
+import com.rentmate.app.auth.BiometricAvailability
+import com.rentmate.app.auth.BiometricLockPolicy
 import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.SettingGroup
 import com.rentmate.app.data.SettingToggle
@@ -38,9 +40,14 @@ import com.rentmate.app.ui.theme.Spacing
 fun SettingsScreen(onSignedOut: () -> Unit = {}, viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.state.collectAsStateWithLifecycle()
 
+    val biometric = rememberBiometricToggleState { viewModel.setToggle(SettingToggle.BIOMETRIC_UNLOCK, it) }
+
     SettingsContent(
         settings = settings,
-        onToggle = viewModel::setToggle,
+        biometricAvailability = biometric.availability,
+        onToggle = { toggle, on ->
+            if (toggle == SettingToggle.BIOMETRIC_UNLOCK) biometric.onToggle(on) else viewModel.setToggle(toggle, on)
+        },
         onLanguage = viewModel::setLanguage,
         onSignOut = { viewModel.signOut(onSignedOut) }
     )
@@ -53,7 +60,8 @@ fun SettingsContent(
     onToggle: (SettingToggle, Boolean) -> Unit,
     onLanguage: (AppLanguage) -> Unit,
     onSignOut: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    biometricAvailability: BiometricAvailability = BiometricAvailability.AVAILABLE
 ) {
     Column(
         modifier = modifier
@@ -71,11 +79,15 @@ fun SettingsContent(
             SettingsSection(title = stringResource(group.titleRes)) {
                 SettingToggle.inGroup(group).forEachIndexed { index, toggle ->
                     if (index > 0) HorizontalDivider()
+                    val isBiometric = toggle == SettingToggle.BIOMETRIC_UNLOCK
+                    val usable = !isBiometric || BiometricLockPolicy.isToggleUsable(biometricAvailability)
                     ToggleRow(
                         title = stringResource(toggle.titleRes),
                         description = toggle.descRes?.let { stringResource(it) },
-                        checked = settings.isOn(toggle),
-                        onCheckedChange = { onToggle(toggle, it) }
+                        checked = settings.isOn(toggle) && usable,
+                        onCheckedChange = { onToggle(toggle, it) },
+                        enabled = usable,
+                        note = if (isBiometric) biometricNoteRes(biometricAvailability)?.let { stringResource(it) } else null
                     )
                 }
             }
@@ -115,7 +127,9 @@ private fun ToggleRow(
     title: String,
     description: String?,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    note: String? = null
 ) {
     androidx.compose.foundation.layout.Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -130,8 +144,15 @@ private fun ToggleRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            if (note != null) {
+                Text(
+                    note,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
 }
 

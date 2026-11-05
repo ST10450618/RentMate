@@ -117,4 +117,34 @@
         <item quantity="one">%d day ago</item>
         <item quantity="other">%d days ago</item>
     </plurals>
+
+    <!-- RM-0004: friendly errors shown instead of raw exception text -->
+    <string name="error_no_connection">You\'re offline. Check your connection and try again.</string>
+    <string name="error_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_not_allowed">You don\'t have permission to do that.</string>
+    <string name="error_already_exists">That already exists.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_invalid_invite_code">That invite code isn\'t valid. Check it and try again.</string>
+    <string name="error_sign_in_failed">Sign-in didn\'t work. Please try again.</string>
+    <string name="error_amount_positive">Amount must be greater than 0.</string>
+    <string name="error_chore_title_blank">Give the chore a title.</string>
+    <string name="error_item_name_blank">Give the item a name.</string>
+
+    <string name="lock_prompt_title">Unlock RentMate</string>
+    <string name="lock_prompt_subtitle">Confirm it\'s you to continue</string>
+    <string name="lock_prompt_cancel">Cancel</string>
+    <string name="lock_locked">RentMate is locked</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_error_cancelled">Unlock cancelled. Try again to continue.</string>
+    <string name="lock_error_lockout">Too many attempts. Wait a moment, then try again.</string>
+    <string name="lock_error_no_credentials">No fingerprint, face or screen lock is set up on this device.</string>
+    <string name="lock_error_other">Something went wrong while unlocking. Try again.</string>
+
+    <string name="biometric_note_no_hardware">This device has no fingerprint or face unlock, so this setting is unavailable.</string>
+    <string name="biometric_note_unavailable">Biometric unlock is not available on this device right now.</string>
+    <string name="biometric_note_none_enrolled">Set up a fingerprint, face or screen lock first.</string>
+    <string name="biometric_enrol_title">Set up biometrics first</string>
+    <string name="biometric_enrol_message">No fingerprint, face or screen lock is set up on this device. Open your device settings to add one, then come back and turn this on.</string>
+    <string name="biometric_enrol_open">Open settings</string>
+    <string name="biometric_enrol_cancel">Not now</string>
 </resources>

@@ -137,7 +137,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        stringResource(R.string.login_error),
+                        stringResource((state as AuthUiState.Error).messageRes),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White,
                         modifier = Modifier.padding(Spacing.md),

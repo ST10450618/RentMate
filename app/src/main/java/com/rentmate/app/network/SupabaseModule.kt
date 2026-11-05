@@ -22,6 +22,12 @@ object SupabaseModule {
         supabaseKey = BuildConfig.SUPABASE_ANON_KEY
     ) {
         install(Postgrest)
-        install(Auth)
+        install(Auth) {
+            // RM-0002: keep the session on the device and refresh it, so a
+            // relaunch skips Login.
+            autoSaveToStorage = true
+            autoLoadFromStorage = true
+            alwaysAutoRefresh = true
+        }
     }
 }

@@ -43,15 +43,41 @@ private data class MaintenanceStatusUpdate(val status: String)
 @Serializable
 private data class SendToLandlordParams(val household_id_in: String)
 
+/**
+ * US-10 data source for maintenance requests.
+ *
+ * Every function talks to the network and may throw (IOException when offline,
+ * RestException when the server rejects the call). Callers must catch: see
+ * [com.rentmate.app.ui.screens.MaintenanceViewModel]. Kept as an interface so
+ * unit tests can swap in a fake that fails on purpose.
+ */
+interface MaintenanceRepository {
+    /** The household's requests as last loaded from the server, newest first after an add. */
+    val requests: StateFlow<List<MaintenanceRequest>>
+
+    /** Reloads every request for the current household. */
+    suspend fun refresh()
+
+    /** Inserts a new request and prepends it to [requests]. */
+    suspend fun add(request: MaintenanceRequest)
+
+    /** Advances one request through open -> sent -> acknowledged -> resolved. */
+    suspend fun advance(id: String)
+
+    /** Sends every open request to the landlord; returns how many were sent. */
+    suspend fun sendOpenRequests(): Int
+}
+
+/** Supabase-backed [MaintenanceRepository] used by the app. */
 @Singleton
-class MaintenanceRepository @Inject constructor(
+class SupabaseMaintenanceRepository @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold
-) {
+) : MaintenanceRepository {
     private val _requests = MutableStateFlow<List<MaintenanceRequest>>(emptyList())
-    val requests: StateFlow<List<MaintenanceRequest>> = _requests.asStateFlow()
+    override val requests: StateFlow<List<MaintenanceRequest>> = _requests.asStateFlow()
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val householdId = currentHousehold.id.first() ?: return
         val rows = supabase.from("maintenance_requests")
             .select { filter { eq("household_id", householdId) } }
@@ -59,7 +85,7 @@ class MaintenanceRepository @Inject constructor(
         _requests.value = rows.map { it.toLocal() }
     }
 
-    suspend fun add(request: MaintenanceRequest) {
+    override suspend fun add(request: MaintenanceRequest) {
         val householdId = currentHousehold.id.first() ?: return
         val userId = supabase.auth.currentUserOrNull()?.id ?: return
         val created = supabase.from("maintenance_requests").insert(
@@ -76,7 +102,7 @@ class MaintenanceRepository @Inject constructor(
     }
 
     /** Advances one request through open -> sent -> acknowledged -> resolved. */
-    suspend fun advance(id: String) {
+    override suspend fun advance(id: String) {
         val next = _requests.value.firstOrNull { it.id == id }?.status?.next() ?: return
         val updated = supabase.from("maintenance_requests").update(
             MaintenanceStatusUpdate(next.toDto())
@@ -88,7 +114,7 @@ class MaintenanceRepository @Inject constructor(
     }
 
     /** US-10: batches every open request into one dated, itemised message to the landlord. */
-    suspend fun sendOpenRequests(): Int {
+    override suspend fun sendOpenRequests(): Int {
         val householdId = currentHousehold.id.first() ?: return 0
         val count = supabase.postgrest.rpc("send_to_landlord", SendToLandlordParams(householdId).toRpcParams())
             .decodeAs<Int>()

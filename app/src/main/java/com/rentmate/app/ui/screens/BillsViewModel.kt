@@ -18,11 +18,13 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.time.Instant
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.ui.error.ErrorMapper
 
 data class BillsUiState(
     val bills: List<BillWithSharesRow> = emptyList(),
     val loading: Boolean = false,
-    val error: String? = null,
+    @StringRes val error: Int? = null,
     val settleUp: List<SettleUpRow>? = null,
     val settleUpLoading: Boolean = false
 )
@@ -56,7 +58,7 @@ class BillsViewModel @Inject constructor(
                     .select(columns = BILL_WITH_SHARES_COLUMNS) { filter { eq("household_id", householdId) } }
                     .decodeList<BillWithSharesRow>()
             }.onSuccess { _state.value = _state.value.copy(loading = false, bills = it) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
+                .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
         }
     }
 
@@ -70,7 +72,7 @@ class BillsViewModel @Inject constructor(
                     filter { eq("id", shareId) }
                 }
             }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = it.message) }
+                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 
@@ -82,7 +84,7 @@ class BillsViewModel @Inject constructor(
             runCatching {
                 supabase.postgrest.rpc("settle_up", SettleUpParams(householdId).toRpcParams()).decodeList<SettleUpRow>()
             }.onSuccess { _state.value = _state.value.copy(settleUpLoading = false, settleUp = it) }
-                .onFailure { _state.value = _state.value.copy(settleUpLoading = false, error = it.message) }
+                .onFailure { _state.value = _state.value.copy(settleUpLoading = false, error = ErrorMapper.toMessage(it)) }
         }
     }
 
@@ -94,7 +96,7 @@ class BillsViewModel @Inject constructor(
             }.onSuccess {
                 _state.value = _state.value.copy(settleUp = null)
                 refresh()
-            }.onFailure { _state.value = _state.value.copy(error = it.message) }
+            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 

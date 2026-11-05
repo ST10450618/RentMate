@@ -62,7 +62,7 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
             val hasStarted = rememberHasStartedLoading(state.loading)
             LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
-            val genericError = stringResource(R.string.state_error_generic)
+            val genericError = state.error?.let { stringResource(it) } ?: stringResource(R.string.state_error_generic)
             when {
                 state.chores.isEmpty() && state.error != null ->
                     ErrorState(message = genericError, onRetry = viewModel::refresh)

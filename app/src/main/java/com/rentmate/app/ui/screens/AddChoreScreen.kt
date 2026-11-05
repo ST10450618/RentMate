@@ -126,7 +126,7 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
         )
 
         (state as? AddChoreUiState.Error)?.let {
-            Text(it.message, color = MaterialTheme.colorScheme.error)
+            Text(stringResource(it.messageRes), color = MaterialTheme.colorScheme.error)
         }
     }
 }

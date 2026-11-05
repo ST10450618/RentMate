@@ -18,4 +18,40 @@
     <string name="leaderboard_desc">Versteek dit vir die hele huishouding</string>
 
     <string name="sign_out">Teken uit</string>
+
+    <string name="maintenance_error_load">Kon nie onderhoudsversoeke laai nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_save">Kon nie jou versoek stoor nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_update">Kon nie die status opdateer nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_send">Kon nie aan die verhuurder stuur nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="action_retry">Probeer weer</string>
+    <string name="action_dismiss">Maak toe</string>
+
+    <string name="error_no_connection">Jy is vanlyn. Gaan jou verbinding na en probeer weer.</string>
+    <string name="error_session_expired">Jou sessie het verval. Teken asseblief weer in.</string>
+    <string name="error_not_allowed">Jy het nie toestemming om dit te doen nie.</string>
+    <string name="error_already_exists">Dit bestaan reeds.</string>
+    <string name="error_generic">Iets het verkeerd geloop. Probeer asseblief weer.</string>
+    <string name="error_invalid_invite_code">Daardie uitnodigingskode is ongeldig. Gaan dit na en probeer weer.</string>
+    <string name="error_sign_in_failed">Aanmelding het nie gewerk nie. Probeer asseblief weer.</string>
+    <string name="error_amount_positive">Die bedrag moet meer as 0 wees.</string>
+    <string name="error_chore_title_blank">Gee die taak \'n titel.</string>
+    <string name="error_item_name_blank">Gee die item \'n naam.</string>
+
+    <string name="lock_prompt_title">Ontsluit RentMate</string>
+    <string name="lock_prompt_subtitle">Bevestig dat dit jy is om voort te gaan</string>
+    <string name="lock_prompt_cancel">Kanselleer</string>
+    <string name="lock_locked">RentMate is gesluit</string>
+    <string name="lock_unlock">Ontsluit</string>
+    <string name="lock_error_cancelled">Ontsluiting gekanselleer. Probeer weer om voort te gaan.</string>
+    <string name="lock_error_lockout">Te veel pogings. Wag \'n oomblik en probeer weer.</string>
+    <string name="lock_error_no_credentials">Geen vingerafdruk, gesig of skermslot is op hierdie toestel opgestel nie.</string>
+    <string name="lock_error_other">Iets het verkeerd gegaan met ontsluit. Probeer weer.</string>
+
+    <string name="biometric_note_no_hardware">Hierdie toestel het nie vingerafdruk- of gesigsontsluiting nie, so hierdie instelling is nie beskikbaar nie.</string>
+    <string name="biometric_note_unavailable">Biometriese ontsluiting is tans nie op hierdie toestel beskikbaar nie.</string>
+    <string name="biometric_note_none_enrolled">Stel eers \'n vingerafdruk, gesig of skermslot op.</string>
+    <string name="biometric_enrol_title">Stel eers biometrie op</string>
+    <string name="biometric_enrol_message">Geen vingerafdruk, gesig of skermslot is op hierdie toestel opgestel nie. Maak jou toestelinstellings oop om een by te voeg, kom dan terug en skakel dit aan.</string>
+    <string name="biometric_enrol_open">Maak instellings oop</string>
+    <string name="biometric_enrol_cancel">Nie nou nie</string>
 </resources>

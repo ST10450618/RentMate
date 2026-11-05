@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.ui.error.ErrorMapper
 
 data class ChoresUiState(
     val chores: List<ChoreRow> = emptyList(),
@@ -27,7 +29,7 @@ data class ChoresUiState(
     val leaderboard: List<LeaderboardRow>? = null,
     val showLeaderboard: Boolean = true,
     val loading: Boolean = false,
-    val error: String? = null
+    @StringRes val error: Int? = null
 )
 
 /** Same modulo logic as ChoreRotationService.Forecast: next 4 cycles from the current index. */
@@ -73,7 +75,7 @@ class ChoresViewModel @Inject constructor(
             runCatching {
                 supabase.from("chores").select { filter { eq("household_id", householdId) } }.decodeList<ChoreRow>()
             }.onSuccess { _state.value = _state.value.copy(loading = false, chores = it) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
+                .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
 
             runCatching {
                 supabase.postgrest.rpc("leaderboard", LeaderboardParams(householdId).toRpcParams()).decodeList<LeaderboardRow>()
@@ -91,7 +93,7 @@ class ChoresViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { supabase.postgrest.rpc("complete_chore", CompleteChoreParams(choreId).toRpcParams()) }
                 .onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = it.message) }
+                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 }

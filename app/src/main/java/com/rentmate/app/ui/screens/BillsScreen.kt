@@ -67,7 +67,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 
             val hasStarted = rememberHasStartedLoading(state.loading)
             LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
-            val genericError = stringResource(R.string.state_error_generic)
+            val genericError = state.error?.let { stringResource(it) } ?: stringResource(R.string.state_error_generic)
             when {
                 state.bills.isEmpty() && state.error != null ->
                     ErrorState(message = genericError, onRetry = viewModel::refresh)

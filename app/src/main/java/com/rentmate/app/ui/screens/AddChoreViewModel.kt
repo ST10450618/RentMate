@@ -16,6 +16,9 @@ import com.rentmate.app.ui.validation.Limits
 import com.rentmate.app.ui.validation.validatePoints
 import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import com.rentmate.app.ui.error.ErrorMapper
 
 private const val TAG = "AddChoreViewModel"
 
@@ -23,7 +26,7 @@ sealed interface AddChoreUiState {
     data object Idle : AddChoreUiState
     data object Loading : AddChoreUiState
     data object Saved : AddChoreUiState
-    data class Error(val message: String) : AddChoreUiState
+    data class Error(@StringRes val messageRes: Int) : AddChoreUiState
 }
 
 @Serializable
@@ -78,7 +81,7 @@ class AddChoreViewModel @Inject constructor(
                     ChoreInsert(householdId, title, recurrence, pointValue, _members.value)
                 )
             }.onSuccess { _state.value = AddChoreUiState.Saved }
-                .onFailure { _state.value = AddChoreUiState.Error(it.message ?: "Could not create chore") }
+                .onFailure { _state.value = AddChoreUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
 }
