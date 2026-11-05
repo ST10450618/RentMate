@@ -3,6 +3,10 @@
 
 Goal: Housemates get real-time FCM pushes for bills, chores and maintenance updates
 
+Owners: Seth (RM-0020 Firebase project, RM-0022 Edge Function), Ali (RM-0021 client, RM-0023 deep links). Docs: https://firebase.google.com/docs/cloud-messaging.
+
+Client: firebase-messaging, a FirebaseMessagingService that saves onNewToken to a device_tokens table (user_id, token, platform, updated_at; RLS: own rows), request POST_NOTIFICATIONS on Android 13+, channels per type (bills, chores, shopping, maintenance) with translated names. Server: Supabase Edge Function 'notify' called by database webhooks on bills insert, chores assignment and maintenance_requests status update; it reads recipients' tokens and their profile toggles, then calls FCM HTTP v1 with a service-account access token stored in Supabase secrets (never in git). Data payload includes 'screen' and 'id' for deep links.
+
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
 | RM-0020 | infra | Create Firebase project, add google-services.json and service account secret | Firebase project exists; app builds with google-services plugin; secret stored outside git | - | - | 🟥 Pending · Needs a human: needs a Google account to create the Firebase project |

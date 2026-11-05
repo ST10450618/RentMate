@@ -3,6 +3,10 @@
 
 Goal: Every screen works fully in English, Afrikaans and isiXhosa, switchable in-app
 
+Owner: James. Languages: English (default), Afrikaans (af), isiXhosa (xh), all official South African languages.
+
+RM-0024: move every literal in Compose screens into strings.xml (use plurals for counts like 'n bill(s)'). Turn on lint HardcodedText as error. RM-0025: fill values-af and values-xh for every key; get a speaker in class to review and record their name in README. RM-0026: AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag)) with locales_config.xml and android:localeConfig in the manifest (per-app language, Android 13 settings integration); persist in profiles.language. Dates and currency through locale-aware formatters.
+
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
 | RM-0024 | android | Move every hard-coded string into resources | Lint HardcodedText/SetTextI18n clean; grep finds no literal UI strings in screens | - | - | 🟥 Pending |
