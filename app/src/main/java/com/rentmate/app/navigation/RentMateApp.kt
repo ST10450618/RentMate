@@ -1,6 +1,5 @@
 ﻿package com.rentmate.app.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -44,8 +43,6 @@ import com.rentmate.app.ui.screens.MoreScreen
 import com.rentmate.app.ui.screens.SettingsScreen
 import com.rentmate.app.ui.screens.ShoppingListScreen
 
-private const val TAG = "RentMateApp"
-
 @Composable
 fun RentMateApp(
     navController: NavHostController = rememberNavController(),
@@ -85,12 +82,12 @@ fun RentMateApp(
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
-                    onSignedInNewUser = { navController.navigate(Screen.HouseholdSetup.route) },
-                    onSignedInExistingUser = { navController.navigateTopLevel(Screen.Dashboard) }
+                    onSignedInNewUser = { navController.onSignedIn(hasHousehold = false) },
+                    onSignedInExistingUser = { navController.onSignedIn(hasHousehold = true) }
                 )
             }
             composable(Screen.HouseholdSetup.route) {
-                HouseholdSetupScreen(onDone = { navController.navigateTopLevel(Screen.Dashboard) })
+                HouseholdSetupScreen(onDone = { navController.onHouseholdReady() })
             }
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
@@ -122,11 +119,7 @@ fun RentMateApp(
             composable(Screen.Maintenance.route) { MaintenanceScreen() }
             composable(Screen.Settings.route) {
                 SettingsScreen(
-                    onSignedOut = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
+                    onSignedOut = { navController.onSignedOut() }
                 )
             }
         }
@@ -150,19 +143,5 @@ private fun SplashScreen() {
         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
         CircularProgressIndicator()
-    }
-}
-
-/**
- * Switching top-level tabs should not stack screens forever. This pops back to
- * the start destination, keeps each tab's own state, and avoids launching a
- * second copy of a tab that is already showing.
- */
-private fun NavHostController.navigateTopLevel(screen: Screen) {
-    Log.d(TAG, "navigateTopLevel -> ${screen.id} ${screen.route}")
-    navigate(screen.route) {
-        popUpTo(graph.startDestinationId) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
     }
 }
