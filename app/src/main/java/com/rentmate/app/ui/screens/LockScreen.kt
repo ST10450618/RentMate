@@ -8,7 +8,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Fingerprint
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import com.rentmate.app.ui.components.BrandMark
+import com.rentmate.app.ui.theme.Aloe
+import com.rentmate.app.ui.theme.AloeDark
+import com.rentmate.app.ui.theme.AloeLight
+import com.rentmate.app.ui.theme.Amber
+import com.rentmate.app.ui.theme.Ink
+import com.rentmate.app.ui.theme.Spacing
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,35 +45,49 @@ import com.rentmate.app.auth.AuthFailure
  */
 @Composable
 fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(
+    // Same aloe gradient and brand mark as Login, so locking feels part of the app.
+    Box(
         modifier = modifier
             .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(Aloe, AloeDark)))
             .pointerInput(Unit) { /* consume every touch */ },
-        color = MaterialTheme.colorScheme.background
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(32.dp),
+            modifier = Modifier.fillMaxSize().padding(Spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(8.dp))
+            BrandMark(size = 96.dp)
+            Spacer(Modifier.height(Spacing.xl))
+            Icon(Icons.Outlined.Lock, contentDescription = null, tint = Amber, modifier = Modifier.size(28.dp))
+            Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = stringResource(R.string.lock_locked),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
                 textAlign = TextAlign.Center
             )
             if (failure != null) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Spacing.lg))
                 Text(
                     text = stringResource(failureMessage(failure)),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
+                    color = AloeLight,
                     textAlign = TextAlign.Center
                 )
             }
-            Spacer(Modifier.height(24.dp))
-            Button(onClick = onRetry) { Text(stringResource(R.string.lock_unlock)) }
+            Spacer(Modifier.height(Spacing.xl))
+            Button(
+                onClick = onRetry,
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Ink),
+                modifier = Modifier.heightIn(min = 52.dp)
+            ) {
+                Icon(Icons.Outlined.Fingerprint, contentDescription = null, tint = Aloe)
+                Spacer(Modifier.size(Spacing.sm))
+                Text(stringResource(R.string.lock_unlock), style = MaterialTheme.typography.titleSmall)
+            }
         }
     }
 }
