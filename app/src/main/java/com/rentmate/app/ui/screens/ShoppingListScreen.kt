@@ -1,5 +1,14 @@
 package com.rentmate.app.ui.screens
 
+import android.util.Log
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
+import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.LoadingState
+import com.rentmate.app.ui.components.RefreshingIndicator
+import com.rentmate.app.ui.components.rememberHasStartedLoading
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +40,8 @@ import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.theme.Spacing
 
+private const val TAG = "ShoppingListScreen"
+
 // S8 - shared shopping list, tick off as bought (US-13).
 @Composable
 fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel = hiltViewModel()) {
@@ -46,12 +57,28 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
-            if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                items(state.items, key = { it.id }) { item ->
-                    ShoppingItemRow(item, onToggle = { viewModel.purchase(item.id) })
+            val hasStarted = rememberHasStartedLoading(state.loading)
+            LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
+            val genericError = stringResource(R.string.state_error_generic)
+            when {
+                state.items.isEmpty() && state.error != null ->
+                    ErrorState(message = genericError, onRetry = viewModel::refresh)
+                state.items.isEmpty() && (state.loading || !hasStarted) -> LoadingState()
+                state.items.isEmpty() -> EmptyState(
+                    illustration = R.drawable.illus_empty_shopping,
+                    title = stringResource(R.string.empty_shopping_title),
+                    body = stringResource(R.string.empty_shopping_body),
+                    actionLabel = stringResource(R.string.empty_shopping_action),
+                    onAction = onAddItem
+                )
+                else -> {
+                    if (state.loading) RefreshingIndicator()
+                    if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        items(state.items, key = { it.id }) { item ->
+                            ShoppingItemRow(item, onToggle = { viewModel.purchase(item.id) })
+                        }
+                    }
                 }
             }
         }
