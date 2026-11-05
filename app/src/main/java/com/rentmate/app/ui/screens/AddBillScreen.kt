@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -128,7 +129,7 @@ fun AddBillScreen(onClose: () -> Unit, viewModel: AddBillViewModel = hiltViewMod
                 color = if (submitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
             )
             mode == SplitMode.Equal -> Text(
-                stringResource(R.string.split_equal_hint, members.size),
+                pluralStringResource(R.plurals.add_bill_split, members.size, members.size),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

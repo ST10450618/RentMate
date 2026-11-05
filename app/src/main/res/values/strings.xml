@@ -107,6 +107,7 @@
     <string name="activity_just_now">Just now</string>
     <string name="activity_empty_title">No activity yet</string>
     <string name="activity_empty_body">Bills, chores, shopping and repairs will show up here as your household uses RentMate.</string>
+    <string name="activity_event">%1$s %2$s</string>
     <string name="activity_error">Could not load activity. Please try again later.</string>
     <plurals name="activity_minutes_ago">
         <item quantity="one">%d min ago</item>
@@ -155,7 +156,6 @@
     <string name="split_equal">Equal</string>
     <string name="split_percentage">Percentage</string>
     <string name="split_exact">Exact amount</string>
-    <string name="split_equal_hint">Split equally across %1$d member(s)</string>
     <string name="split_percent_for">%1$s (%%)</string>
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Member</string>
@@ -167,4 +167,81 @@
     <string name="bills_confirm_received">Confirm received</string>
     <string name="bills_waiting_for">Waiting for %1$s to confirm</string>
     <string name="bills_ask_to_confirm">Ask %1$s to confirm you paid</string>
+    <!-- RM-0024: navigation and screen text moved out of the Kotlin code -->
+    <string name="nav_sign_in">Sign in</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_bills">Bills</string>
+    <string name="nav_chores">Chores</string>
+    <string name="nav_shopping">Shopping list</string>
+    <string name="nav_maintenance">Maintenance</string>
+    <string name="nav_more">More</string>
+    <string name="more_subtitle">Shopping, maintenance and settings</string>
+    <string name="more_shopping_desc">Shared items to buy</string>
+    <string name="more_maintenance_desc">Log and track faults</string>
+    <string name="more_activity_desc">Household activity</string>
+    <string name="more_settings_desc">Notifications, language, account</string>
+    <string name="continue_label">Continue</string>
+    <string name="close">Close</string>
+    <string name="google_badge" translatable="false">G</string>
+
+    <string name="settle_up">Settle up</string>
+    <string name="settle_up_none">The household is already settled.</string>
+    <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <plurals name="bills_count">
+        <item quantity="one">%d bill</item>
+        <item quantity="other">%d bills</item>
+    </plurals>
+    <string name="bills_due">Due %1$s</string>
+    <string name="bills_paid">Paid</string>
+    <string name="bills_outstanding">Outstanding</string>
+    <string name="bills_owes">Owes</string>
+    <string name="bills_mark_paid">Mark paid</string>
+    <string name="bills_share">%1$s · %2$s</string>
+
+    <string name="chores_subtitle">This week\'s roster</string>
+    <string name="chores_this_cycle">This cycle: %1$s</string>
+    <string name="chores_unassigned">unassigned</string>
+    <string name="chores_next_cycles">Next 4 cycles</string>
+    <string name="chores_forecast_row">%1$d. %2$s</string>
+    <string name="chores_mark_done">Mark done</string>
+    <string name="chores_leaderboard">Leaderboard</string>
+    <plurals name="chore_points">
+        <item quantity="one">%d pt</item>
+        <item quantity="other">%d pts</item>
+    </plurals>
+    <plurals name="leaderboard_points">
+        <item quantity="one">%1$d pt (%2$d total)</item>
+        <item quantity="other">%1$d pts (%2$d total)</item>
+    </plurals>
+
+    <plurals name="households_count">
+        <item quantity="one">%d household</item>
+        <item quantity="other">%d households</item>
+    </plurals>
+    <plurals name="bills_overdue">
+        <item quantity="one">%d overdue</item>
+        <item quantity="other">%d overdue</item>
+    </plurals>
+    <string name="dashboard_view_bills">View bills</string>
+    <string name="dashboard_balance">Your balance</string>
+    <string name="dashboard_owed_to_you">You\'re owed %1$s</string>
+    <string name="dashboard_you_owe">You owe %1$s</string>
+    <string name="dashboard_settled">You\'re all settled up</string>
+    <string name="dashboard_next_chore">Your next chore</string>
+    <string name="dashboard_no_chore">Nothing assigned to you right now.</string>
+    <string name="dashboard_view_chores">View chores</string>
+    <string name="dashboard_household">Household</string>
+
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="shopping_added_by">Added by %1$s</string>
+    <string name="shopping_bought">Bought</string>
+
+    <string name="household_setup_title">Set up your household</string>
+    <string name="household_setup_body">Create a new home or join your housemates with their invite code.</string>
+    <string name="household_new">New household</string>
+    <string name="household_join_existing">Join an existing one</string>
+    <string name="household_created">Household created. Share this invite code</string>
 </resources>

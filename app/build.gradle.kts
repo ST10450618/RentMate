@@ -16,6 +16,9 @@ android {
         // translated for the final POE, where multi-language support is assessed.
         warningsAsErrors = false
         disable += "MissingTranslation"
+        // RM-0024: every UI string lives in strings.xml. Compose text is guarded by
+        // NoHardcodedUiStringsTest, which lint cannot see.
+        error += setOf("HardcodedText", "SetTextI18n")
     }
     defaultConfig {
         applicationId = "com.rentmate.app"

@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.rentmate.app.R
@@ -49,10 +50,10 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
-        topBar = { ScreenHeader(title = "Shopping list", subtitle = "${state.items.size} item(s)") },
+        topBar = { ScreenHeader(title = stringResource(R.string.nav_shopping), subtitle = pluralStringResource(R.plurals.items_count, state.items.size, state.items.size)) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddItem) {
-                Icon(Icons.Filled.Add, contentDescription = "Add item")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_item_title))
             }
         }
     ) { padding ->
@@ -98,12 +99,12 @@ private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit) {
                     color = if (item.is_purchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    "Added by ${item.added_by_user_id?.display_name ?: stringResource(R.string.housemate_fallback)}",
+                    stringResource(R.string.shopping_added_by, item.added_by_user_id?.display_name ?: stringResource(R.string.housemate_fallback)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            if (item.is_purchased) StatusPill("Bought", PillTone.Positive)
+            if (item.is_purchased) StatusPill(stringResource(R.string.shopping_bought), PillTone.Positive)
         }
     }
 }

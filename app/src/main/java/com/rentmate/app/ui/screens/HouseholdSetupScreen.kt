@@ -76,19 +76,19 @@ fun HouseholdSetupScreen(
         BrandMark(size = 72.dp, modifier = Modifier.align(Alignment.CenterHorizontally))
         Spacer(Modifier.height(Spacing.lg))
         Text(
-            "Set up your household",
+            stringResource(R.string.household_setup_title),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Text(
-            "Create a new home or join your housemates with their invite code.",
+            stringResource(R.string.household_setup_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(Spacing.xl))
-        SectionLabel("New household")
+        SectionLabel(stringResource(R.string.household_new))
         Spacer(Modifier.height(Spacing.sm))
 
         ValidatedTextField(
@@ -113,7 +113,7 @@ fun HouseholdSetupScreen(
         )
 
         Spacer(Modifier.height(24.dp))
-        SectionLabel("Join an existing one")
+        SectionLabel(stringResource(R.string.household_join_existing))
         Spacer(Modifier.height(Spacing.sm))
 
         ValidatedTextField(
@@ -144,7 +144,7 @@ fun HouseholdSetupScreen(
             is HouseholdSetupUiState.Error -> Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
             is HouseholdSetupUiState.Created -> {
                 RentMateCard(accent = MaterialTheme.colorScheme.primary) {
-                    SectionLabel("Household created. Share this invite code")
+                    SectionLabel(stringResource(R.string.household_created))
                     Text(
                         s.inviteCode,
                         style = MaterialTheme.typography.displaySmall,
@@ -153,7 +153,7 @@ fun HouseholdSetupScreen(
                     )
                 }
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text("Continue") }
+                Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.continue_label)) }
             }
             else -> {}
         }

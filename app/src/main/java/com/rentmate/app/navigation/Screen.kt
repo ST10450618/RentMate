@@ -1,5 +1,7 @@
 ﻿package com.rentmate.app.navigation
 
+import com.rentmate.app.R
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Checklist
@@ -22,22 +24,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(
     val route: String,
     val id: String,
-    val title: String,
+    @StringRes val titleRes: Int,
     val stories: String
 ) {
-    data object Login : Screen("login", "S1", "Sign in", "US-1, US-2, US-4")
-    data object HouseholdSetup : Screen("household", "S2", "Set up your household", "US-5")
-    data object Dashboard : Screen("dashboard", "S3", "Dashboard", "US-3")
-    data object Bills : Screen("bills", "S4", "Bills", "US-6, US-11")
-    data object AddBill : Screen("add_bill", "S5", "Add bill", "US-6")
-    data object Chores : Screen("chores", "S6", "Chores", "US-9, US-12")
-    data object AddChore : Screen("add_chore", "S7", "Add chore", "US-9, US-12")
-    data object ShoppingList : Screen("shopping", "S8", "Shopping list", "US-13")
-    data object AddShoppingItem : Screen("add_shopping_item", "S8", "Add item", "US-13")
-    data object Maintenance : Screen("maintenance", "S9", "Maintenance", "US-10")
-    data object Settings : Screen("settings", "S10", "Settings", "US-2, US-3, US-4")
-    data object Activity : Screen("activity", "S11", "Activity", "RM-0033")
-    data object More : Screen("more", "-", "More", "-")
+    data object Login : Screen("login", "S1", R.string.nav_sign_in, "US-1, US-2, US-4")
+    data object HouseholdSetup : Screen("household", "S2", R.string.household_setup_title, "US-5")
+    data object Dashboard : Screen("dashboard", "S3", R.string.nav_dashboard, "US-3")
+    data object Bills : Screen("bills", "S4", R.string.nav_bills, "US-6, US-11")
+    data object AddBill : Screen("add_bill", "S5", R.string.add_bill_title, "US-6")
+    data object Chores : Screen("chores", "S6", R.string.nav_chores, "US-9, US-12")
+    data object AddChore : Screen("add_chore", "S7", R.string.add_chore_title, "US-9, US-12")
+    data object ShoppingList : Screen("shopping", "S8", R.string.nav_shopping, "US-13")
+    data object AddShoppingItem : Screen("add_shopping_item", "S8", R.string.add_item_title, "US-13")
+    data object Maintenance : Screen("maintenance", "S9", R.string.nav_maintenance, "US-10")
+    data object Settings : Screen("settings", "S10", R.string.settings_title, "US-2, US-3, US-4")
+    data object Activity : Screen("activity", "S11", R.string.activity_title, "RM-0033")
+    data object More : Screen("more", "-", R.string.nav_more, "-")
 }
 
 data class BottomNavItem(val screen: Screen, val icon: ImageVector)
