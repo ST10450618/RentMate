@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
 import com.rentmate.app.data.LeaderboardRow
 import com.rentmate.app.ui.components.ScreenHeader
@@ -50,7 +51,7 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
 
             LazyColumn {
                 items(state.chores, key = { it.id }) { chore ->
-                    ChoreRow(chore, state.memberNames, onComplete = { viewModel.complete(chore.id) })
+                    ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), onComplete = { viewModel.complete(chore.id) })
                 }
                 if (state.showLeaderboard) {
                     state.leaderboard?.let { item { LeaderboardCard(it) } }
@@ -61,7 +62,12 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
 }
 
 @Composable
-private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComplete: () -> Unit) {
+private fun ChoreRow(
+    chore: ChoreRow,
+    memberNames: Map<String, String>,
+    forecast: List<ChoreForecastRow>,
+    onComplete: () -> Unit
+) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -72,14 +78,13 @@ private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComple
                 Text(chore.title, style = MaterialTheme.typography.titleMedium)
                 Text("${chore.point_value} pt", style = MaterialTheme.typography.bodySmall)
             }
-            val current = chore.currentAssignee()?.let { memberNames[it] ?: it }
+            val current = chore.currentAssignee()?.let { memberNames[it] ?: "Housemate" }
             Text("This cycle: ${current ?: "unassigned"}", style = MaterialTheme.typography.bodyMedium)
 
-            val forecast = chore.forecast()
             if (forecast.isNotEmpty()) {
                 Text("Next 4 cycles:", style = MaterialTheme.typography.labelMedium)
-                forecast.forEach { (cycle, userId) ->
-                    Text("  $cycle. ${memberNames[userId] ?: userId}", style = MaterialTheme.typography.bodySmall)
+                forecast.forEach { row ->
+                    Text("  ${row.cycle_number}. ${memberNames[row.assignee_user_id] ?: "Housemate"}", style = MaterialTheme.typography.bodySmall)
                 }
             }
             OutlinedButton(onClick = onComplete, modifier = Modifier.fillMaxWidth()) {
