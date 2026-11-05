@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.time.Instant
 import javax.inject.Inject
 
 data class BillsUiState(
@@ -29,6 +28,9 @@ data class BillsUiState(
 
 @Serializable
 private data class SettleUpParams(val household_id_in: String)
+
+@Serializable
+private data class MarkSharePaidParams(val share_id_in: String)
 
 @Serializable
 private data class ConfirmSettlementParams(val household_id_in: String, val to_user_id_in: String, val amount_in: Double)
@@ -63,12 +65,9 @@ class BillsViewModel @Inject constructor(
     fun payShare(shareId: String) {
         viewModelScope.launch {
             runCatching {
-                supabase.from("bill_shares").update({
-                    set("is_paid", true)
-                    set("paid_at", Instant.now().toString())
-                }) {
-                    filter { eq("id", shareId) }
-                }
+                // RM-0006: shares can't be updated directly any more (RLS has no
+                // update policy); the RPC checks the caller owes or is owed it.
+                supabase.postgrest.rpc("mark_share_paid", MarkSharePaidParams(shareId).toRpcParams())
             }.onSuccess { refresh() }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
