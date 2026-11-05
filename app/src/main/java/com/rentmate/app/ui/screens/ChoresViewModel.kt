@@ -1,8 +1,10 @@
 package com.rentmate.app.ui.screens
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.LeaderboardRow
@@ -16,6 +18,9 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.exception.PostgrestRestException
 import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -26,22 +31,22 @@ import javax.inject.Inject
 data class ChoresUiState(
     val chores: List<ChoreRow> = emptyList(),
     val memberNames: Map<String, String> = emptyMap(),
+    /** chore id -> next cycles, from the server's forecast_chore RPC. */
+    val forecasts: Map<String, List<ChoreForecastRow>> = emptyMap(),
     val leaderboard: List<LeaderboardRow>? = null,
     val showLeaderboard: Boolean = true,
     val loading: Boolean = false,
     val error: String? = null
 )
 
-/** Same modulo logic as ChoreRotationService.Forecast: next 4 cycles from the current index. */
-fun ChoreRow.forecast(cycles: Int = 4): List<Pair<Int, String>> {
-    if (rotation_order.isEmpty()) return emptyList()
-    return (0 until cycles).map { i ->
-        (i + 1) to rotation_order[(current_rotation_index + i) % rotation_order.size]
-    }
-}
-
 fun ChoreRow.currentAssignee(): String? =
     if (rotation_order.isEmpty()) null else rotation_order[current_rotation_index % rotation_order.size]
+
+private const val TAG = "ChoresViewModel"
+private const val FORECAST_CYCLES = 4
+
+@Serializable
+private data class ForecastParams(val chore_id_in: String, val cycles: Int = FORECAST_CYCLES)
 
 @Serializable
 private data class CompleteChoreParams(val chore_id_in: String)
@@ -84,6 +89,22 @@ class ChoresViewModel @Inject constructor(
                 supabase.from("chores").select { filter { eq("household_id", householdId) } }.decodeList<ChoreRow>()
             }.onSuccess { _state.value = _state.value.copy(loading = false, chores = it) }
                 .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
+
+            // RM-0007: the rotation forecast is computed by the server (forecast_chore).
+            val chores = _state.value.chores
+            val forecasts = runCatching {
+                coroutineScope {
+                    chores.map { chore ->
+                        async {
+                            Log.d(TAG, "rpc forecast_chore chore=${chore.id} cycles=$FORECAST_CYCLES")
+                            chore.id to supabase.postgrest
+                                .rpc("forecast_chore", ForecastParams(chore.id).toRpcParams())
+                                .decodeList<ChoreForecastRow>()
+                        }
+                    }.awaitAll().toMap()
+                }
+            }.onFailure { Log.w(TAG, "forecast_chore failed: ${it.message}") }.getOrDefault(emptyMap())
+            _state.value = _state.value.copy(forecasts = forecasts)
 
             // RM-0008: leaderboard visibility is household-wide (households.hide_leaderboard).
             runCatching {
