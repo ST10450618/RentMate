@@ -18,4 +18,11 @@
     <string name="leaderboard_desc">Versteek dit vir die hele huishouding</string>
 
     <string name="sign_out">Teken uit</string>
+
+    <string name="maintenance_error_load">Kon nie onderhoudsversoeke laai nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_save">Kon nie jou versoek stoor nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_update">Kon nie die status opdateer nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_send">Kon nie aan die verhuurder stuur nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="action_retry">Probeer weer</string>
+    <string name="action_dismiss">Maak toe</string>
 </resources>

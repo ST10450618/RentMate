@@ -84,6 +84,10 @@ android {
         compose = true
         buildConfig = true
     }
+    testOptions {
+        // Lets unit tests call android.util.Log (used for logging in view models).
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -97,6 +101,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

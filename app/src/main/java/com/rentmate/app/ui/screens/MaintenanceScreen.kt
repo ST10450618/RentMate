@@ -15,11 +15,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +55,7 @@ import java.util.Locale
 @Composable
 fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
     val requests by viewModel.requests.collectAsStateWithLifecycle()
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     var title by remember { mutableStateOf("") }
@@ -78,6 +82,20 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
                 stringResource(R.string.maintenance_title),
                 style = MaterialTheme.typography.headlineSmall
             )
+        }
+
+        if (uiState.loading) {
+            item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+        }
+
+        uiState.error?.let { failure ->
+            item {
+                ErrorCard(
+                    message = stringResource(failure.messageRes),
+                    onRetry = viewModel::refresh,
+                    onDismiss = viewModel::dismissError
+                )
+            }
         }
 
         item {
@@ -214,6 +232,27 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
 
         items(requests, key = { it.id }) { request ->
             RequestCard(request = request, onAdvance = { viewModel.advance(request.id) })
+        }
+    }
+}
+
+/** Friendly error shown when a maintenance call fails, e.g. in airplane mode. */
+@Composable
+private fun ErrorCard(message: String, onRetry: () -> Unit, onDismiss: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onRetry) { Text(stringResource(R.string.action_retry)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_dismiss)) }
+            }
         }
     }
 }

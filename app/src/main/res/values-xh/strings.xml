@@ -18,4 +18,11 @@
     <string name="leaderboard_desc">Iyifihla kuyo yonke indlu</string>
 
     <string name="sign_out">Phuma</string>
+
+    <string name="maintenance_error_load">Asikwazanga ukulayisha izicelo zolungiso. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="maintenance_error_save">Asikwazanga ukugcina isicelo sakho. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="maintenance_error_update">Asikwazanga ukuhlaziya isimo. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="maintenance_error_send">Asikwazanga ukuthumela kumnini-ndlu. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="action_retry">Zama kwakhona</string>
+    <string name="action_dismiss">Vala</string>
 </resources>
