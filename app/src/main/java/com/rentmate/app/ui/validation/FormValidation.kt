@@ -38,8 +38,11 @@ object Limits {
     const val POINTS_MAX = 100
     const val INVITE_CODE_LENGTH = 6
 
-    /** Largest bill accepted: R1,000,000. Anything bigger is almost certainly a typo. */
-    val AMOUNT_MAX: BigDecimal = BigDecimal("1000000")
+    /**
+     * Largest bill accepted: R999,999.99. Matches BillSplit's limit (99,999,999 cents)
+     * and the create_bill RPC, so a value the field accepts is never rejected later.
+     */
+    val AMOUNT_MAX: BigDecimal = BigDecimal("999999.99")
 
     /** A bill can be logged late, but not more than a year after it was due. */
     const val DUE_DATE_PAST_DAYS = 365L
