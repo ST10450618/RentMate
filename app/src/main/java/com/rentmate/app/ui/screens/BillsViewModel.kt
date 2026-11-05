@@ -8,6 +8,7 @@ import com.rentmate.app.data.SettleUpRow
 import com.rentmate.app.network.toRpcParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.postgrest
@@ -23,7 +24,9 @@ data class BillsUiState(
     val loading: Boolean = false,
     val error: String? = null,
     val settleUp: List<SettleUpRow>? = null,
-    val settleUpLoading: Boolean = false
+    val settleUpLoading: Boolean = false,
+    /** The signed-in user; only the creditor sees Mark paid / Confirm received (RM-0010). */
+    val currentUserId: String? = null
 )
 
 @Serializable
@@ -33,7 +36,7 @@ private data class SettleUpParams(val household_id_in: String)
 private data class MarkSharePaidParams(val share_id_in: String)
 
 @Serializable
-private data class ConfirmSettlementParams(val household_id_in: String, val to_user_id_in: String, val amount_in: Double)
+private data class ConfirmSettlementParams(val household_id_in: String, val from_user_id_in: String, val amount_in: Double)
 
 private val BILL_WITH_SHARES_COLUMNS = Columns.raw("*, bill_shares(*, profiles(display_name))")
 
@@ -42,7 +45,7 @@ class BillsViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold
 ) : ViewModel() {
-    private val _state = MutableStateFlow(BillsUiState())
+    private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
 
     init {
@@ -66,7 +69,7 @@ class BillsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 // RM-0006: shares can't be updated directly any more (RLS has no
-                // update policy); the RPC checks the caller owes or is owed it.
+                // update policy); the RPC only lets the bill's issuer (the creditor) mark a share paid.
                 supabase.postgrest.rpc("mark_share_paid", MarkSharePaidParams(shareId).toRpcParams())
             }.onSuccess { refresh() }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
@@ -85,11 +88,12 @@ class BillsViewModel @Inject constructor(
         }
     }
 
-    fun confirmSettlement(toUserId: String, amount: Double) {
+    /** RM-0010: only the creditor confirms; [fromUserId] is the person who paid the caller. */
+    fun confirmSettlement(fromUserId: String, amount: Double) {
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             runCatching {
-                supabase.postgrest.rpc("confirm_settlement", ConfirmSettlementParams(householdId, toUserId, amount).toRpcParams())
+                supabase.postgrest.rpc("confirm_settlement", ConfirmSettlementParams(householdId, fromUserId, amount).toRpcParams())
             }.onSuccess {
                 _state.value = _state.value.copy(settleUp = null)
                 refresh()

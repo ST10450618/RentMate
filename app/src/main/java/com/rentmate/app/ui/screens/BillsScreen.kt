@@ -26,8 +26,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentmate.app.R
 import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.ui.components.ScreenHeader
 
@@ -54,7 +56,9 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             LazyColumn {
-                items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }
+                items(state.bills, key = { it.id }) { bill ->
+                    BillRow(bill, canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare)
+                }
             }
         }
     }
@@ -73,10 +77,23 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                     } else {
                         Column {
                             suggestions.forEach { s ->
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                                     Text("${s.from_display_name} -> ${s.to_display_name}: R${"%.2f".format(s.amount)}")
-                                    OutlinedButton(onClick = { viewModel.confirmSettlement(s.to_user_id, s.amount) }) {
-                                        Text("Confirm")
+                                    if (s.to_user_id == state.currentUserId) {
+                                        // Only the person who is owed can confirm they received it.
+                                        OutlinedButton(onClick = { viewModel.confirmSettlement(s.from_user_id, s.amount) }) {
+                                            Text(stringResource(R.string.bills_confirm_received))
+                                        }
+                                    } else if (s.from_user_id == state.currentUserId) {
+                                        Text(
+                                            stringResource(R.string.bills_ask_to_confirm, s.to_display_name),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    } else {
+                                        Text(
+                                            stringResource(R.string.bills_waiting_for, s.to_display_name),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 }
                             }
@@ -92,7 +109,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 }
 
 @Composable
-private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
+private fun BillRow(bill: BillWithSharesRow, canMarkPaid: Boolean, onPay: (String) -> Unit) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -106,7 +123,7 @@ private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
                     Text("${share.profiles?.display_name ?: "?"}: R${"%.2f".format(share.amount_owed)}")
                     if (share.is_paid) {
                         Text("Paid", color = MaterialTheme.colorScheme.primary)
-                    } else {
+                    } else if (canMarkPaid) {
                         OutlinedButton(onClick = { onPay(share.id) }) { Text("Mark paid") }
                     }
                 }
