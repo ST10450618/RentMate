@@ -21,8 +21,10 @@ android {
         applicationId = "com.rentmate.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        // versionCode must increase with every Play Store upload; versionName is
+        // what users see. 1 was the Part 2 prototype; 2 is the Final POE release.
+        versionCode = 2
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -65,11 +67,37 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+
+        // Release signing (RM-0039). The upload keystore and its passwords are
+        // never committed: locally they come from the gitignored
+        // keystore.properties, in CI from environment variables set from
+        // GitHub secrets. Without either, release builds are left unsigned
+        // instead of failing, so CI's debug/test jobs still run on forks.
+        val keystoreProps = Properties().apply {
+            val f = rootProject.file("keystore.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }
+        fun signingValue(prop: String, env: String): String? =
+            keystoreProps.getProperty(prop) ?: System.getenv(env)
+
+        val releaseStoreFile = signingValue("storeFile", "RENTMATE_KEYSTORE_PATH")
+        if (releaseStoreFile != null && rootProject.file(releaseStoreFile).exists()) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = signingValue("storePassword", "RENTMATE_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "RENTMATE_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "RENTMATE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 shrinks, optimises and obfuscates the release build; resource
+            // shrinking drops drawables and strings nothing references.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
