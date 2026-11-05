@@ -1,5 +1,19 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import java.text.DateFormat
+import com.rentmate.app.data.isValidEmail
+import com.rentmate.app.data.buildLandlordEmail
+import com.rentmate.app.data.LandlordEmailText
+import com.rentmate.app.data.LandlordEmail
+import com.rentmate.app.data.LandlordContact
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.AlertDialog
+import android.net.Uri
+import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -77,7 +91,39 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
         ActivityResultContracts.TakePicturePreview()
     ) { bitmap -> if (bitmap != null) photo = bitmap }
 
-    val openCount = requests.count { it.status == RequestStatus.OPEN }
+    val openRequests = requests.filter { it.status == RequestStatus.OPEN }
+    val openCount = openRequests.size
+
+    // RM-0009: "Send to landlord" opens the phone's email app with every open
+    // fault itemised, then marks them sent. The first time, it asks for the
+    // landlord's address and saves it on the household for everyone.
+    val context = LocalContext.current
+    val emailText = landlordEmailText()
+    var askForEmail by remember { mutableStateOf(false) }
+    val openEmail: (LandlordContact) -> Unit = { contact ->
+        val email = buildLandlordEmail(contact, openRequests, emailText) { millis ->
+            DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(millis))
+        }
+        try {
+            context.startActivity(email.toSendIntent())
+            viewModel.sendOpenRequests()
+        } catch (e: ActivityNotFoundException) {
+            viewModel.noEmailApp()
+        }
+    }
+
+    if (askForEmail) {
+        LandlordEmailDialog(
+            initial = uiState.landlord?.landlordEmail.orEmpty(),
+            onDismiss = { askForEmail = false },
+            onConfirm = { address ->
+                askForEmail = false
+                viewModel.saveLandlordEmail(address) {
+                    openEmail((uiState.landlord ?: LandlordContact(householdName = "")).copy(landlordEmail = address))
+                }
+            }
+        )
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth().padding(Spacing.screen),
@@ -212,10 +258,13 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
         if (openCount > 0) {
             item {
                 Button(
-                    onClick = { viewModel.sendOpenRequests() },
+                    onClick = {
+                        val landlord = uiState.landlord
+                        if (landlord != null && landlord.hasEmail) openEmail(landlord) else askForEmail = true
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.maintenance_send_to_landlord, openCount))
+                    Text(pluralStringResource(R.plurals.maintenance_send_to_landlord, openCount, openCount))
                 }
             }
         }
@@ -239,7 +288,11 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
         }
 
         items(requests, key = { it.id }) { request ->
-            RequestCard(request = request, onAdvance = { viewModel.advance(request.id) })
+            RequestCard(
+                request = request,
+                canChangeStatus = request.canChangeStatus(uiState.currentUserId),
+                onAdvance = { viewModel.advance(request.id) }
+            )
         }
     }
 }
@@ -266,7 +319,7 @@ private fun ErrorCard(message: String, onRetry: () -> Unit, onDismiss: () -> Uni
 }
 
 @Composable
-private fun RequestCard(request: MaintenanceRequest, onAdvance: () -> Unit) {
+private fun RequestCard(request: MaintenanceRequest, canChangeStatus: Boolean, onAdvance: () -> Unit) {
     RentMateCard {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Text(request.title, style = MaterialTheme.typography.titleMedium)
@@ -280,7 +333,14 @@ private fun RequestCard(request: MaintenanceRequest, onAdvance: () -> Unit) {
 
             StatusTimeline(request)
 
-            if (request.status.canAdvance) {
+            if (request.status.canAdvance && !canChangeStatus) {
+                Text(
+                    stringResource(R.string.maintenance_status_locked),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (request.status.canAdvance && canChangeStatus) {
                 OutlinedButton(onClick = onAdvance, modifier = Modifier.fillMaxWidth()) {
                     Text(
                         stringResource(
@@ -327,4 +387,67 @@ private fun ChipRow(content: @Composable () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) { content() }
+}
+
+/** RM-0009: the email's wording, from string resources so it follows the app language. */
+@Composable
+private fun landlordEmailText(): LandlordEmailText {
+    val context = LocalContext.current
+    return LandlordEmailText(
+        subject = stringResource(R.string.landlord_email_subject),
+        greetingNamed = stringResource(R.string.landlord_email_greeting_named),
+        greetingGeneric = stringResource(R.string.landlord_email_greeting),
+        intro = stringResource(R.string.landlord_email_intro),
+        itemCategory = stringResource(R.string.landlord_email_category),
+        itemUrgency = stringResource(R.string.landlord_email_urgency),
+        itemLogged = stringResource(R.string.landlord_email_logged),
+        signOff = stringResource(R.string.landlord_email_sign_off),
+        categoryLabel = { context.getString(it.labelRes) },
+        urgencyLabel = { context.getString(it.labelRes) }
+    )
+}
+
+/** mailto: with the subject and body in the URI as well as the extras, which some email apps ignore. */
+private fun LandlordEmail.toSendIntent(): Intent {
+    val uri = Uri.parse("mailto:" + Uri.encode(to) + "?subject=" + Uri.encode(subject) + "&body=" + Uri.encode(body))
+    return Intent(Intent.ACTION_SENDTO, uri)
+        .putExtra(Intent.EXTRA_EMAIL, arrayOf(to))
+        .putExtra(Intent.EXTRA_SUBJECT, subject)
+        .putExtra(Intent.EXTRA_TEXT, body)
+}
+
+/** Asks once for the landlord's address; it is saved on the household for every housemate. */
+@Composable
+private fun LandlordEmailDialog(initial: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var address by remember { mutableStateOf(initial) }
+    var showError by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.landlord_email_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                Text(stringResource(R.string.landlord_email_dialog_body), style = MaterialTheme.typography.bodyMedium)
+                OutlinedTextField(
+                    value = address,
+                    onValueChange = { address = it; showError = false },
+                    label = { Text(stringResource(R.string.landlord_email_field)) },
+                    singleLine = true,
+                    isError = showError,
+                    supportingText = if (showError) {
+                        { Text(stringResource(R.string.error_email_invalid)) }
+                    } else null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { if (isValidEmail(address)) onConfirm(address.trim()) else showError = true }) {
+                Text(stringResource(R.string.landlord_email_open))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.lock_prompt_cancel)) }
+        }
+    )
 }

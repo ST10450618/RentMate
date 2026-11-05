@@ -1,6 +1,7 @@
 package com.rentmate.app.ui.screens
 
 import com.rentmate.app.data.MaintenanceCategory
+import com.rentmate.app.data.LandlordContact
 import com.rentmate.app.data.MaintenanceRepository
 import com.rentmate.app.data.MaintenanceRequest
 import com.rentmate.app.data.Urgency
@@ -46,6 +47,15 @@ class MaintenanceViewModelTest {
             failIfOffline()
             return 0
         }
+
+        override val currentUserId: String? = "me"
+
+        override suspend fun landlordContact(): LandlordContact? {
+            failIfOffline()
+            return LandlordContact(householdName = "House A")
+        }
+
+        override suspend fun saveLandlordEmail(email: String) = failIfOffline()
     }
 
     @Before
