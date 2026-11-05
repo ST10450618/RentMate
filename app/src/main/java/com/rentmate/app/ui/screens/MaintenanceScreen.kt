@@ -1,4 +1,4 @@
-﻿package com.rentmate.app.ui.screens
+package com.rentmate.app.ui.screens
 
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -14,15 +14,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,6 +40,8 @@ import com.rentmate.app.data.MaintenanceRequest
 import com.rentmate.app.data.RequestStatus
 import com.rentmate.app.data.TitleError
 import com.rentmate.app.data.Urgency
+import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.theme.Spacing
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -70,8 +71,8 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
     val openCount = requests.count { it.status == RequestStatus.OPEN }
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth().padding(Spacing.screen),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
         item {
             Text(
@@ -81,11 +82,8 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
         }
 
         item {
-            Card {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+            RentMateCard {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                     Text(
                         stringResource(R.string.maintenance_new),
                         style = MaterialTheme.typography.titleMedium
@@ -220,11 +218,8 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
 
 @Composable
 private fun RequestCard(request: MaintenanceRequest, onAdvance: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+    RentMateCard {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Text(request.title, style = MaterialTheme.typography.titleMedium)
             if (request.description.isNotBlank()) {
                 Text(request.description, style = MaterialTheme.typography.bodyMedium)

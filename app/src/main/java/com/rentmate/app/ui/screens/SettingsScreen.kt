@@ -1,12 +1,12 @@
-﻿package com.rentmate.app.ui.screens
+package com.rentmate.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +26,9 @@ import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.SettingGroup
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.UserSettings
+import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.components.SectionLabel
+import com.rentmate.app.ui.theme.Spacing
 
 /**
  * S10 - Settings. Delivers US-3 (preferences) and US-4 (language), and holds the
@@ -102,14 +105,8 @@ fun SettingsContent(
 @Composable
 private fun SettingsSection(title: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) { content() }
-        }
+        SectionLabel(title)
+        RentMateCard(contentPadding = PaddingValues(vertical = Spacing.xs)) { content() }
     }
 }
 
