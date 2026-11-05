@@ -10,6 +10,7 @@ import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.SettingsRepository
 import com.rentmate.app.data.UserSettings
 import com.rentmate.app.data.applyLanguage
+import com.rentmate.app.data.local.LocalCache
 import com.rentmate.app.ui.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,7 +38,8 @@ private val TOGGLE_COLUMN = mapOf(
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val localCache: LocalCache
 ) : ViewModel() {
 
     private val repository = SettingsRepository(context)
@@ -70,6 +72,9 @@ class SettingsViewModel @Inject constructor(
             runCatching { supabase.auth.signOut() }
                 .onFailure { Log.w(TAG, "sign-out failed: ${it.message}") }
             currentHousehold.clear()
+            // PRIVACY.md: the cached household data is removed on sign-out.
+            runCatching { localCache.clear() }
+                .onFailure { Log.e(TAG, "could not clear local cache on sign-out", it) }
             onSignedOut()
         }
     }

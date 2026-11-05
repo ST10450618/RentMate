@@ -203,4 +203,22 @@ class DaoTest {
         dao.deleteById(older)
         assertEquals(listOf(newer), dao.getAllOldestFirst().map { it.id })
     }
+
+    /** Sign-out (PRIVACY.md): nothing from the previous household may remain on the phone. */
+    @Test
+    fun localCache_clear_removesEveryTable() = runBlocking {
+        db.billDao().upsertBills(listOf(bill("b1")))
+        db.billDao().upsertShares(listOf(share("s1", "b1")))
+        db.choreDao().upsert(listOf(chore("c1")))
+        db.shoppingItemDao().upsert(listOf(item("i1", state = SyncState.PENDING_CREATE)))
+        db.outboxDao().enqueue(OutboxEntry(op = "INSERT", tableName = "shopping_items", payloadJson = "{}", createdAt = 1))
+
+        LocalCache(db).clear()
+
+        assertTrue(db.billDao().observeBills("h1").first().isEmpty())
+        assertTrue(db.billDao().getUnsyncedShares("h1").isEmpty())
+        assertTrue(db.choreDao().observeChores("h1").first().isEmpty())
+        assertTrue(db.shoppingItemDao().observeItems("h1").first().isEmpty())
+        assertTrue(db.outboxDao().getAllOldestFirst().isEmpty())
+    }
 }
