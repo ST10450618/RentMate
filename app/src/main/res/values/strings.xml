@@ -19,6 +19,9 @@
     <string name="leaderboard_title">Show points leaderboard</string>
     <string name="leaderboard_desc">Hides it for the whole household</string>
 
+    <string name="chore_error_not_assignee">Only the housemate whose turn it is can mark this chore done.</string>
+    <string name="chore_error_already_done">This chore has already been done this cycle.</string>
+
     <string name="sign_out">Sign out</string>
     <string name="login_tagline">Bills, chores and repairs for your shared home, sorted.</string>
     <string name="login_feature_bills">Split bills and settle up in fewer payments</string>
@@ -148,4 +151,20 @@
     <string name="biometric_enrol_open">Open settings</string>
     <string name="biometric_enrol_cancel">Not now</string>
     <string name="housemate_fallback">Housemate</string>
+    <string name="split_mode_label">Split</string>
+    <string name="split_equal">Equal</string>
+    <string name="split_percentage">Percentage</string>
+    <string name="split_exact">Exact amount</string>
+    <string name="split_equal_hint">Split equally across %1$d member(s)</string>
+    <string name="split_percent_for">%1$s (%%)</string>
+    <string name="split_amount_for">%1$s (R)</string>
+    <string name="split_unknown_member">Member</string>
+    <string name="split_error_percent">Percentages must add up to 100. They add up to %1$s.</string>
+    <string name="split_error_exact">Amounts must add up to R%2$s. They add up to R%1$s.</string>
+    <string name="split_error_number">Enter a number for every member (or leave it blank for 0).</string>
+    <string name="split_error_negative">Split values cannot be negative.</string>
+    <string name="split_error_too_large">That amount is too large.</string>
+    <string name="bills_confirm_received">Confirm received</string>
+    <string name="bills_waiting_for">Waiting for %1$s to confirm</string>
+    <string name="bills_ask_to_confirm">Ask %1$s to confirm you paid</string>
 </resources>

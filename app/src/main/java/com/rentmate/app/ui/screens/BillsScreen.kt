@@ -32,8 +32,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentmate.app.R
 import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.ui.components.MemberAvatar
 import com.rentmate.app.ui.components.PillTone
@@ -87,7 +89,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         modifier = Modifier.padding(top = Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
-                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, onPay = viewModel::payShare) }
+                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare) }
                     }
                 }
             }
@@ -108,12 +110,27 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                     } else {
                         Column {
                             suggestions.forEach { s ->
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(
-                                        "${s.from_display_name} \u2192 ${s.to_display_name}: ${formatRand(s.amount)}",
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    SecondaryButton("Confirm", onClick = { viewModel.confirmSettlement(s.to_user_id, s.amount) })
+                                Column(modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
+                                    Text("${s.from_display_name} \u2192 ${s.to_display_name}: ${formatRand(s.amount)}")
+                                    if (s.to_user_id == state.currentUserId) {
+                                        // Only the person who is owed can confirm they received it (RM-0010).
+                                        SecondaryButton(
+                                            stringResource(R.string.bills_confirm_received),
+                                            onClick = { viewModel.confirmSettlement(s.from_user_id, s.amount) }
+                                        )
+                                    } else if (s.from_user_id == state.currentUserId) {
+                                        Text(
+                                            stringResource(R.string.bills_ask_to_confirm, s.to_display_name),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    } else {
+                                        Text(
+                                            stringResource(R.string.bills_waiting_for, s.to_display_name),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -128,7 +145,8 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 }
 
 @Composable
-private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
+/** One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010). */
+private fun BillRow(bill: BillWithSharesRow, canMarkPaid: Boolean, onPay: (String) -> Unit) {
     val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { it.is_paid }
     RentMateCard {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -158,8 +176,10 @@ private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
                 )
                 if (share.is_paid) {
                     StatusPill("Paid", PillTone.Positive)
-                } else {
+                } else if (canMarkPaid) {
                     SecondaryButton("Mark paid", onClick = { onPay(share.id) })
+                } else {
+                    StatusPill("Owes", PillTone.Attention)
                 }
             }
         }
