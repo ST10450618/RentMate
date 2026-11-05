@@ -98,7 +98,7 @@ private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit) {
                     color = if (item.is_purchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    "Added by ${item.added_by_user_id?.display_name ?: "a housemate"}",
+                    "Added by ${item.added_by_user_id?.display_name ?: stringResource(R.string.housemate_fallback)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

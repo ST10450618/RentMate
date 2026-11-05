@@ -9,6 +9,7 @@ import com.rentmate.app.ui.components.InlineError
 import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.RefreshingIndicator
 import com.rentmate.app.ui.components.rememberHasStartedLoading
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -102,7 +103,8 @@ private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComple
             Text(chore.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
             StatusPill("${chore.point_value} pt", PillTone.Positive)
         }
-        val current = chore.currentAssignee()?.let { memberNames[it] ?: "Housemate" }
+        val housemate = stringResource(R.string.housemate_fallback)
+        val current = chore.currentAssignee()?.let { memberNames[it] ?: housemate }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = Spacing.xs)) {
             MemberAvatar(current ?: "?", size = 28.dp)
             Text(
@@ -116,7 +118,7 @@ private fun ChoreRow(chore: ChoreRow, memberNames: Map<String, String>, onComple
         if (forecast.isNotEmpty()) {
             SectionLabel("Next 4 cycles")
             forecast.forEach { (cycle, userId) ->
-                Text("$cycle. ${memberNames[userId] ?: "Housemate"}", style = MaterialTheme.typography.bodySmall)
+                Text("$cycle. ${memberNames[userId] ?: housemate}", style = MaterialTheme.typography.bodySmall)
             }
         }
         SecondaryButton("Mark done", onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))

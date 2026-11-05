@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -77,12 +78,24 @@ class ChoresViewModel @Inject constructor(
             }.onSuccess { _state.value = _state.value.copy(loading = false, chores = it) }
                 .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
 
+            // Names come from the household roster, not the leaderboard, so members who hide
+            // themselves from the leaderboard still show a name instead of a raw user ID.
+            runCatching {
+                supabase.from("household_members")
+                    .select(columns = Columns.raw("user_id, profiles(display_name)")) { filter { eq("household_id", householdId) } }
+                    .decodeList<HouseholdMemberWithProfile>()
+            }.onSuccess { members ->
+                _state.value = _state.value.copy(
+                    memberNames = members.mapNotNull { m -> m.profiles?.display_name?.let { m.user_id to it } }.toMap()
+                )
+            }
+
             runCatching {
                 supabase.postgrest.rpc("leaderboard", LeaderboardParams(householdId).toRpcParams()).decodeList<LeaderboardRow>()
             }.onSuccess {
                 _state.value = _state.value.copy(
                     leaderboard = it,
-                    memberNames = it.associate { row -> row.user_id to row.display_name }
+                    memberNames = it.associate { row -> row.user_id to row.display_name } + _state.value.memberNames
                 )
             }
         }

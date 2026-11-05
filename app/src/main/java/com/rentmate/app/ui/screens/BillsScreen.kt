@@ -9,6 +9,7 @@ import com.rentmate.app.ui.components.InlineError
 import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.RefreshingIndicator
 import com.rentmate.app.ui.components.rememberHasStartedLoading
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -148,7 +149,7 @@ private fun BillRow(bill: BillWithSharesRow, onPay: (String) -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val name = share.profiles?.display_name ?: "Housemate"
+                val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
                 MemberAvatar(name, size = 28.dp)
                 Text(
                     "$name \u00B7 ${formatRand(share.amount_owed)}",

@@ -147,4 +147,5 @@
     <string name="biometric_enrol_message">No fingerprint, face or screen lock is set up on this device. Open your device settings to add one, then come back and turn this on.</string>
     <string name="biometric_enrol_open">Open settings</string>
     <string name="biometric_enrol_cancel">Not now</string>
+    <string name="housemate_fallback">Housemate</string>
 </resources>

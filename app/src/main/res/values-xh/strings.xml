@@ -54,4 +54,5 @@
     <string name="biometric_enrol_message">Akukho mnwe, buso okanye ukhiye wesikrini osetiweyo kweso sixhobo. Vula useto lwesixhobo ukongeza, uze ubuye uvule oku.</string>
     <string name="biometric_enrol_open">Vula useto</string>
     <string name="biometric_enrol_cancel">Hayi ngoku</string>
+    <string name="housemate_fallback">Umhlali-kunye</string>
 </resources>
