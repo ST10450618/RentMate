@@ -1,0 +1,43 @@
+# Ajiya configuration: https://github.com/AliyuYahaya/Ajiya
+
+[project]
+name = "RentMate"
+prefix = "RM"
+
+# [launch]
+# target = "go-live"          # a phase slug or a ticket ID
+
+[test]
+command = "./gradlew testDebugUnitTest"
+
+# [[apps]]
+# name = "api"
+# path = "apps/api"
+
+[[milestones]]
+name = "part2-fixed"
+targets = ["part2-fixes"]
+
+[[milestones]]
+name = "final-poe"
+targets = ["release"]
+
+[[milestones]]
+name = "launch"
+targets = ["release"]
+
+[[apps]]
+name = "rentmate.api"
+path = "RentMate.Api/RentMate.Api"
+
+[[apps]]
+name = "rentmate.api.tests"
+path = "RentMate.Api/RentMate.Api.Tests"
+
+[[apps]]
+name = "android"
+path = "app"
+
+[[apps]]
+name = "supabase"
+path = "supabase"
