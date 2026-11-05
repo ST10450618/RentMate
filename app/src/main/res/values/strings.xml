@@ -42,4 +42,12 @@
     <string name="lock_error_lockout">Too many attempts. Wait a moment, then try again.</string>
     <string name="lock_error_no_credentials">No fingerprint, face or screen lock is set up on this device.</string>
     <string name="lock_error_other">Something went wrong while unlocking. Try again.</string>
+
+    <string name="biometric_note_no_hardware">This device has no fingerprint or face unlock, so this setting is unavailable.</string>
+    <string name="biometric_note_unavailable">Biometric unlock is not available on this device right now.</string>
+    <string name="biometric_note_none_enrolled">Set up a fingerprint, face or screen lock first.</string>
+    <string name="biometric_enrol_title">Set up biometrics first</string>
+    <string name="biometric_enrol_message">No fingerprint, face or screen lock is set up on this device. Open your device settings to add one, then come back and turn this on.</string>
+    <string name="biometric_enrol_open">Open settings</string>
+    <string name="biometric_enrol_cancel">Not now</string>
 </resources>

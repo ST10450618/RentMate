@@ -44,6 +44,18 @@ fun failureFromErrorCode(code: Int): AuthFailure = when (code) {
     else -> AuthFailure.OTHER
 }
 
+/** What to do when the user flips the biometric toggle on (RM-0014). */
+enum class EnableOutcome {
+    /** Turn the setting on. */
+    ENABLE,
+
+    /** Do not enable yet; offer to open the system enrolment screen. */
+    OFFER_ENROLMENT,
+
+    /** Do not enable; explain that this device cannot use biometrics. */
+    EXPLAIN_UNSUPPORTED
+}
+
 /**
  * Pure decision logic for the biometric lock, kept free of Android types so it is
  * unit-testable.
@@ -80,4 +92,17 @@ object BiometricLockPolicy {
         if (!toggleOn || availability != BiometricAvailability.AVAILABLE) return false
         return nowMs - backgroundedAtMs >= RELOCK_AFTER_MS
     }
+
+    /** Decides what happens when the user tries to switch the biometric toggle on. */
+    fun onEnableRequested(availability: BiometricAvailability): EnableOutcome = when (availability) {
+        BiometricAvailability.AVAILABLE -> EnableOutcome.ENABLE
+        BiometricAvailability.NONE_ENROLLED -> EnableOutcome.OFFER_ENROLMENT
+        BiometricAvailability.NO_HARDWARE,
+        BiometricAvailability.UNAVAILABLE -> EnableOutcome.EXPLAIN_UNSUPPORTED
+    }
+
+    /** True when the toggle can be used at all on this device (hardware exists). */
+    fun isToggleUsable(availability: BiometricAvailability): Boolean =
+        availability == BiometricAvailability.AVAILABLE ||
+            availability == BiometricAvailability.NONE_ENROLLED
 }

@@ -46,4 +46,12 @@
     <string name="lock_error_lockout">Iimvavanyo ezininzi kakhulu. Linda kancinci uze uzame kwakhona.</string>
     <string name="lock_error_no_credentials">Akukho mnwe, buso okanye ukhiye wesikrini osetiweyo kule ndlela yokusebenza.</string>
     <string name="lock_error_other">Kukho into engahambanga kakuhle ekuvuleni. Zama kwakhona.</string>
+
+    <string name="biometric_note_no_hardware">Esi sixhobo asinako ukuvula ngomnwe okanye ngobuso, ngoko olu seto alufumaneki.</string>
+    <string name="biometric_note_unavailable">Ukuvula ngebhayometriki akufumaneki kweso sixhobo ngoku.</string>
+    <string name="biometric_note_none_enrolled">Qala usete umnwe, ubuso okanye ukhiye wesikrini.</string>
+    <string name="biometric_enrol_title">Qala usete ibhayometriki</string>
+    <string name="biometric_enrol_message">Akukho mnwe, buso okanye ukhiye wesikrini osetiweyo kweso sixhobo. Vula useto lwesixhobo ukongeza, uze ubuye uvule oku.</string>
+    <string name="biometric_enrol_open">Vula useto</string>
+    <string name="biometric_enrol_cancel">Hayi ngoku</string>
 </resources>

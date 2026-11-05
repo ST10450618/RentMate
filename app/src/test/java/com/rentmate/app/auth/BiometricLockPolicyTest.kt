@@ -62,6 +62,22 @@ class BiometricLockPolicyTest {
     }
 
     @Test
+    fun enable_dependsOnAvailability() {
+        assertEquals(EnableOutcome.ENABLE, BiometricLockPolicy.onEnableRequested(BiometricAvailability.AVAILABLE))
+        assertEquals(EnableOutcome.OFFER_ENROLMENT, BiometricLockPolicy.onEnableRequested(BiometricAvailability.NONE_ENROLLED))
+        assertEquals(EnableOutcome.EXPLAIN_UNSUPPORTED, BiometricLockPolicy.onEnableRequested(BiometricAvailability.NO_HARDWARE))
+        assertEquals(EnableOutcome.EXPLAIN_UNSUPPORTED, BiometricLockPolicy.onEnableRequested(BiometricAvailability.UNAVAILABLE))
+    }
+
+    @Test
+    fun toggleUsable_onlyWhenHardwareExists() {
+        assertTrue(BiometricLockPolicy.isToggleUsable(BiometricAvailability.AVAILABLE))
+        assertTrue(BiometricLockPolicy.isToggleUsable(BiometricAvailability.NONE_ENROLLED))
+        assertFalse(BiometricLockPolicy.isToggleUsable(BiometricAvailability.NO_HARDWARE))
+        assertFalse(BiometricLockPolicy.isToggleUsable(BiometricAvailability.UNAVAILABLE))
+    }
+
+    @Test
     fun availability_mapsCanAuthenticateCodes() {
         assertEquals(BiometricAvailability.AVAILABLE, availabilityFromCode(BiometricManager.BIOMETRIC_SUCCESS))
         assertEquals(BiometricAvailability.NONE_ENROLLED, availabilityFromCode(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED))
