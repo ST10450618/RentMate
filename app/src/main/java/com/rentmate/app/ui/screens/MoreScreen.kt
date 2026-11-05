@@ -1,5 +1,8 @@
 package com.rentmate.app.ui.screens
 
+import androidx.annotation.StringRes
+import com.rentmate.app.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +30,7 @@ import com.rentmate.app.ui.theme.Spacing
 @Composable
 fun MoreScreen(onOpen: (Screen) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        ScreenHeader(title = "More", subtitle = "Shopping, maintenance and settings")
+        ScreenHeader(title = stringResource(R.string.nav_more), subtitle = stringResource(R.string.more_subtitle))
         Column(
             modifier = Modifier.padding(Spacing.screen),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm)
@@ -38,8 +41,8 @@ fun MoreScreen(onOpen: (Screen) -> Unit) {
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     ListItem(
-                        headlineContent = { Text(item.screen.title, style = MaterialTheme.typography.titleMedium) },
-                        supportingContent = { Text(moreScreenDescription(item.screen)) },
+                        headlineContent = { Text(stringResource(item.screen.titleRes), style = MaterialTheme.typography.titleMedium) },
+                        supportingContent = { moreScreenDescription(item.screen)?.let { Text(stringResource(it)) } },
                         leadingContent = {
                             Icon(item.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         },
@@ -54,10 +57,11 @@ fun MoreScreen(onOpen: (Screen) -> Unit) {
     }
 }
 
-private fun moreScreenDescription(screen: Screen): String = when (screen) {
-    Screen.ShoppingList -> "Shared items to buy"
-    Screen.Maintenance -> "Log and track faults"
-    Screen.Activity -> "Household activity"
-    Screen.Settings -> "Notifications, language, account"
-    else -> ""
+@StringRes
+private fun moreScreenDescription(screen: Screen): Int? = when (screen) {
+    Screen.ShoppingList -> R.string.more_shopping_desc
+    Screen.Maintenance -> R.string.more_maintenance_desc
+    Screen.Activity -> R.string.more_activity_desc
+    Screen.Settings -> R.string.more_settings_desc
+    else -> null
 }

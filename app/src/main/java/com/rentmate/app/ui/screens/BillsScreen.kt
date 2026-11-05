@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.rentmate.app.R
@@ -54,16 +55,16 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
-        topBar = { ScreenHeader(title = "Bills", subtitle = "${state.bills.size} bill(s)") },
+        topBar = { ScreenHeader(title = stringResource(R.string.nav_bills), subtitle = pluralStringResource(R.plurals.bills_count, state.bills.size, state.bills.size)) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddBill) {
-                Icon(Icons.Filled.Add, contentDescription = "Add bill")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_bill_title))
             }
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                PrimaryButton("Settle up", onClick = { viewModel.loadSettleUp() })
+                PrimaryButton(stringResource(R.string.settle_up), onClick = { viewModel.loadSettleUp() })
             }
 
             val hasStarted = rememberHasStartedLoading(state.loading)
@@ -97,19 +98,19 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
     if (state.settleUp != null || state.settleUpLoading) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissSettleUp() },
-            title = { Text("Settle up") },
+            title = { Text(stringResource(R.string.settle_up)) },
             text = {
                 if (state.settleUpLoading) {
                     CircularProgressIndicator()
                 } else {
                     val suggestions = state.settleUp.orEmpty()
                     if (suggestions.isEmpty()) {
-                        Text("The household is already settled.")
+                        Text(stringResource(R.string.settle_up_none))
                     } else {
                         Column {
                             suggestions.forEach { s ->
                                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
-                                    Text("${s.from_display_name} \u2192 ${s.to_display_name}: ${formatRand(s.amount)}")
+                                    Text(stringResource(R.string.settle_up_payment, s.from_display_name, s.to_display_name, formatRand(s.amount)))
                                     if (s.to_user_id == state.currentUserId) {
                                         // Only the person who is owed can confirm they received it (RM-0010).
                                         SecondaryButton(
@@ -136,7 +137,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                 }
             },
             confirmButton = {
-                PrimaryButton("Close", onClick = { viewModel.dismissSettleUp() })
+                PrimaryButton(stringResource(R.string.close), onClick = { viewModel.dismissSettleUp() })
             }
         )
     }
@@ -156,8 +157,8 @@ private fun BillRow(bill: BillWithSharesRow, canMarkPaid: Boolean, onPay: (Strin
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Due ${bill.due_date.take(10)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if (allPaid) StatusPill("Paid", PillTone.Positive) else StatusPill("Outstanding", PillTone.Attention)
+            Text(stringResource(R.string.bills_due, bill.due_date.take(10)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
         }
         bill.bill_shares.forEach { share ->
             Row(
@@ -168,16 +169,16 @@ private fun BillRow(bill: BillWithSharesRow, canMarkPaid: Boolean, onPay: (Strin
                 val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
                 MemberAvatar(name, size = 28.dp)
                 Text(
-                    "$name \u00B7 ${formatRand(share.amount_owed)}",
+                    stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f).padding(start = Spacing.sm)
                 )
                 if (share.is_paid) {
-                    StatusPill("Paid", PillTone.Positive)
+                    StatusPill(stringResource(R.string.bills_paid), PillTone.Positive)
                 } else if (canMarkPaid) {
-                    SecondaryButton("Mark paid", onClick = { onPay(share.id) })
+                    SecondaryButton(stringResource(R.string.bills_mark_paid), onClick = { onPay(share.id) })
                 } else {
-                    StatusPill("Owes", PillTone.Attention)
+                    StatusPill(stringResource(R.string.bills_owes), PillTone.Attention)
                 }
             }
         }

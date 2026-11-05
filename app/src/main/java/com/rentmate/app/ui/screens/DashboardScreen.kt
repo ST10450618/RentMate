@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,8 +56,8 @@ fun DashboardScreen(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ScreenHeader(
-            title = "Dashboard",
-            subtitle = if (state.households.isNotEmpty()) "${state.households.size} household(s)" else null
+            title = stringResource(R.string.nav_dashboard),
+            subtitle = if (state.households.isNotEmpty()) pluralStringResource(R.plurals.households_count, state.households.size, state.households.size) else null
         )
 
         val hasStarted = rememberHasStartedLoading(state.loading)
@@ -89,47 +90,47 @@ fun DashboardScreen(
 
             if (state.overdueBills.isNotEmpty()) {
                 RentMateCard(accent = MaterialTheme.colorScheme.secondary) {
-                    StatusPill("${state.overdueBills.size} overdue", PillTone.Attention)
+                    StatusPill(pluralStringResource(R.plurals.bills_overdue, state.overdueBills.size, state.overdueBills.size), PillTone.Attention)
                     state.overdueBills.forEach { Text(it.title, style = MaterialTheme.typography.titleMedium) }
-                    PrimaryButton("View bills", onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
+                    PrimaryButton(stringResource(R.string.dashboard_view_bills), onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
                 }
             }
 
             RentMateCard {
-                SectionLabel("Your balance")
+                SectionLabel(stringResource(R.string.dashboard_balance))
                 if (state.owedToYou > 0) {
                     Text(
-                        "You're owed ${formatRand(state.owedToYou)}",
+                        stringResource(R.string.dashboard_owed_to_you, formatRand(state.owedToYou)),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (state.youOwe > 0) {
                     Text(
-                        "You owe ${formatRand(state.youOwe)}",
+                        stringResource(R.string.dashboard_you_owe, formatRand(state.youOwe)),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
                 if (state.owedToYou == 0.0 && state.youOwe == 0.0) {
-                    Text("You're all settled up", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.dashboard_settled), style = MaterialTheme.typography.titleMedium)
                 }
-                SecondaryButton("Settle up", onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
+                SecondaryButton(stringResource(R.string.settle_up), onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
             }
 
             RentMateCard {
-                SectionLabel("Your next chore")
+                SectionLabel(stringResource(R.string.dashboard_next_chore))
                 val chore = state.nextChore
                 Text(
-                    chore?.title ?: "Nothing assigned to you right now.",
+                    chore?.title ?: stringResource(R.string.dashboard_no_chore),
                     style = MaterialTheme.typography.titleMedium
                 )
-                SecondaryButton("View chores", onClick = onOpenChores, modifier = Modifier.padding(top = Spacing.sm))
+                SecondaryButton(stringResource(R.string.dashboard_view_chores), onClick = onOpenChores, modifier = Modifier.padding(top = Spacing.sm))
             }
 
             if (state.members.isNotEmpty()) {
                 RentMateCard {
-                    SectionLabel("Household", color = MaterialTheme.colorScheme.primary)
+                    SectionLabel(stringResource(R.string.dashboard_household), color = MaterialTheme.colorScheme.primary)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                         state.members.forEach { name -> MemberAvatar(name) }
                         Text(state.members.joinToString(", "), modifier = Modifier.padding(start = 8.dp))

@@ -1,5 +1,6 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.rentmate.app.R
@@ -54,10 +55,10 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
-        topBar = { ScreenHeader(title = "Chores", subtitle = "This week's roster") },
+        topBar = { ScreenHeader(title = stringResource(R.string.nav_chores), subtitle = stringResource(R.string.chores_subtitle)) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddChore) {
-                Icon(Icons.Filled.Add, contentDescription = "Add chore")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_chore_title))
             }
         }
     ) { padding ->
@@ -107,14 +108,14 @@ private fun ChoreRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(chore.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            StatusPill("${chore.point_value} pt", PillTone.Positive)
+            StatusPill(pluralStringResource(R.plurals.chore_points, chore.point_value, chore.point_value), PillTone.Positive)
         }
         val housemate = stringResource(R.string.housemate_fallback)
         val current = chore.currentAssignee()?.let { memberNames[it] ?: housemate }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = Spacing.xs)) {
             MemberAvatar(current ?: "?", size = 28.dp)
             Text(
-                "This cycle: ${current ?: "unassigned"}",
+                stringResource(R.string.chores_this_cycle, current ?: stringResource(R.string.chores_unassigned)),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = Spacing.sm)
             )
@@ -122,19 +123,19 @@ private fun ChoreRow(
 
         // Forecast comes from the server's forecast_chore RPC (RM-0007), so every phone shows the same schedule.
         if (forecast.isNotEmpty()) {
-            SectionLabel("Next 4 cycles")
+            SectionLabel(stringResource(R.string.chores_next_cycles))
             forecast.forEach { row ->
-                Text("${row.cycle_number}. ${memberNames[row.assignee_user_id] ?: housemate}", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.chores_forecast_row, row.cycle_number, memberNames[row.assignee_user_id] ?: housemate), style = MaterialTheme.typography.bodySmall)
             }
         }
-        SecondaryButton("Mark done", onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+        SecondaryButton(stringResource(R.string.chores_mark_done), onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
     }
 }
 
 @Composable
 private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
     RentMateCard(accent = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(vertical = Spacing.sm)) {
-        SectionLabel("Leaderboard", color = MaterialTheme.colorScheme.primary)
+        SectionLabel(stringResource(R.string.chores_leaderboard), color = MaterialTheme.colorScheme.primary)
         leaderboard.sortedByDescending { it.month_points }.forEachIndexed { index, entry ->
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
@@ -144,7 +145,7 @@ private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
                 MemberAvatar(entry.display_name, size = 28.dp)
                 Text(entry.display_name, modifier = Modifier.weight(1f).padding(start = Spacing.sm))
                 Text(
-                    "${entry.month_points} pts (${entry.total_points} total)",
+                    pluralStringResource(R.plurals.leaderboard_points, entry.month_points.toInt(), entry.month_points, entry.total_points),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
