@@ -73,4 +73,13 @@
     <string name="household_invite_code">Invite code</string>
     <string name="household_create">Create household</string>
     <string name="household_join">Join household</string>
+    <!-- Notification channels (RM-0021) -->
+    <string name="channel_bills_name">Bills</string>
+    <string name="channel_bills_desc">New bills and payment reminders</string>
+    <string name="channel_chores_name">Chores</string>
+    <string name="channel_chores_desc">Chores assigned to you and when they\'re due</string>
+    <string name="channel_shopping_name">Shopping list</string>
+    <string name="channel_shopping_desc">Items added to or bought from the shared list</string>
+    <string name="channel_maintenance_name">Maintenance</string>
+    <string name="channel_maintenance_desc">Updates on repair requests</string>
 </resources>
