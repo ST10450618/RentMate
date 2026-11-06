@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.HouseholdRow
 import com.rentmate.app.ui.components.MemberAvatar
@@ -134,7 +133,7 @@ fun DashboardScreen(
                     SectionLabel(stringResource(R.string.dashboard_household), color = MaterialTheme.colorScheme.primary)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                         state.members.forEach { name -> MemberAvatar(name) }
-                        Text(state.members.joinToString(", "), modifier = Modifier.padding(start = 8.dp))
+                        Text(state.members.joinToString(", "), modifier = Modifier.padding(start = Spacing.sm))
                     }
                 }
             }
@@ -158,7 +157,7 @@ private fun HouseholdSwitcher(
                 selected = household.id == currentId,
                 onClick = { onSelect(household.id) },
                 label = { Text(household.name) },
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = Spacing.sm)
             )
         }
     }
