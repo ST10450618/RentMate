@@ -27,14 +27,31 @@ object ActivityEventBuilder {
         return if (text.length <= EVENT_TEXT_MAX) text else text.take(EVENT_TEXT_MAX - 1) + "…"
     }
 
+    // Summary texts. Each one is the part of the feed row that follows the actor's name.
+
+    /** Summary for [ActivityType.BILL_ADDED]. */
     fun billAdded(title: String, amount: String) = "added a bill: $title $amount"
+
+    /** Summary for a paid share; names the payer when someone else's share was marked. */
     fun sharePaid(title: String, amount: String, payerName: String?) =
         if (payerName.isNullOrBlank()) "marked a share of $title $amount as paid"
         else "marked ${payerName}'s share of $title $amount as paid"
+
+    /** Summary for a settle-up payment the creditor confirmed. */
     fun settlementConfirmed(fromName: String, amount: String) = "confirmed $amount received from $fromName"
+
+    /** Summary for [ActivityType.CHORE_COMPLETED]. */
     fun choreCompleted(title: String) = "completed: $title"
+
+    /** Summary for [ActivityType.SHOPPING_ADDED]. */
     fun shoppingAdded(name: String) = "added to the shopping list: $name"
+
+    /** Summary for [ActivityType.SHOPPING_BOUGHT]. */
     fun shoppingBought(name: String) = "bought: $name"
+
+    /** Summary for [ActivityType.MAINTENANCE_LOGGED]. */
     fun maintenanceLogged(title: String) = "logged a fault: $title"
+
+    /** Summary for [ActivityType.MAINTENANCE_STATUS]. */
     fun maintenanceStatus(title: String, status: String) = "marked $title as $status"
 }

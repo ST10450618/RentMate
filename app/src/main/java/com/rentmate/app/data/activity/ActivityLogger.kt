@@ -25,13 +25,21 @@ private const val TAG = "ActivityLogger"
  * bills, chores and maintenance keep working and the event is only missing from the feed.
  */
 interface ActivityLogger {
+    /** Records that the user created the bill [billId]. */
     fun billAdded(title: String, amount: Double, billId: String?)
+    /** Records that a share of [title] was marked paid, by the payer or for [payerName]. */
     fun sharePaid(title: String, amount: Double, payerName: String?, billId: String?)
+    /** Records that the user confirmed a settle-up payment from [fromName]. */
     fun settlementConfirmed(fromName: String, amount: Double)
+    /** Records that the user finished the chore [choreId]. */
     fun choreCompleted(title: String, choreId: String?)
+    /** Records that the user put [name] on the shopping list. */
     fun shoppingAdded(name: String, itemId: String?)
+    /** Records that the user bought [name] from the shopping list. */
     fun shoppingBought(name: String, itemId: String?)
+    /** Records that the user logged the maintenance fault [requestId]. */
     fun maintenanceLogged(title: String, requestId: String?)
+    /** Records that the maintenance request [requestId] moved to [status]. */
     fun maintenanceStatus(title: String, status: String, requestId: String?)
 }
 
@@ -47,6 +55,13 @@ object NoOpActivityLogger : ActivityLogger {
     override fun maintenanceStatus(title: String, status: String, requestId: String?) = Unit
 }
 
+/**
+ * The app's [ActivityLogger]: adds one document to `households/{id}/events` per call,
+ * with the actor's display name read once from `profiles` and cached per user.
+ *
+ * Based on: Firebase docs, Add data to Cloud Firestore,
+ * https://firebase.google.com/docs/firestore/manage-data/add-data (accessed 2026-11-06)
+ */
 @Singleton
 class FirestoreActivityLogger @Inject constructor(
     private val supabase: SupabaseClient,
@@ -83,9 +98,13 @@ class FirestoreActivityLogger @Inject constructor(
     override fun maintenanceStatus(title: String, status: String, requestId: String?) =
         write(ActivityType.MAINTENANCE_STATUS, ActivityEventBuilder.maintenanceStatus(title, status), requestId)
 
+    /** Adds the event document in the background; does nothing when no household is selected. */
     private fun write(type: ActivityType, summary: String, refId: String?) {
         // Read now, on the caller's thread of execution, in case the user signs out before the coroutine runs.
-        val householdId = currentHousehold.id.value ?: return
+        val householdId = currentHousehold.id.value ?: run {
+            Log.d(TAG, "no current household; ${type.wireName} event skipped")
+            return
+        }
         scope.launch {
             try {
                 firebaseSession.ensureSignedIn()
@@ -93,6 +112,7 @@ class FirestoreActivityLogger @Inject constructor(
                 FirebaseFirestore.getInstance()
                     .collection("households").document(householdId).collection("events")
                     .add(data).await()
+                Log.d(TAG, "wrote ${type.wireName} event")
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -101,6 +121,7 @@ class FirestoreActivityLogger @Inject constructor(
         }
     }
 
+    /** The signed-in user's display name, cached per user id; "Someone" when it cannot be read. */
     private suspend fun actorName(): String {
         val userId = supabase.auth.currentUserOrNull()?.id ?: return "Someone"
         cachedName?.takeIf { it.first == userId }?.let { return it.second }

@@ -31,11 +31,14 @@ interface ActivityRepository {
 @Singleton
 class InMemoryActivityRepository @Inject constructor() : ActivityRepository {
 
+    /** Always true: this data is invented. */
     override val isSampleData: Boolean = true
 
+    /** Emits the sample list once, cut to [limit]. */
     override fun observe(householdId: String, limit: Int): Flow<List<ActivityEvent>> =
         flowOf(sampleEvents(Instant.now()).take(limit))
 
+    /** Eight fixed events spread from five minutes to nine days before [now]. */
     internal fun sampleEvents(now: Instant): List<ActivityEvent> = listOf(
         ActivityEvent("e1", ActivityType.BILL_ADDED, "Thandi", "added a bill: Electricity R1 200", "bill-1", now.minus(Duration.ofMinutes(5))),
         ActivityEvent("e2", ActivityType.CHORE_COMPLETED, "Sipho", "completed: Take out bins", "chore-1", now.minus(Duration.ofMinutes(48))),

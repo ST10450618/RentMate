@@ -7,12 +7,19 @@ import java.time.Instant
  * string stored in the Firestore `type` field.
  */
 enum class ActivityType(val wireName: String) {
+    /** A housemate created a bill. */
     BILL_ADDED("bill_added"),
+    /** A share was marked paid or a settlement was confirmed. */
     BILL_PAID("bill_paid"),
+    /** A housemate finished a chore. */
     CHORE_COMPLETED("chore_completed"),
+    /** An item went on the shopping list. */
     SHOPPING_ADDED("shopping_added"),
+    /** An item on the shopping list was bought. */
     SHOPPING_BOUGHT("shopping_bought"),
+    /** A maintenance fault was logged. */
     MAINTENANCE_LOGGED("maintenance_logged"),
+    /** A maintenance request changed status. */
     MAINTENANCE_STATUS("maintenance_status");
 
     companion object {
