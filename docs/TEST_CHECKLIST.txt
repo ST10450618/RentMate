@@ -111,6 +111,18 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
     bought, and add a bill. Each shows "Waiting to sync". Swipe the app
     away and reopen: they are still there with the badge. (They upload in
     RM-0018, not yet.)
+[ ] RM-0023: with the app in the background, add a bill on phone A. Tap
+    the push on the tablet: Bills opens. Press Back: the Dashboard shows,
+    not Login.
+[ ] RM-0023: swipe the app away, then tap a bill push (cold start): Bills
+    opens after the splash screen.
+[ ] RM-0023: with the app lock ON, tap a bill push after more than a
+    minute away: the lock prompt shows first, then Bills after unlock.
+[ ] RM-0023: tap a repair status push: Maintenance opens. Tap a chore
+    reminder (or a console test message with data key channel=chores):
+    Chores opens.
+[ ] RM-0023: turn Bills notifications OFF in Settings, add a bill on
+    phone A: no push on the tablet. Turn it back ON: the next bill pushes.
 
 
 7. TRANSLATIONS (RM-0025)

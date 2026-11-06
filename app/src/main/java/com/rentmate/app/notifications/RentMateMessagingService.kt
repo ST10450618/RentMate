@@ -44,7 +44,7 @@ class RentMateMessagingService : FirebaseMessagingService() {
         // FCM calls this on a background thread and allows several seconds,
         // so a short blocking read of the local settings is safe.
         val enabled = runBlocking {
-            SettingsRepository(applicationContext).settings.first().isOn(push.channel.toggle)
+            push.isAllowedBy(SettingsRepository(applicationContext).settings.first())
         }
         if (!enabled) {
             Log.i(TAG, "${push.channel.id} pushes are off in Settings; dropped")

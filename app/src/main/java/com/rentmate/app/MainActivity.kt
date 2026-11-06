@@ -1,6 +1,7 @@
 package com.rentmate.app
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +19,8 @@ import com.rentmate.app.data.reconcileLanguage
 import com.rentmate.app.navigation.RentMateApp
 import com.rentmate.app.ui.theme.RentMateTheme
 import com.rentmate.app.data.activity.FirebaseSession
+import com.rentmate.app.notifications.DeepLinkInbox
+import com.rentmate.app.notifications.PushDeepLink
 import com.rentmate.app.notifications.PushTokenSync
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -47,6 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var firebaseSession: FirebaseSession
     @Inject lateinit var pushTokenSync: PushTokenSync
+    @Inject lateinit var deepLinkInbox: DeepLinkInbox
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -67,12 +71,33 @@ class MainActivity : AppCompatActivity() {
         // on a fresh start, not when the activity is recreated by a language switch.
         if (savedInstanceState == null) {
             lifecycleScope.launch { reconcileLanguage(SettingsRepository(applicationContext)) }
+            // RM-0023: a cold start from a notification tap. Skipped on recreation
+            // (rotation, language switch) so the screen does not open twice.
+            handleNotificationTap(intent)
         }
         setContent {
             RentMateTheme {
-                BiometricLockHost { RentMateApp() }
+                BiometricLockHost { RentMateApp(deepLinks = deepLinkInbox) }
             }
         }
+    }
+
+    /** RM-0023: a notification tap while the activity is already running. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Log.d(TAG, "onNewIntent")
+        setIntent(intent)
+        handleNotificationTap(intent)
+    }
+
+    /**
+     * Queues the screen a notification tap asks for. RentMateApp opens it once
+     * the start screen is ready, underneath the app lock if the lock is on.
+     */
+    private fun handleNotificationTap(intent: Intent?) {
+        val screen = PushDeepLink.screenFrom(intent) ?: return
+        Log.d(TAG, "notification tap -> ${screen.route}")
+        deepLinkInbox.offer(screen)
     }
 
     /** Asks for POST_NOTIFICATIONS once, on Android 13+ only, if not already granted. */
