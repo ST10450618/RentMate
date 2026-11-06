@@ -200,4 +200,11 @@ dependencies {
     // RM-0021: push notifications (FCM token and incoming messages).
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    // RM-0018: background upload of the offline outbox. hilt-work lets the
+    // worker take its dependencies from Hilt.
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+    testImplementation(libs.androidx.work.testing)
 }
