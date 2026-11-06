@@ -21,6 +21,12 @@ interface SyncScheduler {
     /** Schedules an upload of the outbox for as soon as there is a network. Safe to call often. */
     fun requestSync()
 
+    /**
+     * RM-0019: starts an upload now, even if an earlier run is waiting out its
+     * retry delay. For the banner's Retry button. Still waits for a network.
+     */
+    fun syncNow() = requestSync()
+
     /** Does nothing. For tests and code paths without WorkManager. */
     object None : SyncScheduler {
         override fun requestSync() = Unit
@@ -52,6 +58,20 @@ class WorkManagerSyncScheduler @Inject constructor(
             Log.d(TAG, "sync requested")
         } catch (e: IllegalStateException) {
             // WorkManager not initialised (should not happen in the app). The entry stays queued.
+            Log.e(TAG, "could not schedule sync", e)
+        }
+    }
+
+    /**
+     * [ExistingWorkPolicy.REPLACE] drops a run that waits out its backoff and
+     * enqueues a fresh one without delay. The banner offers this only after a
+     * run failed, so no run is in progress to be cancelled.
+     */
+    override fun syncNow() {
+        try {
+            WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, buildRequest())
+            Log.d(TAG, "sync now requested")
+        } catch (e: IllegalStateException) {
             Log.e(TAG, "could not schedule sync", e)
         }
     }
