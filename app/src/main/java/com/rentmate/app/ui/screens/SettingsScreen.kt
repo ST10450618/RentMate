@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rentmate.app.R
@@ -29,6 +27,8 @@ import com.rentmate.app.data.SettingGroup
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.UserSettings
 import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.components.ScreenHeader
+import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.theme.Spacing
 
@@ -63,18 +63,15 @@ fun SettingsContent(
     modifier: Modifier = Modifier,
     biometricAvailability: BiometricAvailability = BiometricAvailability.AVAILABLE
 ) {
+    Column(modifier = modifier.fillMaxWidth()) {
+    ScreenHeader(title = stringResource(R.string.settings_title))
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(Spacing.screen),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
-        Text(
-            text = stringResource(R.string.settings_title),
-            style = MaterialTheme.typography.headlineSmall
-        )
-
         SettingGroup.entries.forEach { group ->
             SettingsSection(title = stringResource(group.titleRes)) {
                 SettingToggle.inGroup(group).forEachIndexed { index, toggle ->
@@ -108,22 +105,22 @@ fun SettingsContent(
                 stringResource(R.string.language_translation_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, bottom = Spacing.md)
             )
         }
 
-        OutlinedButton(
+        SecondaryButton(
+            text = stringResource(R.string.sign_out),
             onClick = onSignOut,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.sign_out))
-        }
+        )
+    }
     }
 }
 
 @Composable
 private fun SettingsSection(title: String, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         SectionLabel(title)
         RentMateCard(contentPadding = PaddingValues(vertical = Spacing.xs)) { content() }
     }
@@ -139,7 +136,7 @@ private fun ToggleRow(
     note: String? = null
 ) {
     androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -166,7 +163,7 @@ private fun ToggleRow(
 @Composable
 private fun Row3(content: @Composable () -> Unit) {
     androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) { content() }
 }
