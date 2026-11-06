@@ -33,7 +33,12 @@ import javax.inject.Inject
 
 private const val TAG = "SettingsViewModel"
 
-private val TOGGLE_COLUMN = mapOf(
+/**
+ * The profiles column for each toggle. The send-push Edge Function reads the
+ * notify_* columns to skip users who turned a channel off, so these names must
+ * match supabase/functions/send-push/push.ts (checked by NotificationToggleTest).
+ */
+internal val TOGGLE_COLUMN = mapOf(
     SettingToggle.NOTIFY_BILLS to "notify_bills",
     SettingToggle.NOTIFY_CHORES to "notify_chores",
     SettingToggle.NOTIFY_SHOPPING to "notify_shopping_list",

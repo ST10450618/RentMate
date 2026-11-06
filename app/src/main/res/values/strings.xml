@@ -9,6 +9,7 @@
     <string name="notif_maintenance">Maintenance updates</string>
 
     <string name="section_language">Language</string>
+    <string name="language_translation_disclaimer">Afrikaans and isiXhosa are machine-translated, similar to Google Translate, and may contain mistakes.</string>
     <!-- RM-0026: each language is shown in its own name, whatever language the
          app is in now, so these are not translated. -->
     <string name="lang_english" translatable="false">English</string>

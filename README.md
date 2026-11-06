@@ -166,14 +166,15 @@ The validators are covered by unit tests, including a fuzz test that feeds them 
 
 **Localisation.** All UI text lives in string resources with plural forms, translated into Afrikaans (`values-af`) and isiXhosa (`values-xh`), two official South African languages. The language is picked in Settings, where each language is shown in its own name. The switch applies at once through Android's per-app language support (`AppCompatDelegate.setApplicationLocales`), is kept after a restart, and is saved to the user's profile so it follows them to a new phone. `TranslationCompletenessTest` and lint's `MissingTranslation` check fail the build if a key is missing from either language.
 
-### Translation review
+### Translation accuracy
 
-Each translation must be checked by a first-language speaker before the final release. The reviewer fills in their name and the date below.
+The Afrikaans (`values-af`) and isiXhosa (`values-xh`) translations are machine-translated. No first-language speaker has reviewed them.
 
-| Language | Folder | Status | Reviewer | Date reviewed |
-|---|---|---|---|---|
-| Afrikaans | `values-af` | Machine-drafted, needs review by an Afrikaans speaker | TBD | TBD |
-| isiXhosa | `values-xh` | Machine-drafted, needs review by an isiXhosa speaker | TBD | TBD |
+Expect accuracy similar to Google Translate. Most screens read correctly, but some wording may be awkward, too literal or wrong, especially plurals and isiXhosa number forms. English (`values`) is the reference text.
+
+The app says the same thing in Settings, under the language picker (`language_translation_disclaimer`), so users see it before they switch.
+
+If you find a wrong translation, fix the string in `values-af` or `values-xh`. `TranslationCompletenessTest` checks that every English string still has an Afrikaans and an isiXhosa version.
 
 **Privacy.** Data is scoped to a household by Row Level Security. Biometric data never leaves the device. See [PRIVACY.md](PRIVACY.md).
 

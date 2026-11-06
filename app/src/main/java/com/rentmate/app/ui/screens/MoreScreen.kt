@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.rentmate.app.navigation.Screen
 import com.rentmate.app.navigation.moreItems
 import com.rentmate.app.ui.components.RentMateCard
@@ -38,7 +37,7 @@ fun MoreScreen(onOpen: (Screen) -> Unit) {
             moreItems.forEach { item ->
                 RentMateCard(
                     modifier = Modifier.clickable { onOpen(item.screen) },
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues()
                 ) {
                     ListItem(
                         headlineContent = { Text(stringResource(item.screen.titleRes), style = MaterialTheme.typography.titleMedium) },
