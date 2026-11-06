@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.rentmate.app.ui.theme.Spacing
 
 /** Full-bleed banner matching the Canva mockups: title + subtitle on the brand colour. */
 @Composable
@@ -17,7 +17,7 @@ fun ScreenHeader(title: String, subtitle: String? = null) {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.lg, bottom = Spacing.sm)
     ) {
         Text(
             title,

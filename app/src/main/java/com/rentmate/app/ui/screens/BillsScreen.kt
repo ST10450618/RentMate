@@ -186,7 +186,7 @@ private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPai
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
-                MemberAvatar(name, size = 28.dp)
+                MemberAvatar(name, size = 28.dp, userId = share.user_id)
                 Text(
                     stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
                     style = MaterialTheme.typography.bodyMedium,
