@@ -162,7 +162,7 @@
     <string name="split_error_exact">Izixa kufuneka zidibane zibe yi-R%2$s. Ngoku zidibana zibe yi-R%1$s.</string>
     <string name="split_error_number">Faka inani lelungu ngalinye (okanye ushiye kungenanto ukuze kube ngu-0).</string>
     <string name="split_error_negative">Amaxabiso okwahlula akanakuba ngaphantsi ko-0.</string>
-    <string name="split_error_too_large">Eso sixa sikhulu kakhulu.</string>
+    <string name="split_error_too_large">Isixa asinakudlula i-R999,999.99.</string>
     <string name="bills_confirm_received">Qinisekisa ukuba ifunyenwe</string>
     <string name="bills_waiting_for">Silinde u-%1$s aqinisekise</string>
     <string name="bills_ask_to_confirm">Cela u-%1$s aqinisekise ukuba uhlawulile</string>

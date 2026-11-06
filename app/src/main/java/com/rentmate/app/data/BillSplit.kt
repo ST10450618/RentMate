@@ -1,5 +1,6 @@
 package com.rentmate.app.data
 
+import com.rentmate.app.ui.validation.Limits
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -73,7 +74,8 @@ object BillSplit {
         if (amount == null || amount.signum() <= 0) return SplitResult.Invalid(SplitError.InvalidAmount)
         val totalCents = amount.movePointRight(2).setScale(0, RoundingMode.HALF_UP)
         if (totalCents.signum() <= 0) return SplitResult.Invalid(SplitError.InvalidAmount)
-        if (totalCents > BigDecimal(99_999_999L)) return SplitResult.Invalid(SplitError.TooLarge)
+        // Same limit as the Amount field, so a total the field accepts always splits.
+        if (totalCents > Limits.AMOUNT_MAX.movePointRight(2)) return SplitResult.Invalid(SplitError.TooLarge)
         if (memberIds.isEmpty()) return SplitResult.Invalid(SplitError.NoMembers)
         val total = totalCents.toLong()
 

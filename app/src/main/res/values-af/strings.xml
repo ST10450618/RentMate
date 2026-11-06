@@ -160,7 +160,7 @@
     <string name="split_error_exact">Die bedrae moet saam R%2$s wees. Hulle is saam R%1$s.</string>
     <string name="split_error_number">Voer \'n getal vir elke lid in (of laat dit leeg vir 0).</string>
     <string name="split_error_negative">Verdelingswaardes kan nie negatief wees nie.</string>
-    <string name="split_error_too_large">Daardie bedrag is te groot.</string>
+    <string name="split_error_too_large">Die bedrag kan nie meer as R999,999.99 wees nie.</string>
     <string name="bills_confirm_received">Bevestig ontvangs</string>
     <string name="bills_waiting_for">Wag vir %1$s om te bevestig</string>
     <string name="bills_ask_to_confirm">Vra %1$s om te bevestig dat jy betaal het</string>
