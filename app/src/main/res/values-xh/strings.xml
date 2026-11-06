@@ -11,6 +11,7 @@
     <string name="notif_maintenance">Uhlaziyo malunga nolungiso</string>
 
     <string name="section_language">Ulwimi</string>
+    <string name="language_translation_disclaimer">IsiBhulu nesiXhosa ziguqulelwe ngomatshini, njengeGoogle Translate, kwaye zinokuba neempazamo.</string>
 
     <string name="section_security">Ukhuseleko nomboniso</string>
     <string name="biometric_title">Vula ngebhayometriki</string>
@@ -236,6 +237,7 @@
     </plurals>
     <string name="shopping_added_by">Yongezwe ngu-%1$s</string>
     <string name="shopping_bought">Ithengiwe</string>
+    <string name="sync_pending">Ilindele ukuvumelanisa</string>
 
     <string name="household_setup_title">Seta ikhaya lakho</string>
     <string name="household_setup_body">Yenza ikhaya elitsha okanye ujoyine abahlali-kunye bakho ngekhowudi yabo yesimemo.</string>

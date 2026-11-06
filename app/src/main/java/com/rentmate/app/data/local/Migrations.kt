@@ -58,3 +58,21 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_bill_shares_household_id` ON `bill_shares` (`household_id`)")
     }
 }
+
+/**
+ * v2 -> v3 (RM-0017): the outbox gets the fields RM-0018's worker needs to replay
+ * an entry (local entity id, attempt count, last error), and the household roster
+ * gets its own table so Add Bill works offline. Columns are only added, so every
+ * queued entry and cached row is kept.
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `outbox` ADD COLUMN `entityId` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `outbox` ADD COLUMN `attemptCount` INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE `outbox` ADD COLUMN `lastError` TEXT")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `household_members` (`household_id` TEXT NOT NULL, " +
+                "`user_id` TEXT NOT NULL, `display_name` TEXT, PRIMARY KEY(`household_id`, `user_id`))"
+        )
+    }
+}

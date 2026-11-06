@@ -19,7 +19,7 @@ object LocalDatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): RentMateDatabase =
         Room.databaseBuilder(context, RentMateDatabase::class.java, "rentmate.db")
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     /** Bill DAO. */
@@ -37,4 +37,8 @@ object LocalDatabaseModule {
     /** Outbox DAO. */
     @Provides
     fun provideOutboxDao(db: RentMateDatabase): OutboxDao = db.outboxDao()
+
+    /** Household roster DAO (RM-0017). */
+    @Provides
+    fun provideMemberDao(db: RentMateDatabase): MemberDao = db.memberDao()
 }

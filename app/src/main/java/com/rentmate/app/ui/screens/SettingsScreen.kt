@@ -100,6 +100,13 @@ fun SettingsContent(
                     )
                 }
             }
+            // RM-0025: no native speaker reviewed the af and xh strings.
+            Text(
+                stringResource(R.string.language_translation_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, bottom = Spacing.md)
+            )
         }
 
         SecondaryButton(

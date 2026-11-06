@@ -94,7 +94,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         modifier = Modifier.padding(top = Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
-                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat) }
+                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId && !bill.pending, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat) }
                     }
                 }
             }
@@ -155,7 +155,10 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 }
 
 @Composable
-/** One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010). */
+/**
+ * One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010).
+ * RM-0017: a bill saved offline shows "Waiting to sync" and no server actions until it is uploaded.
+ */
 private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPaid: Boolean, onPay: (String) -> Unit, onStopRepeat: (String) -> Unit) {
     val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { it.is_paid }
     RentMateCard {
@@ -169,7 +172,10 @@ private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPai
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(stringResource(R.string.bills_due, bill.due_date.take(10)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                if (bill.pending) StatusPill(stringResource(R.string.sync_pending), PillTone.Neutral)
+                if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
+            }
         }
         if (isRepeating(bill.repeat, bill.repeat_stopped)) {
             Row(

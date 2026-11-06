@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.rentmate.app.data.local.BillEntity
 import com.rentmate.app.data.local.BillShareEntity
 import com.rentmate.app.data.local.ChoreEntity
+import com.rentmate.app.data.local.OutboxQueue
 import com.rentmate.app.data.local.RentMateDatabase
 import com.rentmate.app.data.local.ShoppingItemEntity
 import com.rentmate.app.data.local.SyncState
@@ -44,6 +45,10 @@ class CachedRepositoriesTest {
         override suspend fun fetchBills(householdId: String) = bills.also { failIfOffline() }
         override suspend fun fetchChores(householdId: String) = chores.also { failIfOffline() }
         override suspend fun fetchItems(householdId: String) = items.also { failIfOffline() }
+        override suspend fun fetchMembers(householdId: String) = emptyList<HouseholdMemberRow>().also { failIfOffline() }
+        override suspend fun createBill(params: CreateBillParams): String = error("not used here")
+        override suspend fun insertItem(insert: ShoppingItemInsert): String = error("not used here")
+        override suspend fun markPurchased(id: String, update: ShoppingItemPurchase) = error("not used here")
     }
 
     private lateinit var db: RentMateDatabase
@@ -79,9 +84,9 @@ class CachedRepositoriesTest {
         is_purchased = false, created_at = "c-$id"
     )
 
-    private fun bills() = CachedBillsRepository(remote, db.billDao(), household)
+    private fun bills() = CachedBillsRepository(remote, db.billDao(), db.memberDao(), OutboxQueue(db), household)
     private fun chores() = CachedChoresRepository(remote, db.choreDao(), household)
-    private fun shopping() = CachedShoppingRepository(remote, db.shoppingItemDao(), household)
+    private fun shopping() = CachedShoppingRepository(remote, db.shoppingItemDao(), db.memberDao(), OutboxQueue(db), household)
 
     @Test
     fun bills_failedRefreshAfterOnlineLoad_stillEmitsCachedRows() = runBlocking {

@@ -1,6 +1,7 @@
 package com.rentmate.app.data
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 // Row shapes match Postgres columns (snake_case) from supabase/migrations/0001_init.sql.
 
@@ -85,7 +86,9 @@ data class BillWithSharesRow(
     val updated_at: String,
     val repeat: String = "Never",
     val repeat_stopped: Boolean = false,
-    val bill_shares: List<BillShareWithProfileRow> = emptyList()
+    val bill_shares: List<BillShareWithProfileRow> = emptyList(),
+    /** RM-0017: true while this bill (or one of its shares) waits in the outbox. Never sent or decoded. */
+    @Transient val pending: Boolean = false
 )
 
 @Serializable
@@ -130,7 +133,9 @@ data class ShoppingItemRow(
     val purchased_by_user_id: ProfileNameRow? = null,
     val purchased_at: String? = null,
     val converted_to_bill_id: String? = null,
-    val created_at: String
+    val created_at: String,
+    /** RM-0017: true while this item has a change waiting in the outbox. Never sent or decoded. */
+    @Transient val pending: Boolean = false
 )
 
 @Serializable

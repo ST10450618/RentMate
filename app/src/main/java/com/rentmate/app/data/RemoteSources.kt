@@ -1,19 +1,28 @@
 package com.rentmate.app.data
 
+import com.rentmate.app.network.toRpcParams
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * RM-0016: the network reads behind the cached repositories. Each call may throw
+ * RM-0016: the network calls behind the cached repositories. Each call may throw
  * (IOException offline, RestException from Supabase). Kept as interfaces so tests
- * can pass a fake that fails on purpose.
+ * can pass a fake that fails on purpose. RM-0017 added the writes.
  */
 interface BillsRemoteSource {
     /** Every bill of [householdId] with its shares and debtor names. */
     suspend fun fetchBills(householdId: String): List<BillWithSharesRow>
+
+    /** The members of [householdId] with their display names. */
+    suspend fun fetchMembers(householdId: String): List<HouseholdMemberRow>
+
+    /** Calls create_bill and returns the new bill's server id. */
+    suspend fun createBill(params: CreateBillParams): String
 }
 
 /** Network reads for chores. */
@@ -26,7 +35,18 @@ interface ChoresRemoteSource {
 interface ShoppingRemoteSource {
     /** Every shopping item of [householdId], with who added and bought it. */
     suspend fun fetchItems(householdId: String): List<ShoppingItemRow>
+
+    /** Inserts one item and returns its id. */
+    suspend fun insertItem(insert: ShoppingItemInsert): String
+
+    /** Marks the item [id] purchased. */
+    suspend fun markPurchased(id: String, update: ShoppingItemPurchase)
 }
+
+private val MEMBER_COLUMNS = Columns.raw("user_id, profiles(display_name)")
+
+@Serializable
+private data class MemberWithProfileRow(val user_id: String, val profiles: ProfileNameRow? = null)
 
 private val BILL_WITH_SHARES_COLUMNS = Columns.raw("*, bill_shares(*, profiles(display_name))")
 
@@ -47,6 +67,15 @@ class SupabaseBillsRemoteSource @Inject constructor(
         supabase.from("bills")
             .select(columns = BILL_WITH_SHARES_COLUMNS) { filter { eq("household_id", householdId) } }
             .decodeList<BillWithSharesRow>()
+
+    override suspend fun fetchMembers(householdId: String): List<HouseholdMemberRow> =
+        supabase.from("household_members")
+            .select(columns = MEMBER_COLUMNS) { filter { eq("household_id", householdId) } }
+            .decodeList<MemberWithProfileRow>()
+            .map { HouseholdMemberRow(it.user_id, it.profiles?.display_name) }
+
+    override suspend fun createBill(params: CreateBillParams): String =
+        supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<IdRow>().id
 }
 
 /** Supabase [ChoresRemoteSource]. */
@@ -67,4 +96,11 @@ class SupabaseShoppingRemoteSource @Inject constructor(
         supabase.from("shopping_items")
             .select(columns = SHOPPING_ITEM_COLUMNS) { filter { eq("household_id", householdId) } }
             .decodeList<ShoppingItemRow>()
+
+    override suspend fun insertItem(insert: ShoppingItemInsert): String =
+        supabase.from("shopping_items").insert(insert) { select() }.decodeSingle<IdRow>().id
+
+    override suspend fun markPurchased(id: String, update: ShoppingItemPurchase) {
+        supabase.from("shopping_items").update(update) { filter { eq("id", id) } }
+    }
 }

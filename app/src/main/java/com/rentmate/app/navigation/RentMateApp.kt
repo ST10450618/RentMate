@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.rentmate.app.ui.feedback.CollectFeedback
@@ -36,6 +37,10 @@ import com.rentmate.app.R
 import com.rentmate.app.auth.StartDestination
 import com.rentmate.app.auth.StartupState
 import com.rentmate.app.auth.StartupViewModel
+import com.rentmate.app.notifications.DeepLinkInbox
+import com.rentmate.app.notifications.DeepLinkStep
+import com.rentmate.app.notifications.PushDeepLink
+import kotlinx.coroutines.flow.MutableStateFlow
 import com.rentmate.app.ui.screens.AddBillScreen
 import com.rentmate.app.ui.screens.AddChoreScreen
 import com.rentmate.app.ui.screens.ActivityScreen
@@ -50,10 +55,17 @@ import com.rentmate.app.ui.screens.MoreScreen
 import com.rentmate.app.ui.screens.SettingsScreen
 import com.rentmate.app.ui.screens.ShoppingListScreen
 
+/**
+ * The navigation host and app scaffold.
+ *
+ * @param deepLinks screens queued by notification taps (RM-0023). Null in
+ *   previews and tests, where no tap can arrive.
+ */
 @Composable
 fun RentMateApp(
     navController: NavHostController = rememberNavController(),
-    startupViewModel: StartupViewModel = hiltViewModel()
+    startupViewModel: StartupViewModel = hiltViewModel(),
+    deepLinks: DeepLinkInbox? = null
 ) {
     // RM-0002: wait for the saved session before choosing the first screen.
     val startup by startupViewModel.state.collectAsStateWithLifecycle()
@@ -65,6 +77,22 @@ fun RentMateApp(
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+
+    // RM-0023: open the screen of a tapped notification. The tab is anchored on
+    // the Dashboard, so Back returns there. A tap waits on Login and household setup.
+    val pendingFlow = deepLinks?.pending ?: remember { MutableStateFlow<String?>(null) }
+    val pendingRoute by pendingFlow.collectAsStateWithLifecycle()
+    LaunchedEffect(pendingRoute, currentRoute) {
+        val pending = pendingRoute ?: return@LaunchedEffect
+        when (val step = PushDeepLink.nextStep(pending, currentRoute)) {
+            DeepLinkStep.Hold -> Unit
+            DeepLinkStep.AlreadyThere -> deepLinks?.consume(pending)
+            is DeepLinkStep.Open -> {
+                navController.navigateTopLevel(step.screen)
+                deepLinks?.consume(pending)
+            }
+        }
+    }
 
     // RM-0052: the one SnackbarHostState for the whole app.
     val snackbarHostState = remember { SnackbarHostState() }

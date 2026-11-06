@@ -9,6 +9,7 @@
     <string name="notif_maintenance">Opdaterings oor onderhoud</string>
 
     <string name="section_language">Taal</string>
+    <string name="language_translation_disclaimer">Afrikaans en isiXhosa is masjienvertaal, soortgelyk aan Google Translate, en kan foute bevat.</string>
 
     <string name="section_security">Sekuriteit en vertoning</string>
     <string name="biometric_title">Ontsluit met biometrie</string>
@@ -234,6 +235,7 @@
     </plurals>
     <string name="shopping_added_by">Bygevoeg deur %1$s</string>
     <string name="shopping_bought">Gekoop</string>
+    <string name="sync_pending">Wag om te sinkroniseer</string>
 
     <string name="household_setup_title">Stel jou huishouding op</string>
     <string name="household_setup_body">Skep \'n nuwe huishouding of sluit by jou huisgenote aan met hul uitnodigingskode.</string>

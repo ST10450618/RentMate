@@ -8,7 +8,8 @@ import com.rentmate.app.data.ShoppingItemRow
 
 // RM-0016: conversions between the Supabase row types the UI already uses and
 // the Room entities. Server rows always map to SYNCED entities. Money becomes
-// cents on the way in and Rand only on the way out to the UI.
+// cents on the way in and Rand only on the way out to the UI. RM-0017: any
+// entity that is not SYNCED maps to a row with pending = true.
 
 /** A server bill as a SYNCED [BillEntity] (shares are mapped by [toShareEntities]). */
 fun BillWithSharesRow.toEntity(): BillEntity = BillEntity(
@@ -56,6 +57,7 @@ fun BillWithShares.toRow(): BillWithSharesRow = BillWithSharesRow(
     updated_at = bill.server_updated_at,
     repeat = bill.repeat,
     repeat_stopped = bill.repeat_stopped,
+    pending = bill.syncState != SyncState.SYNCED || shares.any { it.syncState != SyncState.SYNCED },
     bill_shares = shares
         .filter { it.syncState != SyncState.PENDING_DELETE }
         .map { share ->
@@ -121,5 +123,6 @@ fun ShoppingItemEntity.toRow(): ShoppingItemRow = ShoppingItemRow(
     purchased_by_user_id = purchased_by_name?.let { ProfileNameRow(it) },
     purchased_at = purchased_at,
     converted_to_bill_id = converted_to_bill_id,
-    created_at = created_at
+    created_at = created_at,
+    pending = syncState != SyncState.SYNCED
 )
