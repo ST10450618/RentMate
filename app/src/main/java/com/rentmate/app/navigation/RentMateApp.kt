@@ -133,7 +133,8 @@ fun RentMateApp(
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
                     onOpenBills = { navController.navigateTopLevel(Screen.Bills) },
-                    onOpenChores = { navController.navigateTopLevel(Screen.Chores) }
+                    onOpenChores = { navController.navigateTopLevel(Screen.Chores) },
+                    onOpenActivity = { navController.navigate(Screen.Activity.route) }
                 )
             }
             composable(Screen.Bills.route) {

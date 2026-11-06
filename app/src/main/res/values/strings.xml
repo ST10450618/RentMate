@@ -274,4 +274,26 @@
     <string name="chores_done">Done</string>
     <string name="nav_back">Back</string>
     <string name="shopping_mark_bought">Mark %1$s as bought</string>
+    <string name="home_title">Home</string>
+    <string name="home_you_owe_label">You owe</string>
+    <string name="home_owed_label">You\'re owed</string>
+    <string name="home_to">to %1$s</string>
+    <string name="home_to_by">to %1$s, by %2$s</string>
+    <string name="home_from">from %1$s</string>
+    <string name="home_pay">Pay %1$s</string>
+    <string name="home_open_money">Open Money</string>
+    <string name="home_settled_body">Nobody owes anything right now.</string>
+    <string name="home_this_week">This week</string>
+    <string name="home_your_turn">Your turn: %1$s</string>
+    <string name="home_recent">Recent activity</string>
+    <string name="home_recent_empty">Nothing has happened in your household yet.</string>
+    <string name="home_see_all">See all activity</string>
+    <plurals name="home_also_owe">
+        <item quantity="one">You also owe %d other housemate</item>
+        <item quantity="other">You also owe %d other housemates</item>
+    </plurals>
+    <plurals name="home_also_owed">
+        <item quantity="one">%d other housemate also owes you</item>
+        <item quantity="other">%d other housemates also owe you</item>
+    </plurals>
 </resources>

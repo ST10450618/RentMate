@@ -145,8 +145,9 @@ private fun relativeTimeLabel(time: RelativeTime): String = when (time) {
     is RelativeTime.Days -> pluralStringResource(R.plurals.activity_days_ago, time.count, time.count)
 }
 
+/** One event: who did what, and how long ago. Home reuses it for its recent activity (RM-0056). */
 @Composable
-private fun ActivityRow(event: ActivityEvent, now: Instant) {
+internal fun ActivityRow(event: ActivityEvent, now: Instant) {
     RentMateCard {
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
             MemberAvatar(event.actorName)

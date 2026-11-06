@@ -267,4 +267,26 @@
     <string name="chores_done">Klaar</string>
     <string name="nav_back">Terug</string>
     <string name="shopping_mark_bought">Merk %1$s as gekoop</string>
+    <string name="home_title">Tuis</string>
+    <string name="home_you_owe_label">Jy skuld</string>
+    <string name="home_owed_label">Jy word geskuld</string>
+    <string name="home_to">aan %1$s</string>
+    <string name="home_to_by">aan %1$s, teen %2$s</string>
+    <string name="home_from">van %1$s</string>
+    <string name="home_pay">Betaal %1$s</string>
+    <string name="home_open_money">Maak Geld oop</string>
+    <string name="home_settled_body">Niemand skuld nou iets nie.</string>
+    <string name="home_this_week">Hierdie week</string>
+    <string name="home_your_turn">Jou beurt: %1$s</string>
+    <string name="home_recent">Onlangse aktiwiteit</string>
+    <string name="home_recent_empty">Niks het nog in jou huishouding gebeur nie.</string>
+    <string name="home_see_all">Sien alle aktiwiteit</string>
+    <plurals name="home_also_owe">
+        <item quantity="one">Jy skuld ook %d ander huismaat</item>
+        <item quantity="other">Jy skuld ook %d ander huismaats</item>
+    </plurals>
+    <plurals name="home_also_owed">
+        <item quantity="one">%d ander huismaat skuld jou ook</item>
+        <item quantity="other">%d ander huismaats skuld jou ook</item>
+    </plurals>
 </resources>

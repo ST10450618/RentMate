@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -36,28 +35,43 @@ import com.rentmate.app.ui.components.PillTone
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
-import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.Spacing
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.Role
+import com.rentmate.app.data.activity.ActivityEvent
+import com.rentmate.app.ui.theme.Sizes
+import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 private const val TAG = "DashboardScreen"
 
-// S3 - dashboard: household switcher, overdue-bill alert, next chore, balance summary (US-3).
+/**
+ * S3 - Home (US-3). RM-0056: the screen answers first. The top card says what
+ * you owe, to whom and by when, with one button. Your next chore and the
+ * household's recent activity sit below it.
+ *
+ * @param onOpenBills opens Money, where the user pays or confirms payments.
+ * @param onOpenActivity opens the full activity feed.
+ */
 @Composable
 fun DashboardScreen(
     onOpenBills: () -> Unit,
     onOpenChores: () -> Unit,
+    onOpenActivity: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        ScreenHeader(
-            title = stringResource(R.string.nav_dashboard),
-            subtitle = if (state.households.isNotEmpty()) pluralStringResource(R.plurals.households_count, state.households.size, state.households.size) else null
-        )
+        ScreenHeader(title = state.householdName ?: stringResource(R.string.home_title))
 
         val hasStarted = rememberHasStartedLoading(state.loading)
         LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
@@ -72,78 +86,152 @@ fun DashboardScreen(
                 title = stringResource(R.string.empty_dashboard_title),
                 body = stringResource(R.string.empty_dashboard_body)
             )
-            else -> {
-        Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            if (state.households.size > 1) {
-                HouseholdSwitcher(
-                    households = state.households,
-                    currentId = state.currentHouseholdId,
-                    onSelect = viewModel::switchHousehold
-                )
-            }
+            else -> HomeContent(state, genericError, viewModel::refresh, viewModel::switchHousehold, onOpenBills, onOpenChores, onOpenActivity)
+        }
+    }
+}
 
-            if (state.loading) RefreshingIndicator()
-            if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
+@Composable
+private fun HomeContent(
+    state: DashboardUiState,
+    genericError: String,
+    onRetry: () -> Unit,
+    onSwitchHousehold: (String) -> Unit,
+    onOpenBills: () -> Unit,
+    onOpenChores: () -> Unit,
+    onOpenActivity: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.screen),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+    ) {
+        if (state.households.size > 1) {
+            HouseholdSwitcher(households = state.households, currentId = state.currentHouseholdId, onSelect = onSwitchHousehold)
+        }
+        if (state.loading) RefreshingIndicator()
+        if (state.error != null) InlineError(message = genericError, onRetry = onRetry)
 
-            if (state.overdueBills.isNotEmpty()) {
-                RentMateCard(accent = MaterialTheme.colorScheme.secondary) {
-                    StatusPill(pluralStringResource(R.plurals.bills_overdue, state.overdueBills.size, state.overdueBills.size), PillTone.Attention)
-                    state.overdueBills.forEach { Text(it.title, style = MaterialTheme.typography.titleMedium) }
-                    PrimaryButton(stringResource(R.string.dashboard_view_bills), onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
-                }
-            }
+        HeadlineCard(state, onOpenBills)
 
-            RentMateCard {
-                SectionLabel(stringResource(R.string.dashboard_balance))
-                if (state.owedToYou > 0) {
-                    Text(
-                        stringResource(R.string.dashboard_owed_to_you, formatRand(state.owedToYou)),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                if (state.youOwe > 0) {
-                    Text(
-                        stringResource(R.string.dashboard_you_owe, formatRand(state.youOwe)),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                if (state.owedToYou == 0.0 && state.youOwe == 0.0) {
-                    Text(stringResource(R.string.dashboard_settled), style = MaterialTheme.typography.titleMedium)
-                }
-                SecondaryButton(stringResource(R.string.settle_up), onClick = onOpenBills, modifier = Modifier.padding(top = Spacing.sm))
-            }
-
-            RentMateCard {
-                SectionLabel(stringResource(R.string.dashboard_next_chore))
-                val chore = state.nextChore
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            SectionLabel(stringResource(R.string.home_this_week))
+            val chore = state.nextChore
+            RentMateCard(modifier = Modifier.clickable(role = Role.Button, onClick = onOpenChores)) {
                 Text(
-                    chore?.title ?: stringResource(R.string.dashboard_no_chore),
-                    style = MaterialTheme.typography.titleMedium
+                    if (chore != null) stringResource(R.string.home_your_turn, chore.title)
+                    else stringResource(R.string.dashboard_no_chore),
+                    style = MaterialTheme.typography.bodyLarge
                 )
-                SecondaryButton(stringResource(R.string.dashboard_view_chores), onClick = onOpenChores, modifier = Modifier.padding(top = Spacing.sm))
-            }
-
-            if (state.members.isNotEmpty()) {
-                RentMateCard {
-                    SectionLabel(stringResource(R.string.dashboard_household), color = MaterialTheme.colorScheme.primary)
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        state.members.forEach { name -> MemberAvatar(name) }
-                        Text(state.members.joinToString(", "), modifier = Modifier.padding(start = Spacing.sm))
-                    }
-                }
+                Text(
+                    stringResource(R.string.dashboard_view_chores),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
+
+        RecentActivity(state.recentActivity, state.activityIsSample, onOpenActivity)
+    }
+}
+
+/**
+ * The answer card: the amount, the person and the date, then the screen's one
+ * filled button. Overdue bills add an amber pill here, not a second card.
+ */
+@Composable
+private fun HeadlineCard(state: DashboardUiState, onOpenBills: () -> Unit) {
+    val housemate = stringResource(R.string.housemate_fallback)
+    val headline = state.headline
+    val accent = if (state.overdueBills.isNotEmpty()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
+    RentMateCard(accent = accent) {
+        if (state.overdueBills.isNotEmpty()) {
+            StatusPill(pluralStringResource(R.plurals.bills_overdue, state.overdueBills.size, state.overdueBills.size), PillTone.Attention)
+        }
+        when (headline) {
+            is HomeHeadline.YouOwe -> {
+                val name = state.memberNames[headline.toUserId] ?: housemate
+                SectionLabel(stringResource(R.string.home_you_owe_label))
+                Text(formatRand(headline.cents / 100.0), style = MaterialTheme.typography.displaySmall)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    MemberAvatar(name, userId = headline.toUserId)
+                    Text(
+                        headline.dueDate?.let { stringResource(R.string.home_to_by, name, formatDueDate(it)) }
+                            ?: stringResource(R.string.home_to, name),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (headline.otherCreditors > 0) {
+                    Text(
+                        pluralStringResource(R.plurals.home_also_owe, headline.otherCreditors, headline.otherCreditors),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                PrimaryButton(stringResource(R.string.home_pay, name), onClick = onOpenBills, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+            }
+            is HomeHeadline.OwedToYou -> {
+                val name = state.memberNames[headline.fromUserId] ?: housemate
+                SectionLabel(stringResource(R.string.home_owed_label))
+                Text(formatRand(headline.cents / 100.0), style = MaterialTheme.typography.displaySmall)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    MemberAvatar(name, userId = headline.fromUserId)
+                    Text(stringResource(R.string.home_from, name), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                }
+                if (headline.otherDebtors > 0) {
+                    Text(
+                        pluralStringResource(R.plurals.home_also_owed, headline.otherDebtors, headline.otherDebtors),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                PrimaryButton(stringResource(R.string.home_open_money), onClick = onOpenBills, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+            }
+            HomeHeadline.Settled -> {
+                Text(stringResource(R.string.dashboard_settled), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.home_settled_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                PrimaryButton(stringResource(R.string.home_open_money), onClick = onOpenBills, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
             }
         }
     }
 }
 
+/** The newest few events, then a text link to the full feed. */
+@Composable
+private fun RecentActivity(events: List<ActivityEvent>, isSample: Boolean, onOpenActivity: () -> Unit) {
+    val now = remember(events) { Instant.now() }
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            SectionLabel(stringResource(R.string.home_recent), modifier = Modifier.weight(1f))
+            if (isSample) StatusPill(stringResource(R.string.activity_sample_pill), PillTone.Attention)
+        }
+        if (events.isEmpty()) {
+            Text(
+                stringResource(R.string.home_recent_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            events.forEach { ActivityRow(it, now) }
+        }
+        TextButton(onClick = onOpenActivity, modifier = Modifier.heightIn(min = Sizes.minTouch)) {
+            Text(stringResource(R.string.home_see_all), style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
 
+/** Formats a yyyy-MM-dd due date as "30 Nov" in the app language. Falls back to the raw text. */
+@Composable
+private fun formatDueDate(isoDate: String): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(isoDate, locale) {
+        runCatching { LocalDate.parse(isoDate).format(DateTimeFormatter.ofPattern("d MMM", locale)) }.getOrDefault(isoDate)
+    }
+}
 
 @Composable
 private fun HouseholdSwitcher(
