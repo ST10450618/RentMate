@@ -11,6 +11,9 @@ import java.util.UUID
  * the housemates' relationship with each other.
  *
  * Fields mirror the MaintenanceRequest entity in Section 7 of the design document.
+ *
+ * [MaintenanceCategory] is the kind of fault, shown in the email so the landlord
+ * knows which trade to call.
  */
 enum class MaintenanceCategory(@StringRes val labelRes: Int) {
     PLUMBING(R.string.category_plumbing),
@@ -20,6 +23,7 @@ enum class MaintenanceCategory(@StringRes val labelRes: Int) {
     OTHER(R.string.category_other)
 }
 
+/** How soon the fault needs attention, as the tenant judges it. */
 enum class Urgency(@StringRes val labelRes: Int) {
     LOW(R.string.urgency_low),
     MEDIUM(R.string.urgency_medium),
@@ -37,6 +41,7 @@ enum class RequestStatus(@StringRes val labelRes: Int) {
     ACKNOWLEDGED(R.string.status_acknowledged),
     RESOLVED(R.string.status_resolved);
 
+    /** The only status this one may move to, or null once resolved. */
     fun next(): RequestStatus? = when (this) {
         OPEN -> SENT
         SENT -> ACKNOWLEDGED
@@ -44,9 +49,11 @@ enum class RequestStatus(@StringRes val labelRes: Int) {
         RESOLVED -> null
     }
 
+    /** False only for [RESOLVED]. */
     val canAdvance: Boolean get() = next() != null
 }
 
+/** A maintenance fault as the app works with it; times are epoch millis. */
 data class MaintenanceRequest(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
@@ -93,6 +100,7 @@ data class MaintenanceRequest(
         }
 }
 
+/** Why a request title was refused by [validateTitle]. */
 enum class TitleError { BLANK, TOO_LONG }
 
 /**
