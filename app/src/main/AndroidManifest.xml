@@ -59,6 +59,19 @@
                 android:name="autoStoreLocales"
                 android:value="true" />
         </service>
+        <!-- RM-0018: WorkManager starts on demand with the Hilt worker factory
+             (RentMateApplication is a Configuration.Provider), so its default
+             startup initializer is removed. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
         <!-- RM-0028: shares a cache file with the camera app for "Take photo". -->
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -19,6 +19,7 @@ import com.rentmate.app.navigation.RentMateApp
 import com.rentmate.app.ui.theme.RentMateTheme
 import com.rentmate.app.data.activity.FirebaseSession
 import com.rentmate.app.notifications.PushTokenSync
+import com.rentmate.app.data.sync.SyncStartup
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var firebaseSession: FirebaseSession
     @Inject lateinit var pushTokenSync: PushTokenSync
+    @Inject lateinit var syncStartup: SyncStartup
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -61,6 +63,8 @@ class MainActivity : AppCompatActivity() {
         firebaseSession.start()
         // RM-0021: save the FCM token whenever a user is signed in.
         pushTokenSync.start()
+        // RM-0018: upload changes still queued from an earlier offline session.
+        syncStartup.start()
         enableEdgeToEdge()
         maybeAskForNotificationPermission()
         // RM-0026: re-apply the saved language if it is not the one in use. Only
