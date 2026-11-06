@@ -5,8 +5,8 @@ import com.rentmate.app.R
 
 /*
  * RM-0056 part 5: the Add screens show the shared LoadingState, EmptyState and
- * ErrorState from StateViews.kt while the data a form needs is not there yet.
- * The rules live here as pure functions so unit tests cover them.
+ * ErrorState from StateViews.kt until the form has the data it needs. The
+ * rules are pure functions, so unit tests can cover them without a device.
  */
 
 /** Whether the saved household id is known yet. */

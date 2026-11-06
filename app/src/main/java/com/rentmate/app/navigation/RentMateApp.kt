@@ -56,6 +56,7 @@ import com.rentmate.app.ui.components.TabItem
 import com.rentmate.app.ui.components.RentMateTabBar
 import com.rentmate.app.ui.screens.SettingsScreen
 import com.rentmate.app.ui.screens.ShoppingListScreen
+import com.rentmate.app.ui.sync.SyncBannerHost
 
 /**
  * The navigation host and app scaffold.
@@ -128,10 +129,13 @@ fun RentMateApp(
             { SettingsAvatarButton(onClick = { navController.navigate(Screen.Settings.route) { launchSingleTop = true } }) }
         } else null
         CompositionLocalProvider(LocalHeaderAction provides headerAction) {
+        Column(Modifier.padding(innerPadding)) {
+        // RM-0019: one offline/sync banner above every signed-in screen.
+        if (currentRoute != null && currentRoute != Screen.Login.route) SyncBannerHost()
         NavHost(
             navController = navController,
             startDestination = start.toScreen().route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.weight(1f)
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
@@ -177,6 +181,7 @@ fun RentMateApp(
                     onSignedOut = { navController.onSignedOut() }
                 )
             }
+        }
         }
         }
     }

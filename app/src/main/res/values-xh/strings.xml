@@ -186,6 +186,9 @@
     <string name="settle_up">Lungelelanisa amatyala</string>
     <string name="settle_up_none">Akukho matyala ekhaya.</string>
     <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Umboniso: usekelwe kwidatha ekule fowuni. Ungatshintsha emva kokuvumelanisa.</string>
+    <string name="settle_up_preview_pill">Umboniso</string>
+    <string name="settle_up_confirm_needs_sync">Ungaqinisekisa xa le fowuni ibuyele kwi-intanethi kwaye ivumelanisiwe.</string>
     <plurals name="bills_count">
         <item quantity="one">%d ibhili</item>
         <item quantity="other">%d iibhili</item>

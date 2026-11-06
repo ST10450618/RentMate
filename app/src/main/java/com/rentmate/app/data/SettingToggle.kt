@@ -7,7 +7,9 @@ import com.rentmate.app.R
 
 /** Sections of the Settings screen, in display order. */
 enum class SettingGroup(@StringRes val titleRes: Int) {
+    /** Per-category push notification switches. */
     NOTIFICATIONS(R.string.section_notifications),
+    /** Biometric lock and display options. */
     SECURITY_DISPLAY(R.string.section_security)
 }
 
@@ -56,6 +58,7 @@ enum class SettingToggle(
     );
 
     companion object {
+        /** The toggles shown under [group], in declaration order. */
         fun inGroup(group: SettingGroup): List<SettingToggle> = entries.filter { it.group == group }
     }
 }

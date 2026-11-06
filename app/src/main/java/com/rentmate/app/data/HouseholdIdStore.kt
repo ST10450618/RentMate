@@ -27,14 +27,21 @@ interface HouseholdIdStore {
     suspend fun write(id: String?)
 }
 
-/** [HouseholdIdStore] backed by DataStore Preferences. */
+/**
+ * [HouseholdIdStore] backed by DataStore Preferences.
+ *
+ * Based on: Android Developers, DataStore,
+ * https://developer.android.com/topic/libraries/architecture/datastore (accessed 2026-11-06)
+ */
 @Singleton
 class DataStoreHouseholdIdStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) : HouseholdIdStore {
 
+    /** Reads the first value of the DataStore, which waits for the file to load. */
     override suspend fun read(): String? = context.householdDataStore.data.first()[HOUSEHOLD_ID_KEY]
 
+    /** Saves or removes the id in one DataStore transaction. */
     override suspend fun write(id: String?) {
         context.householdDataStore.edit { prefs ->
             if (id == null) prefs.remove(HOUSEHOLD_ID_KEY) else prefs[HOUSEHOLD_ID_KEY] = id

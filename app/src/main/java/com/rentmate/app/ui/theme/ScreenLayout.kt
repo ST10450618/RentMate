@@ -19,7 +19,7 @@ private const val TAG = "ScreenLayout"
  */
 data class ScreenLayout(val gutter: Dp, val listColumns: Int)
 
-/** Width from which the app uses the tablet layout. Material 3 calls 600 dp and up "medium". */
+/** The tablet layout starts at this width. Material 3 calls 600 dp and wider the "medium" window class. */
 const val TABLET_MIN_WIDTH_DP = 600
 
 /** Phone layout: 16 dp gutter, one column. */

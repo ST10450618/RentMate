@@ -16,7 +16,12 @@ data class BillWithShares(
     val shares: List<BillShareEntity>
 )
 
-/** Access to cached bills and their shares. Reads hide PENDING_DELETE rows. */
+/**
+ * Access to cached bills and their shares. Reads hide PENDING_DELETE rows.
+ *
+ * Based on: Android Developers, Accessing data using Room DAOs,
+ * https://developer.android.com/training/data-storage/room/accessing-data (accessed 2026-11-06)
+ */
 @Dao
 abstract class BillDao {
 
@@ -256,6 +261,10 @@ interface SyncRejectionDao {
     /** Removes one rejection, e.g. after the user saw it. */
     @Query("DELETE FROM sync_rejections WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    /** RM-0019: removes the rejections the user has seen, so each one is shown once. */
+    @Query("DELETE FROM sync_rejections WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
 
     /** Removes every rejection. */
     @Query("DELETE FROM sync_rejections")

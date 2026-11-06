@@ -15,6 +15,9 @@ private const val TAG = "SyncWorker"
  * RM-0018: uploads the offline outbox. Scheduled by [WorkManagerSyncScheduler]
  * with a network constraint. All the logic is in [OutboxReplayer]; this class
  * only maps its result to a WorkManager result.
+ *
+ * Based on: Android Developers, Threading in CoroutineWorker,
+ * https://developer.android.com/develop/background-work/background-tasks/persistent/threading/coroutineworker (accessed 2026-11-06)
  */
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
@@ -28,8 +31,8 @@ class SyncWorker @AssistedInject constructor(
         Log.d(TAG, "sync run $runAttemptCount")
         return try {
             when (replayer.run()) {
-                ReplayResult.DONE -> Result.success()
-                ReplayResult.RETRY -> Result.retry()
+                ReplayResult.DONE -> Result.success().also { Log.i(TAG, "sync run $runAttemptCount: success") }
+                ReplayResult.RETRY -> Result.retry().also { Log.i(TAG, "sync run $runAttemptCount: retry later") }
             }
         } catch (e: CancellationException) {
             throw e

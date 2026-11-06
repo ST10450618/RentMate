@@ -113,6 +113,21 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
 [ ] RM-0018: after the RM-0017 check, turn airplane mode off. Within a
     minute the "Waiting to sync" badges go away, and a second phone in the
     same household sees the item, the purchase and the bill (only once).
+[ ] RM-0031: with two housemates who owe each other, turn on airplane
+    mode, add a bill and tap Settle up. The dialog says it is a preview,
+    each row has a "Preview" pill, the amounts include the new bill, and
+    "Confirm received" is greyed out. Turn airplane mode off and keep the
+    dialog open: within about 20 seconds of the sync the label and pills
+    go, the amounts match a second phone, and Confirm received works.
+[ ] RM-0019: turn on airplane mode. Within a few seconds an amber banner
+    at the top says you are offline. Add a shopping item and a bill: it
+    adds "2 changes are waiting". The banner shows once on every screen
+    and never on Login. Turn airplane mode off: it shows "Syncing 2
+    changes", then "All changes synced", and hides after about 3 seconds.
+[ ] RM-0019: queue an offline purchase of an item that a housemate deletes
+    before you reconnect. After sync a grey notice says the change was not
+    saved because the item no longer exists. Tap Dismiss and restart the
+    app: the notice does not come back.
 [ ] RM-0023: with the app in the background, add a bill on phone A. Tap
     the push on the tablet: Bills opens. Press Back: the Dashboard shows,
     not Login.

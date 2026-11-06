@@ -24,9 +24,13 @@ data class PushMessage(
     fun isAllowedBy(settings: UserSettings): Boolean = settings.isOn(channel.toggle)
 
     companion object {
+        /** Data key naming the [RentMateChannel] id. */
         const val KEY_CHANNEL = "channel"
+        /** Data key for the notification title. */
         const val KEY_TITLE = "title"
+        /** Data key for the notification body. */
         const val KEY_BODY = "body"
+        /** Data key for the id of the item the push is about. */
         const val KEY_ID = "id"
 
         /** The plan calls the deep-link key "screen". Each channel id is also its screen route. */
