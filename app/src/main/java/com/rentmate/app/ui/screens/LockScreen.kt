@@ -6,26 +6,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.rentmate.app.ui.components.BrandMark
+import com.rentmate.app.ui.components.OnBrandButton
 import com.rentmate.app.ui.theme.Aloe
 import com.rentmate.app.ui.theme.AloeDark
 import com.rentmate.app.ui.theme.AloeLight
 import com.rentmate.app.ui.theme.Amber
-import com.rentmate.app.ui.theme.Ink
 import com.rentmate.app.ui.theme.Spacing
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,7 +50,7 @@ fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = 
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(Spacing.xxl),
+            modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.screen, vertical = Spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -78,16 +74,11 @@ fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = 
                 )
             }
             Spacer(Modifier.height(Spacing.xl))
-            Button(
+            OnBrandButton(
+                text = stringResource(R.string.lock_unlock),
                 onClick = onRetry,
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Ink),
-                modifier = Modifier.heightIn(min = 52.dp)
-            ) {
-                Icon(Icons.Outlined.Fingerprint, contentDescription = null, tint = Aloe)
-                Spacer(Modifier.size(Spacing.sm))
-                Text(stringResource(R.string.lock_unlock), style = MaterialTheme.typography.titleSmall)
-            }
+                leadingIcon = { Icon(Icons.Outlined.Fingerprint, contentDescription = null, tint = Aloe) }
+            )
         }
     }
 }

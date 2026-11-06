@@ -9,6 +9,7 @@
     <string name="notif_maintenance">Opdaterings oor onderhoud</string>
 
     <string name="section_language">Taal</string>
+    <string name="language_translation_disclaimer">Afrikaans en isiXhosa is masjienvertaal, soortgelyk aan Google Translate, en kan foute bevat.</string>
 
     <string name="section_security">Sekuriteit en vertoning</string>
     <string name="biometric_title">Ontsluit met biometrie</string>

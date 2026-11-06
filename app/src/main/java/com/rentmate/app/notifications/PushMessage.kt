@@ -1,5 +1,7 @@
 package com.rentmate.app.notifications
 
+import com.rentmate.app.data.UserSettings
+
 /**
  * One push message from the RM-0022 Edge Function, read from the FCM data map.
  *
@@ -15,6 +17,12 @@ data class PushMessage(
     /** Id of the bill, chore or request, for the RM-0023 deep link. Null when absent. */
     val refId: String?
 ) {
+    /**
+     * True when [settings] let this message show. Each channel follows its own
+     * Settings toggle, so turning Bills off drops bill pushes and nothing else (RM-0023).
+     */
+    fun isAllowedBy(settings: UserSettings): Boolean = settings.isOn(channel.toggle)
+
     companion object {
         const val KEY_CHANNEL = "channel"
         const val KEY_TITLE = "title"
