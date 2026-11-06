@@ -30,7 +30,7 @@ private const val TAG = "UndoQueue"
  *   RM-0018), until the window closes. An undone action never writes an
  *   outbox entry, so the sync worker never has to replay or cancel one.
  *
- * Put simply: the change waits 5 s on this phone before it is sent. Undo just
+ * In plain terms: the change waits 5 s on this phone before it is sent. Undo
  * throws the waiting change away.
  *
  * Commits run in this singleton's own scope, so leaving the screen inside the

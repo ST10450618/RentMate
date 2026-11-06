@@ -297,9 +297,9 @@ fun BrandMark(modifier: Modifier = Modifier, size: Dp = Sizes.brandMark) {
 }
 
 /**
- * Formats an amount as South African rand, e.g. `R 1 250,00`, so money looks the
- * same on every screen instead of each one using its own `"R%.2f"` template.
- * RM-0056: delegates to [RandFormat], the one shared en-ZA formatter.
+ * Formats an amount as South African rand, for example `R 1 250,00`.
+ * Every screen uses it, so money looks the same everywhere. RM-0056: it calls
+ * [RandFormat], the one shared en-ZA formatter.
  */
 fun formatRand(amount: Double): String = RandFormat.format(amount)
 
