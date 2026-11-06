@@ -19,7 +19,7 @@
 </p>
 
 > **Technical report: Final Portfolio of Evidence**
-> PROG7314 (Programming 3D), Emeris, 2026, Group 1: James, Seth, Michael and Ali.
+> PROG7314 (Programming 3D), Emeris, 2026, Group 1: Michael Jani (ST10451592), Ruan Cupido (ST10450618), Seth Oliver (ST10434065, team lead) and Aliyu Yahaya Haliru (ST10440112).
 
 ---
 
@@ -130,15 +130,19 @@ Status key: ✅ done · 🔄 in progress · 📋 planned. This table is updated 
 
 ## 4. Screenshots
 
-<!-- Captured on the physical test device; see docs/store/listing.md for the shot list. -->
+Captured on the physical test device (Samsung Galaxy Tab SM-X230) running the signed release build, at phone proportions (1080 × 2160). The household is demo data.
 
-| Login | Dashboard | Bills |
+| Home | Money | Bill detail |
 |---|---|---|
-| _docs/store/screenshots/08-login.png_ | _01-dashboard.png_ | _02-bills.png_ |
+| <img src="docs/store/screenshots/01-home.png" width="240" alt="Home: what you owe, to whom, by when"> | <img src="docs/store/screenshots/02-money.png" width="240" alt="Money: bills and settle-up on one screen"> | <img src="docs/store/screenshots/03-bill-detail.png" width="240" alt="Bill detail with each housemate's share"> |
 
-| Chores | Maintenance | Settings |
+| Chores | Shopping | Repairs |
 |---|---|---|
-| _04-chores.png_ | _05-maintenance.png_ | _settings.png_ |
+| <img src="docs/store/screenshots/04-chores.png" width="240" alt="Chores: next chore and the rotation"> | <img src="docs/store/screenshots/05-shopping.png" width="240" alt="Shared shopping list"> | <img src="docs/store/screenshots/06-repairs.png" width="240" alt="Repairs with photos and status"> |
+
+| Offline | Login | Settings |
+|---|---|---|
+| <img src="docs/store/screenshots/07-offline.png" width="240" alt="Offline banner, cached data and the settle-up preview"> | <img src="docs/store/screenshots/08-login.png" width="240" alt="Branded Login with Google SSO"> | <img src="docs/store/screenshots/09-settings.png" width="240" alt="Grouped Settings"> |
 
 ## 5. Design considerations
 
@@ -466,10 +470,10 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 
 | Requirement | Location |
 |---|---|
-| Signed production build (APK and AAB) | `./gradlew assembleRelease bundleRelease` |
+| Signed production APK and AAB | Download from the [`final-poe` release](https://github.com/ST10450618/RentMate/releases/tag/final-poe). The release workflow builds and signs them on the tag. Locally: `./gradlew assembleRelease bundleRelease` |
 | 512 × 512 hi-res icon | `docs/store/icon-512.png` |
 | 1024 × 500 feature graphic | `docs/store/feature-graphic-1024x500.png` |
-| Phone and tablet screenshots | `docs/store/screenshots/` |
+| Phone screenshots (8 for upload, 1 extra) | [`docs/store/screenshots/`](docs/store/screenshots/), shown in section 4 |
 | Title, short and full description | `docs/store/listing.md` |
 | Content rating, data safety and app-access answers | `docs/store/listing.md` |
 | Privacy policy | [PRIVACY.md](PRIVACY.md) |
