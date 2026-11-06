@@ -18,6 +18,7 @@ import com.rentmate.app.data.reconcileLanguage
 import com.rentmate.app.navigation.RentMateApp
 import com.rentmate.app.ui.theme.RentMateTheme
 import com.rentmate.app.data.activity.FirebaseSession
+import com.rentmate.app.notifications.PushTokenSync
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -45,6 +46,7 @@ private const val KEY_ASKED_NOTIFICATIONS = "asked_notification_permission"
 class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var firebaseSession: FirebaseSession
+    @Inject lateinit var pushTokenSync: PushTokenSync
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -57,6 +59,8 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate")
         // RM-0032: follow the Supabase session so Firestore sees the same user.
         firebaseSession.start()
+        // RM-0021: save the FCM token whenever a user is signed in.
+        pushTokenSync.start()
         enableEdgeToEdge()
         maybeAskForNotificationPermission()
         // RM-0026: re-apply the saved language if it is not the one in use. Only

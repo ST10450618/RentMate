@@ -28,6 +28,27 @@
             </intent-filter>
         </activity>
 
+        <!-- RM-0021: receives FCM tokens and pushes. Not exported: only Google
+             Play services may start it, through the MESSAGING_EVENT intent. -->
+        <service
+            android:name=".notifications.RentMateMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- Used only when a push has a notification block and the app is in the
+             background, for example a test message from the Firebase console. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_rentmate" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/rentmate_aloe" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="maintenance" />
+
         <!-- RM-0026: on Android 8-12 AppCompat stores the in-app language choice
              and re-applies it at startup. Android 13+ stores it in the system. -->
         <service

@@ -12,6 +12,7 @@ import com.rentmate.app.data.SettingsRepository
 import com.rentmate.app.data.UserSettings
 import com.rentmate.app.data.applyLanguage
 import com.rentmate.app.data.local.LocalCache
+import com.rentmate.app.notifications.DeviceTokenRegistrar
 import com.rentmate.app.ui.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 private const val TAG = "SettingsViewModel"
@@ -42,7 +44,8 @@ class SettingsViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     private val localCache: LocalCache,
-    private val profileSettingsSync: ProfileSettingsSync
+    private val profileSettingsSync: ProfileSettingsSync,
+    private val deviceTokenRegistrar: DeviceTokenRegistrar
 ) : ViewModel() {
 
     private val repository = SettingsRepository(context)
@@ -81,6 +84,10 @@ class SettingsViewModel @Inject constructor(
 
     fun signOut(onSignedOut: () -> Unit) {
         viewModelScope.launch {
+            // RM-0021: stop this device getting the account's pushes. This must run
+            // while the session is still valid. Offline it gives up after 5 s and
+            // sign-out goes ahead.
+            withTimeoutOrNull(5_000) { deviceTokenRegistrar.unregisterCurrent() }
             runCatching { supabase.auth.signOut() }
                 .onFailure { Log.w(TAG, "sign-out failed: ${it.message}") }
             currentHousehold.clear()
