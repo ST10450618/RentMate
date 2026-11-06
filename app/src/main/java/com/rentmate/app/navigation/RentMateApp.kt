@@ -68,8 +68,8 @@ fun RentMateApp(
                         NavigationBarItem(
                             selected = currentRoute == item.screen.route,
                             onClick = { navController.navigateTopLevel(item.screen) },
-                            icon = { Icon(item.icon, contentDescription = item.screen.title) },
-                            label = { Text(item.screen.title) }
+                            icon = { Icon(item.icon, contentDescription = stringResource(item.screen.titleRes)) },
+                            label = { Text(stringResource(item.screen.titleRes)) }
                         )
                     }
                 }

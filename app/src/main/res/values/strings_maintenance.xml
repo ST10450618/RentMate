@@ -9,7 +9,10 @@
     <string name="maintenance_add_photo">Attach a photo</string>
     <string name="maintenance_retake_photo">Replace photo</string>
     <string name="maintenance_log_request">Log request</string>
-    <string name="maintenance_send_to_landlord">Send %1$d open request(s) to the landlord</string>
+    <plurals name="maintenance_send_to_landlord">
+        <item quantity="one">Send %d open request to the landlord</item>
+        <item quantity="other">Send %d open requests to the landlord</item>
+    </plurals>
     <string name="maintenance_logged">Logged requests</string>
     <string name="maintenance_empty">Nothing logged yet. Add a request above.</string>
     <string name="maintenance_mark_as">Mark as %1$s</string>
@@ -38,4 +41,21 @@
     <string name="maintenance_error_send">Couldn\'t send to the landlord. Check your connection and try again.</string>
     <string name="action_retry">Retry</string>
     <string name="action_dismiss">Dismiss</string>
+
+    <!-- RM-0009: itemised email to the landlord -->
+    <string name="landlord_email_subject">Maintenance request - %1$s</string>
+    <string name="landlord_email_greeting_named">Dear %1$s,</string>
+    <string name="landlord_email_greeting">Dear landlord,</string>
+    <string name="landlord_email_intro">The following faults need attention at %1$s:</string>
+    <string name="landlord_email_category">Category: %1$s</string>
+    <string name="landlord_email_urgency">Urgency: %1$s</string>
+    <string name="landlord_email_logged">Logged: %1$s</string>
+    <string name="landlord_email_sign_off">Kind regards,\nThe tenants at %1$s</string>
+    <string name="landlord_email_dialog_title">Landlord\'s email</string>
+    <string name="landlord_email_dialog_body">We\'ll save it for your whole household, so you only enter it once.</string>
+    <string name="landlord_email_field">Email address</string>
+    <string name="landlord_email_open">Write email</string>
+    <string name="error_email_invalid">Enter an email address, e.g. name@example.com</string>
+    <string name="maintenance_error_no_email_app">There\'s no email app on this phone. Install one, then try again.</string>
+    <string name="maintenance_status_locked">Only the housemate who logged or sent this request can update it.</string>
 </resources>

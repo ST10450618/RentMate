@@ -218,6 +218,6 @@ private fun GoogleBadge() {
             .background(AloeLight, CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Text("G", style = MaterialTheme.typography.labelLarge, color = AloeDark)
+        Text(stringResource(R.string.google_badge), style = MaterialTheme.typography.labelLarge, color = AloeDark)
     }
 }

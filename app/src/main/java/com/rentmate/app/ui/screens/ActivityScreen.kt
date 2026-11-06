@@ -167,7 +167,7 @@ private fun ActivityRow(event: ActivityEvent, now: Instant) {
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
             MemberAvatar(event.actorName)
             Column(modifier = Modifier.weight(1f)) {
-                Text("${event.actorName} ${event.summary}", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.activity_event, event.actorName, event.summary), style = MaterialTheme.typography.bodyLarge)
                 Text(
                     relativeTimeLabel(relativeTime(event.createdAt, now)),
                     style = MaterialTheme.typography.bodySmall,

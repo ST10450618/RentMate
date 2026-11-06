@@ -142,9 +142,9 @@ private fun EmptyStatePreview() {
     RentMateTheme {
         EmptyState(
             illustration = R.drawable.illus_empty_bills,
-            title = "No bills yet",
-            body = "Add the first bill and RentMate will split it for everyone.",
-            actionLabel = "Add a bill",
+            title = stringResource(R.string.empty_bills_title),
+            body = stringResource(R.string.empty_bills_body),
+            actionLabel = stringResource(R.string.empty_bills_action),
             onAction = {}
         )
     }
@@ -153,13 +153,13 @@ private fun EmptyStatePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun ErrorStatePreview() {
-    RentMateTheme { ErrorState(message = "Something went wrong. Check your connection and try again.", onRetry = {}) }
+    RentMateTheme { ErrorState(message = stringResource(R.string.state_error_generic), onRetry = {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun InlineErrorPreview() {
-    RentMateTheme { InlineError(message = "Something went wrong. Check your connection and try again.", onRetry = {}) }
+    RentMateTheme { InlineError(message = stringResource(R.string.state_error_generic), onRetry = {}) }
 }
 
 @Preview(showBackground = true)
