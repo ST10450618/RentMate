@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.HouseholdRow
 import com.rentmate.app.data.ProfileSettingsSync
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.SettingsRepository
@@ -23,6 +24,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,6 +35,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -77,6 +81,20 @@ internal suspend fun saveWithRollback(
         feedback.show(failedRes)
     }
 }
+
+/**
+ * RM-0060: who is signed in and which household they are in, for the profile
+ * row at the top of Settings.
+ *
+ * @param householdName and [inviteCode] are null until the household row loads,
+ *   or when the user has no household.
+ */
+data class SettingsProfile(
+    val userId: String?,
+    val name: String,
+    val householdName: String? = null,
+    val inviteCode: String? = null
+)
 
 /** RM-0056: what the Settings screen shows while the saved settings load. */
 sealed interface SettingsLoad {
@@ -125,8 +143,45 @@ class SettingsViewModel @Inject constructor(
     }.distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsLoad.Loading)
 
+    private val _profile = MutableStateFlow(SettingsProfile(userId = null, name = ""))
+
+    /**
+     * RM-0060: the profile row. The name comes from the session straight away;
+     * the household name and invite code follow when the household row loads.
+     */
+    val profile: StateFlow<SettingsProfile> = _profile.asStateFlow()
+
     init {
         pullFromProfile()
+        loadProfile()
+    }
+
+    /**
+     * RM-0060: reads the signed-in user's name and the current household's name
+     * and invite code. A failed read leaves the household line empty; the rest
+     * of Settings still works.
+     */
+    private fun loadProfile() {
+        val user = supabase.auth.currentUserOrNull()
+        val name = listOf("full_name", "name")
+            .firstNotNullOfOrNull { key -> runCatching { user?.userMetadata?.get(key)?.jsonPrimitive?.contentOrNull }.getOrNull() }
+            ?: user?.email
+            ?: ""
+        _profile.value = SettingsProfile(userId = user?.id, name = name)
+        launchSafely(TAG) {
+            val householdId = currentHousehold.id.first { it != null } ?: return@launchSafely
+            val row = supabase.from("households").select {
+                filter { eq("id", householdId) }
+            }.decodeSingle<HouseholdRow>()
+            Log.d(TAG, "profile loaded for household")
+            _profile.value = _profile.value.copy(householdName = row.name, inviteCode = row.invite_code)
+        }
+    }
+
+    /** RM-0060: the invite code was copied to the clipboard; confirm it with a snackbar. */
+    fun onInviteCodeCopied() {
+        Log.d(TAG, "invite code copied")
+        feedback.show(R.string.settings_code_copied)
     }
 
     /** RM-0005: pick up changes made on another device since sign-in. */

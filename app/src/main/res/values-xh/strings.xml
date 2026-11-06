@@ -313,6 +313,34 @@
     <string name="money_tap_received">Cofa xa uyifumene</string>
     <string name="undo_marked_received">U-%1$s uphawulwe njengofunyenweyo</string>
     <string name="save_bill">Gcina ibhili</string>
+    <!-- RM-0060: Settings redesign -->
+    <string name="settings_notifications">Izaziso</string>
+    <string name="settings_privacy">Ubumfihlo nolwimi</string>
+    <string name="settings_bills_title">Iibhili</string>
+    <string name="settings_chores_title">Imisebenzi</string>
+    <string name="settings_shopping_title">Ukuthenga</string>
+    <string name="settings_repairs_title">Ukulungisa</string>
+    <string name="settings_app_lock_title">Isitshixo se-app</string>
+    <string name="settings_bills_desc">Iibhili ezintsha neentlawulo</string>
+    <string name="settings_chores_desc">Usuku ekufika ngalo ithuba lakho</string>
+    <string name="settings_shopping_desc">Xa umntu esongeza kuluhlu lokuthenga</string>
+    <string name="settings_repairs_desc">Xa isiphoso sitshintsha imeko</string>
+    <string name="settings_app_lock_desc">Icela umnwe wakho, ubuso okanye i-PIN ukuvula iRentMate</string>
+    <string name="settings_leaderboard_desc">Kulo lonke ikhaya</string>
+    <string name="settings_language_current">Ivuliwe</string>
+    <string name="settings_copy_code">Kopa ikhowudi yesimemo</string>
+    <string name="settings_code_copied">Ikhowudi yesimemo ikopiwe</string>
+    <string name="settings_profile_line">%1$s · ikhowudi %2$s</string>
+    <!-- RM-0060: Activity redesign -->
+    <string name="activity_context_bills">Iibhili</string>
+    <string name="activity_context_chores">Imisebenzi</string>
+    <string name="activity_context_shopping">Ukuthenga</string>
+    <string name="activity_context_repairs">Ukulungisa</string>
+    <string name="activity_pill_paid">Ihlawulwe</string>
+    <string name="activity_pill_done">Kugqityiwe</string>
+    <string name="activity_pill_bought">Kuthengiwe</string>
+    <string name="activity_pill_updated">Kuhlaziyiwe</string>
+    <string name="activity_row_meta">%1$s · %2$s</string>
     <string name="house_undo_bought">%1$s ithengiwe</string>
     <string name="house_shopping_empty_body">Bhala oko kufunwa yindlu kwindawo engentla. Cofa into xa uyithenga, ize iye kwezithengiweyo.</string>
     <string name="house_shopping_all_bought">Yonke into ekuluhlu ithengiwe.</string>

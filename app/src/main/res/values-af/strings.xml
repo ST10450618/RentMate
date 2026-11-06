@@ -311,6 +311,34 @@
     <string name="money_tap_received">Tik sodra jy dit ontvang het</string>
     <string name="undo_marked_received">%1$s as ontvang gemerk</string>
     <string name="save_bill">Stoor rekening</string>
+    <!-- RM-0060: Settings redesign -->
+    <string name="settings_notifications">Kennisgewings</string>
+    <string name="settings_privacy">Privaatheid en taal</string>
+    <string name="settings_bills_title">Rekeninge</string>
+    <string name="settings_chores_title">Takies</string>
+    <string name="settings_shopping_title">Inkopies</string>
+    <string name="settings_repairs_title">Herstelwerk</string>
+    <string name="settings_app_lock_title">Toepassingslot</string>
+    <string name="settings_bills_desc">Nuwe rekeninge en betalings</string>
+    <string name="settings_chores_desc">Die dag wanneer dit jou beurt is</string>
+    <string name="settings_shopping_desc">Wanneer iemand iets by die inkopielys voeg</string>
+    <string name="settings_repairs_desc">Wanneer \'n fout se status verander</string>
+    <string name="settings_app_lock_desc">Vra jou vingerafdruk, gesig of PIN om RentMate oop te maak</string>
+    <string name="settings_leaderboard_desc">Vir die hele huishouding</string>
+    <string name="settings_language_current">Aan</string>
+    <string name="settings_copy_code">Kopieer uitnodigingskode</string>
+    <string name="settings_code_copied">Uitnodigingskode gekopieer</string>
+    <string name="settings_profile_line">%1$s · kode %2$s</string>
+    <!-- RM-0060: Activity redesign -->
+    <string name="activity_context_bills">Rekeninge</string>
+    <string name="activity_context_chores">Takies</string>
+    <string name="activity_context_shopping">Inkopies</string>
+    <string name="activity_context_repairs">Herstelwerk</string>
+    <string name="activity_pill_paid">Betaal</string>
+    <string name="activity_pill_done">Klaar</string>
+    <string name="activity_pill_bought">Gekoop</string>
+    <string name="activity_pill_updated">Opgedateer</string>
+    <string name="activity_row_meta">%1$s · %2$s</string>
     <string name="house_undo_bought">%1$s gekoop</string>
     <string name="house_shopping_empty_body">Tik in die veld hierbo wat die huis nodig het. Tik op \'n item wanneer jy dit koop, en dit skuif na Gekoop.</string>
     <string name="house_shopping_all_bought">Alles op die lys is gekoop.</string>
