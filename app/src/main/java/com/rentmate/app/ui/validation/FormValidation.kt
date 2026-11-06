@@ -39,8 +39,9 @@ object Limits {
     const val INVITE_CODE_LENGTH = 6
 
     /**
-     * Largest bill accepted: R999,999.99. Matches BillSplit's limit (99,999,999 cents)
-     * and the create_bill RPC, so a value the field accepts is never rejected later.
+     * Largest bill accepted: R999,999.99. BillSplit reads this value too, so a total the
+     * field accepts is never rejected when the bill is split. The bills.amount column
+     * (numeric(10,2)) allows more, so the server never rejects it either.
      */
     val AMOUNT_MAX: BigDecimal = BigDecimal("999999.99")
 

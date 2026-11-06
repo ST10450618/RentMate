@@ -45,6 +45,9 @@ data class BillsUiState(
 private data class SettleUpParams(val household_id_in: String)
 
 @Serializable
+private data class StopRepeatParams(val bill_id_in: String)
+
+@Serializable
 private data class MarkSharePaidParams(val share_id_in: String)
 
 @Serializable
@@ -108,6 +111,16 @@ class BillsViewModel @Inject constructor(
                 }
                 refresh()
             }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+        }
+    }
+
+    /** RM-0049: only the issuer can stop a bill repeating; the server checks it too. */
+    fun stopRepeat(billId: String) {
+        viewModelScope.launch {
+            runCatching {
+                supabase.postgrest.rpc("stop_bill_repeat", StopRepeatParams(billId).toRpcParams())
+            }.onSuccess { refresh() }
+                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.BillSplit
+import com.rentmate.app.data.RepeatMode
 import com.rentmate.app.data.SplitError
 import com.rentmate.app.data.SplitMode
 import com.rentmate.app.data.SplitResult
@@ -69,6 +70,7 @@ fun AddBillScreen(
     var amount by remember { mutableStateOf("") }
     var dueDate by remember { mutableStateOf<LocalDate?>(LocalDate.now().plusDays(7)) }
     var mode by remember { mutableStateOf(SplitMode.Equal) }
+    var repeat by remember { mutableStateOf(RepeatMode.Never) }
     var splitInputs by remember { mutableStateOf(emptyMap<String, String>()) }
     var submitted by remember { mutableStateOf(false) }
 
@@ -128,6 +130,17 @@ fun AddBillScreen(
                 label = { Text(stringResource(R.string.split_percentage)) })
             FilterChip(selected = mode == SplitMode.ExactAmount, onClick = { mode = SplitMode.ExactAmount },
                 label = { Text(stringResource(R.string.split_exact)) })
+        }
+
+        // Repeat (RM-0049)
+        SectionLabel(stringResource(R.string.repeat_label), modifier = Modifier.padding(top = Spacing.sm))
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            FilterChip(selected = repeat == RepeatMode.Never, onClick = { repeat = RepeatMode.Never },
+                label = { Text(stringResource(R.string.repeat_never)) })
+            FilterChip(selected = repeat == RepeatMode.Weekly, onClick = { repeat = RepeatMode.Weekly },
+                label = { Text(stringResource(R.string.repeat_weekly)) })
+            FilterChip(selected = repeat == RepeatMode.Monthly, onClick = { repeat = RepeatMode.Monthly },
+                label = { Text(stringResource(R.string.repeat_monthly)) })
         }
 
         when {
@@ -201,7 +214,7 @@ fun AddBillScreen(
                 submitted = true
                 val date = dueDate
                 if (formValid && parsedAmount != null && date != null && split is SplitResult.Valid) {
-                    viewModel.createBill(title.trim(), parsedAmount, date, mode, split.shares, photosViewModel.uploadedPaths)
+                    viewModel.createBill(title.trim(), parsedAmount, date, mode, split.shares, repeat, photosViewModel.uploadedPaths)
                 }
             },
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
