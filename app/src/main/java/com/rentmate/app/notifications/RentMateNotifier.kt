@@ -28,6 +28,11 @@ const val EXTRA_REF_ID = "com.rentmate.app.extra.REF_ID"
  * kept separate from Firebase so it can be tested and reused for local alerts.
  * It never throws: if the user has denied the POST_NOTIFICATIONS permission
  * (Android 13+) or switched notifications off, the message is logged and dropped.
+ *
+ * Based on: Android Developers, Create a notification,
+ * https://developer.android.com/develop/ui/compose/notifications/create-notification (accessed 2026-11-06)
+ * Based on: Android Developers, Notification runtime permission,
+ * https://developer.android.com/develop/ui/compose/notifications/notification-permission (accessed 2026-11-06)
  */
 object RentMateNotifier {
 

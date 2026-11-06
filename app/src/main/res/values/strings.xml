@@ -190,6 +190,9 @@
     <string name="settle_up">Settle up</string>
     <string name="settle_up_none">The household is already settled.</string>
     <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Preview: based on data on this phone. It may change after sync.</string>
+    <string name="settle_up_preview_pill">Preview</string>
+    <string name="settle_up_confirm_needs_sync">You can confirm once this phone is back online and synced.</string>
     <plurals name="bills_count">
         <item quantity="one">%d bill</item>
         <item quantity="other">%d bills</item>
@@ -315,4 +318,11 @@
     <string name="money_tap_received">Tap when you have received it</string>
     <string name="undo_marked_received">Marked %1$s as received</string>
     <string name="save_bill">Save bill</string>
+    <string name="money_empty_body">Add rent or electricity to start splitting.</string>
+    <string name="money_empty_action">Add bill</string>
+    <string name="money_added_by">Added by %1$s</string>
+    <string name="money_pay_then_confirm">Pay %1$s, then ask them to confirm</string>
+    <string name="money_detail_your_share">Your share</string>
+    <string name="money_detail_added_split">Added by %1$s · %2$s · %3$s total</string>
+    <string name="money_detail_shares">Shares</string>
 </resources>

@@ -27,8 +27,14 @@ object DebtSimplifier {
         return net
     }
 
+    /** Nets [obligations] per user, then returns the payments that settle every balance. */
     fun simplify(obligations: List<Obligation>): List<Transfer> = simplify(netBalances(obligations))
 
+    /**
+     * Matches debtors to creditors greedily, as described on [DebtSimplifier].
+     * The result has at most (users - 1) transfers. When the balances sum to zero, as
+     * [netBalances] guarantees, every balance ends at zero.
+     */
     fun simplify(balances: Map<String, Long>): List<Transfer> {
         val order = compareByDescending<Pair<String, Long>> { it.second }.thenBy { it.first }
         val creditors = balances.filter { it.value > 0 }.toList().sortedWith(order)

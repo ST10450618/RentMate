@@ -109,6 +109,7 @@ class BiometricLockViewModel @Inject constructor(
         _state.value = LockState.Locked(attempt = current.attempt + 1)
     }
 
+    /** Reads the biometric toggle. A read error counts as off, so the user is never locked out. */
     private suspend fun readToggle(): Boolean = try {
         settings.settings.first().isOn(SettingToggle.BIOMETRIC_UNLOCK)
     } catch (e: Exception) {

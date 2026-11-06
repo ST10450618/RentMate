@@ -18,18 +18,26 @@ private const val TAG = "RentMateApplication"
  * RM-0018: WorkManager is initialised on demand with [HiltWorkerFactory], so
  * the sync worker gets its dependencies from Hilt. The default initializer is
  * removed in the manifest.
+ *
+ * Based on: Android Developers, Custom WorkManager configuration and initialization,
+ * https://developer.android.com/develop/background-work/background-tasks/persistent/configuration/custom-configuration (accessed 2026-11-06)
+ * Based on: Android Developers, Use Hilt with other Jetpack libraries,
+ * https://developer.android.com/training/dependency-injection/hilt-jetpack (accessed 2026-11-06)
  */
 @HiltAndroidApp
 class RentMateApplication : Application(), Configuration.Provider {
 
+    /** Builds workers with Hilt-injected constructors. */
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
+    /** WorkManager reads this the first time the app uses it, because on-demand initialisation is on. */
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .setMinimumLoggingLevel(Log.INFO)
             .build()
 
+    /** Registers the notification channels once per process start. */
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate")

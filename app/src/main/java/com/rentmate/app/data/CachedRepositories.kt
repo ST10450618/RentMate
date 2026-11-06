@@ -61,6 +61,7 @@ private suspend fun sendOrQueue(what: String, send: suspend () -> String, queue:
         Log.d(TAG, "$what: no connection, queueing (${e.javaClass.simpleName})")
         return WriteResult.Queued(queue())
     }
+    Log.d(TAG, "$what: sent")
     return WriteResult.Sent(id)
 }
 
@@ -100,6 +101,9 @@ data class NewBill(
  * RM-0016: bills read from Room. [bills] always shows the cache for the current
  * household; [refresh] pulls from Supabase and writes through the DAO. A failed
  * refresh throws and leaves the cache (and so the screen) as it was.
+ *
+ * Based on: Android Developers, Build an offline-first app,
+ * https://developer.android.com/topic/architecture/data-layer/offline-first (accessed 2026-11-06)
  */
 interface BillsRepository {
     /** Cached bills (with shares) of the current household, newest due date first. */
@@ -172,19 +176,26 @@ class CachedBillsRepository @Inject constructor(
     private val currentHousehold: CurrentHousehold
 ) : BillsRepository {
 
+    /** Switches to the new household's cached bills whenever the selection changes. */
     override val bills: Flow<List<BillWithSharesRow>> = currentHousehold.id.flatMapLatest { householdId ->
         if (householdId == null) flowOf(emptyList())
         else dao.observeBills(householdId).map { list -> list.map { it.toRow() } }
     }
 
+    /** Switches to the new household's cached roster whenever the selection changes. */
     override val members: Flow<List<HouseholdMemberRow>> = currentHousehold.id.flatMapLatest { householdId ->
         if (householdId == null) flowOf(emptyList())
         else memberDao.observeMembers(householdId).map { list -> list.map { HouseholdMemberRow(it.user_id, it.display_name) } }
     }
 
+    /** Fetches bills, then members. Throws on a network or server error. */
     override suspend fun refresh() {
         currentHousehold.awaitRestored()
-        val householdId = currentHousehold.id.value ?: return
+        val householdId = currentHousehold.id.value ?: run {
+            Log.d(TAG, "bills refresh skipped: no household")
+            return
+        }
+        Log.d(TAG, "bills refresh: fetching")
         val rows = remote.fetchBills(householdId)
         // replaceForHousehold keeps PENDING_* bills and shares (offline edits).
         dao.replaceForHousehold(householdId, rows.map { it.toEntity() }, rows.flatMap { it.toShareEntities() })
@@ -192,6 +203,7 @@ class CachedBillsRepository @Inject constructor(
         refreshMembers()
     }
 
+    /** Replaces the cached roster of the current household. */
     override suspend fun refreshMembers() {
         currentHousehold.awaitRestored()
         val householdId = currentHousehold.id.value ?: return
@@ -200,6 +212,7 @@ class CachedBillsRepository @Inject constructor(
         Log.d(TAG, "members refreshed: ${rows.size}")
     }
 
+    /** Recomputes the split, then sends create_bill or queues it when offline. */
     override suspend fun createBill(bill: NewBill): WriteResult {
         // Same rules as create_bill (BillSplit mirrors it), so offline shares match what the server will store.
         val split = BillSplit.compute(
@@ -226,6 +239,7 @@ class CachedBillsRepository @Inject constructor(
         return result
     }
 
+    /** Writes the bill and shares as PENDING_CREATE with a local UUID, plus the create_bill outbox entry. */
     private suspend fun queueBill(bill: NewBill, params: CreateBillParams, shares: List<SplitShare>): String {
         val now = System.currentTimeMillis()
         val billId = UUID.randomUUID().toString()
@@ -281,14 +295,20 @@ class CachedChoresRepository @Inject constructor(
     private val currentHousehold: CurrentHousehold
 ) : ChoresRepository {
 
+    /** Switches to the new household's cached chores whenever the selection changes. */
     override val chores: Flow<List<ChoreRow>> = currentHousehold.id.flatMapLatest { householdId ->
         if (householdId == null) flowOf(emptyList())
         else dao.observeChores(householdId).map { list -> list.map { it.toRow() } }
     }
 
+    /** Fetches chores and replaces the SYNCED rows in the cache. */
     override suspend fun refresh() {
         currentHousehold.awaitRestored()
-        val householdId = currentHousehold.id.value ?: return
+        val householdId = currentHousehold.id.value ?: run {
+            Log.d(TAG, "chores refresh skipped: no household")
+            return
+        }
+        Log.d(TAG, "chores refresh: fetching")
         val rows = remote.fetchChores(householdId)
         dao.replaceForHousehold(householdId, rows.map { it.toEntity() })
         Log.d(TAG, "chores refreshed: ${rows.size}")
@@ -306,19 +326,26 @@ class CachedShoppingRepository @Inject constructor(
     private val currentHousehold: CurrentHousehold
 ) : ShoppingRepository {
 
+    /** Switches to the new household's cached items whenever the selection changes. */
     override val items: Flow<List<ShoppingItemRow>> = currentHousehold.id.flatMapLatest { householdId ->
         if (householdId == null) flowOf(emptyList())
         else dao.observeItems(householdId).map { list -> list.map { it.toRow() } }
     }
 
+    /** Fetches items and replaces the SYNCED rows in the cache. */
     override suspend fun refresh() {
         currentHousehold.awaitRestored()
-        val householdId = currentHousehold.id.value ?: return
+        val householdId = currentHousehold.id.value ?: run {
+            Log.d(TAG, "shopping refresh skipped: no household")
+            return
+        }
+        Log.d(TAG, "shopping refresh: fetching")
         val rows = remote.fetchItems(householdId)
         dao.replaceForHousehold(householdId, rows.map { it.toEntity() })
         Log.d(TAG, "shopping items refreshed: ${rows.size}")
     }
 
+    /** Gives the item a client UUID so a replayed insert cannot add it twice. */
     override suspend fun addItem(householdId: String, name: String, addedByUserId: String): WriteResult {
         val insert = ShoppingItemInsert(
             id = UUID.randomUUID().toString(),
@@ -335,6 +362,7 @@ class CachedShoppingRepository @Inject constructor(
         return result
     }
 
+    /** Writes the item as PENDING_CREATE plus its INSERT outbox entry. */
     private suspend fun queueInsert(insert: ShoppingItemInsert): String {
         val now = System.currentTimeMillis()
         val entity = ShoppingItemEntity(
@@ -358,6 +386,7 @@ class CachedShoppingRepository @Inject constructor(
         return insert.id
     }
 
+    /** Sends the purchase, or queues it behind an earlier pending change to the same item. */
     override suspend fun markPurchased(id: String, userId: String): WriteResult {
         val update = ShoppingItemPurchase(purchased_by_user_id = userId, purchased_at = Instant.now().toString())
         val local = dao.getById(id)
@@ -376,6 +405,7 @@ class CachedShoppingRepository @Inject constructor(
         return result
     }
 
+    /** Marks the cached item bought and enqueues the UPDATE entry, in one transaction. */
     private suspend fun queuePurchase(id: String, local: ShoppingItemEntity?, update: ShoppingItemPurchase): String {
         val now = System.currentTimeMillis()
         val entry = OutboxEntry(

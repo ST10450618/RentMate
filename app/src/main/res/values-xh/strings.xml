@@ -186,6 +186,9 @@
     <string name="settle_up">Lungelelanisa amatyala</string>
     <string name="settle_up_none">Akukho matyala ekhaya.</string>
     <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Umboniso: usekelwe kwidatha ekule fowuni. Ungatshintsha emva kokuvumelanisa.</string>
+    <string name="settle_up_preview_pill">Umboniso</string>
+    <string name="settle_up_confirm_needs_sync">Ungaqinisekisa xa le fowuni ibuyele kwi-intanethi kwaye ivumelanisiwe.</string>
     <plurals name="bills_count">
         <item quantity="one">%d ibhili</item>
         <item quantity="other">%d iibhili</item>
@@ -310,4 +313,11 @@
     <string name="money_tap_received">Cofa xa uyifumene</string>
     <string name="undo_marked_received">U-%1$s uphawulwe njengofunyenweyo</string>
     <string name="save_bill">Gcina ibhili</string>
+    <string name="money_empty_body">Yongeza irente okanye umbane ukuze uqalise ukwahlulahlula.</string>
+    <string name="money_empty_action">Yongeza ityala</string>
+    <string name="money_added_by">Yongezwe ngu-%1$s</string>
+    <string name="money_pay_then_confirm">Hlawula u-%1$s, emva koko umcele ukuba aqinisekise</string>
+    <string name="money_detail_your_share">Isabelo sakho</string>
+    <string name="money_detail_added_split">Yongezwe ngu-%1$s · %2$s · %3$s iyonke</string>
+    <string name="money_detail_shares">Izabelo</string>
 </resources>

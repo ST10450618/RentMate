@@ -11,10 +11,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class ActivityModule {
 
+    /** The feed screen reads events from Firestore. */
     @Binds
     @Singleton
     abstract fun bindActivityRepository(impl: FirestoreActivityRepository): ActivityRepository
 
+    /** Repositories write events to Firestore. */
     @Binds
     @Singleton
     abstract fun bindActivityLogger(impl: FirestoreActivityLogger): ActivityLogger

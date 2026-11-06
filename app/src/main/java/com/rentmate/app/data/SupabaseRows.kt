@@ -4,7 +4,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 // Row shapes match Postgres columns (snake_case) from supabase/migrations/0001_init.sql.
+// supabase-kt Postgrest decodes each class with kotlinx.serialization.
 
+/** One `households` row, including the landlord contact (RM-0009). */
 @Serializable
 data class HouseholdRow(
     val id: String,
@@ -15,12 +17,14 @@ data class HouseholdRow(
     val created_at: String
 )
 
+/** A household member with their profile name, from a join on `profiles`. */
 @Serializable
 data class HouseholdMemberRow(
     val user_id: String,
     val display_name: String? = null
 )
 
+/** One `profiles` row: the user's name and the settings that follow them between devices. */
 @Serializable
 data class ProfileRow(
     val id: String,
@@ -35,6 +39,7 @@ data class ProfileRow(
     val biometric_enabled: Boolean
 )
 
+/** One `bill_shares` row: what one member owes on one bill. */
 @Serializable
 data class BillShareRow(
     val id: String,
@@ -45,6 +50,7 @@ data class BillShareRow(
     val paid_at: String? = null
 )
 
+/** One `bills` row without its shares. */
 @Serializable
 data class BillRow(
     val id: String,
@@ -60,9 +66,11 @@ data class BillRow(
     val repeat_stopped: Boolean = false
 )
 
+/** The embedded `profiles(display_name)` part of a join. */
 @Serializable
 data class ProfileNameRow(val display_name: String)
 
+/** A bill share with the debtor's display name embedded. */
 @Serializable
 data class BillShareWithProfileRow(
     val id: String,
@@ -73,6 +81,7 @@ data class BillShareWithProfileRow(
     val profiles: ProfileNameRow? = null
 )
 
+/** A bill with its shares embedded. The Bills and Dashboard screens use this row type. */
 @Serializable
 data class BillWithSharesRow(
     val id: String,
@@ -91,6 +100,7 @@ data class BillWithSharesRow(
     @Transient val pending: Boolean = false
 )
 
+/** One `chores` row. [rotation_order] lists user ids in turn order. */
 @Serializable
 data class ChoreRow(
     val id: String,
@@ -103,9 +113,11 @@ data class ChoreRow(
     val created_at: String
 )
 
+/** One row of the chore forecast RPC: who does the chore in a future cycle. */
 @Serializable
 data class ChoreForecastRow(val cycle_number: Int, val assignee_user_id: String)
 
+/** One suggested payment returned by the `settle_up` RPC, in rand. */
 @Serializable
 data class SettleUpRow(
     val from_user_id: String,
@@ -115,6 +127,7 @@ data class SettleUpRow(
     val amount: Double
 )
 
+/** One member's chore points from the leaderboard RPC. */
 @Serializable
 data class LeaderboardRow(
     val user_id: String,
@@ -123,6 +136,7 @@ data class LeaderboardRow(
     val total_points: Long
 )
 
+/** One `shopping_items` row with the adder's and buyer's names embedded. */
 @Serializable
 data class ShoppingItemRow(
     val id: String,
@@ -138,6 +152,7 @@ data class ShoppingItemRow(
     @Transient val pending: Boolean = false
 )
 
+/** One `maintenance_requests` row. Times are ISO-8601 text. */
 @Serializable
 data class MaintenanceRequestRow(
     val id: String,
