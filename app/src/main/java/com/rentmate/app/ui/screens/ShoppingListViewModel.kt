@@ -75,7 +75,7 @@ class ShoppingListViewModel @Inject constructor(
                 .onSuccess { result ->
                     when (result) {
                         is WriteResult.Sent -> if (name != null) activity.shoppingBought(name, id)
-                        // TODO(RM-0018): post the shoppingBought activity event once the outbox replay succeeds.
+                        // RM-0018: SyncWorker posts shoppingBought once the queued purchase uploads.
                         is WriteResult.Queued -> Log.d(TAG, "purchase of $id queued offline")
                     }
                 }

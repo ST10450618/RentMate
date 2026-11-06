@@ -89,7 +89,8 @@ class AddBillViewModel @Inject constructor(
      * bill never reaches Supabase even if the UI is bypassed (RM-0036).
      *
      * RM-0017: with no connection the bill and its shares are saved locally as
-     * pending and queued for upload. Photos cannot be linked to a queued bill.
+     * pending and queued for upload. RM-0018: photos that already uploaded are
+     * kept with the queued bill and linked by the sync worker.
      */
     fun createBill(
         title: String,
@@ -124,7 +125,7 @@ class AddBillViewModel @Inject constructor(
                 return@launch
             }
             runCatching {
-                billsRepository.createBill(NewBill(householdId, title, amount, dueDate, mode, shares, repeat, userId))
+                billsRepository.createBill(NewBill(householdId, title, amount, dueDate, mode, shares, repeat, userId, photoPaths))
             }.onSuccess { result ->
                 when (result) {
                     is WriteResult.Sent -> {
@@ -135,7 +136,7 @@ class AddBillViewModel @Inject constructor(
                             .onFailure { linkFailed(it) { createBill(title, amount, dueDate, mode, shares, repeat, photoPaths) } }
                     }
                     is WriteResult.Queued -> {
-                        // TODO(RM-0018): post the billAdded activity event (and link photos) after replay.
+                        // RM-0018: SyncWorker posts billAdded and links these photos once the bill uploads.
                         Log.d(TAG, "bill queued offline: ${result.id}, photos=${photoPaths.size}")
                         _state.value = AddBillUiState.Saved
                     }
