@@ -132,7 +132,9 @@ private fun MoneyContent(
 ) {
     val shown = filterBills(state.bills, state.filter, state::isShownPaid)
     // RM-0056: one column on a phone; bills and settle-up side by side from 600 dp.
-    AdaptiveList(contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = Spacing.xxl + Spacing.xxl)) {
+    // The add button is 56 dp plus a 16 dp margin, so the list ends 96 dp above
+    // the bottom: the last settle-up row stays readable when scrolled to the end.
+    AdaptiveList(contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = Spacing.xxl * 3)) {
         fullWidthItem(key = "top") {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 if (state.loading) RefreshingIndicator()
