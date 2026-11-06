@@ -10,6 +10,22 @@ enum class SplitMode(val wire: String) {
     ExactAmount("ExactAmount")
 }
 
+/** How often a bill repeats. [wire] is the value stored in bills.repeat. */
+enum class RepeatMode(val wire: String) {
+    Never("Never"),
+    Weekly("Weekly"),
+    Monthly("Monthly");
+
+    companion object {
+        /** Unknown or missing values count as Never, so old rows still show. */
+        fun fromWire(value: String?): RepeatMode = entries.firstOrNull { it.wire == value } ?: Never
+    }
+}
+
+/** True while a bill still makes new copies of itself. */
+fun isRepeating(repeat: String?, stopped: Boolean): Boolean =
+    !stopped && RepeatMode.fromWire(repeat) != RepeatMode.Never
+
 /** One member's share in cents, plus the raw value the server's create_bill expects. */
 data class SplitShare(val userId: String, val cents: Long, val value: BigDecimal) {
     val amount: BigDecimal get() = BigDecimal.valueOf(cents, 2)

@@ -250,4 +250,11 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Sample</string>
     <string name="activity_sample_body">Example activity. Your household\'s real feed appears here once it\'s connected.</string>
+    <string name="repeat_label">Repeat</string>
+    <string name="repeat_never">Never</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
+    <string name="bills_repeats_weekly">Repeats weekly</string>
+    <string name="bills_repeats_monthly">Repeats monthly</string>
+    <string name="bills_stop_repeat">Stop repeating</string>
 </resources>

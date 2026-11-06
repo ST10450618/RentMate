@@ -244,4 +244,11 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Voorbeeld</string>
     <string name="activity_sample_body">Voorbeeld van aktiwiteit. Jou huishouding se regte aktiwiteit verskyn hier sodra dit gekoppel is.</string>
+    <string name="repeat_label">Herhaal</string>
+    <string name="repeat_never">Nooit</string>
+    <string name="repeat_weekly">Weekliks</string>
+    <string name="repeat_monthly">Maandeliks</string>
+    <string name="bills_repeats_weekly">Herhaal weekliks</string>
+    <string name="bills_repeats_monthly">Herhaal maandeliks</string>
+    <string name="bills_stop_repeat">Stop herhaling</string>
 </resources>

@@ -246,4 +246,11 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Umzekelo</string>
     <string name="activity_sample_body">Umzekelo wokwenzekileyo. Okwenzeka ngokwenene ekhaya lakho kuya kubonakala apha xa sele kudityanisiwe.</string>
+    <string name="repeat_label">Phinda</string>
+    <string name="repeat_never">Ngaphandle</string>
+    <string name="repeat_weekly">Evekini</string>
+    <string name="repeat_monthly">Inyanga nenyanga</string>
+    <string name="bills_repeats_weekly">Iyaphinda evekini</string>
+    <string name="bills_repeats_monthly">Iyaphinda inyanga nenyanga</string>
+    <string name="bills_stop_repeat">Yekela ukuphinda</string>
 </resources>
