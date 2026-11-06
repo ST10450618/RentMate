@@ -422,6 +422,28 @@ Every feature is also checked on a physical device against its ticket's "Done wh
 | Versioning | `versionCode 2`, `versionName 1.0.0` (`1` was the Part 2 prototype) |
 | Artefacts | `./gradlew assembleRelease` builds the signed APK; `./gradlew bundleRelease` builds the AAB for Google Play |
 
+#### Releasing from CI
+
+`.github/workflows/android-release.yml` runs when a tag matching `v*` or `final-poe` is pushed (or by hand from the Actions tab). It builds the signed APK and AAB, checks the APK signature with `apksigner`, and uploads the APK, the AAB and the R8 `mapping.txt` as artefacts named after the tag. It fails at once, with a clear message, if a signing secret is empty.
+
+Add these repository secrets under Settings, Secrets and variables, Actions:
+
+| Secret | Value |
+|---|---|
+| `RENTMATE_KEYSTORE_BASE64` | The upload keystore, base64 encoded |
+| `RENTMATE_KEYSTORE_PASSWORD` | Keystore password |
+| `RENTMATE_KEY_ALIAS` | Key alias |
+| `RENTMATE_KEY_PASSWORD` | Key password |
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` and `WEB_CLIENT_ID` are optional secrets. The workflow writes them to `local.properties` when set, so the release build can reach the backend.
+
+Encode the keystore on macOS with `base64 -i upload.jks | pbcopy`, then paste it into the secret. To cut a release:
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ### Version control workflow
 
 - `main` is the submitted state.
