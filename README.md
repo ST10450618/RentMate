@@ -470,7 +470,7 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 
 | Requirement | Location |
 |---|---|
-| Signed production APK and AAB | Download from the [`final-poe` release](https://github.com/ST10450618/RentMate/releases/tag/final-poe). The release workflow builds and signs them on the tag. Locally: `./gradlew assembleRelease bundleRelease` |
+| Signed production APK | [`release/RentMate-1.0.0.apk`](release/RentMate-1.0.0.apk): version 1.0.0 (versionCode 2), signed with the RentMate upload key and built with R8. Install on Android 8.0 or later. Pushing a tag also builds the APK and AAB in CI and publishes them as a GitHub Release. Locally: `./gradlew assembleRelease bundleRelease` |
 | 512 × 512 hi-res icon | `docs/store/icon-512.png` |
 | 1024 × 500 feature graphic | `docs/store/feature-graphic-1024x500.png` |
 | Phone screenshots (8 for upload, 1 extra) | [`docs/store/screenshots/`](docs/store/screenshots/), shown in section 4 |

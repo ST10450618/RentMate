@@ -14,6 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -105,7 +109,7 @@ fun BillDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     StatusPill(
-                        stringResource(R.string.bills_due, bill.due_date.take(10)),
+                        stringResource(R.string.bills_due, longDate(bill.due_date)),
                         if (myShareOpen) PillTone.Attention else PillTone.Neutral
                     )
                     if (bill.pending) StatusPill(stringResource(R.string.sync_pending), PillTone.Neutral)
@@ -174,4 +178,14 @@ private fun splitLabel(splitMethod: String): Int = when (splitMethod) {
     SplitMode.Percentage.wire -> R.string.money_split_percent
     SplitMode.ExactAmount.wire -> R.string.money_split_exact
     else -> R.string.money_split_equally
+}
+
+/** "1 Dec 2026" in the app language, or the raw date if it cannot be read. */
+@Composable
+private fun longDate(isoDate: String): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(isoDate, locale) {
+        runCatching { LocalDate.parse(isoDate.take(10)).format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)) }
+            .getOrDefault(isoDate.take(10))
+    }
 }
