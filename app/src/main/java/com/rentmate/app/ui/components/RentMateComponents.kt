@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import com.rentmate.app.R
 import com.rentmate.app.ui.theme.Aloe
+import com.rentmate.app.ui.theme.Ink
 import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.theme.Spacing
 import java.text.NumberFormat
@@ -124,6 +126,66 @@ fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modi
         contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
     ) {
         Text(text, style = MaterialTheme.typography.labelLarge)
+    }
+}
+
+/**
+ * White pill button for the main action on the aloe gradient (Login and Lock).
+ *
+ * [PrimaryButton] is filled with the brand colour, so it disappears on the
+ * gradient. This button uses a white container with ink text instead, and keeps
+ * the same pill shape and touch target.
+ *
+ * @param text label shown when the button is not loading.
+ * @param onClick called when the user taps the button.
+ * @param leadingIcon optional content drawn before [text], for example a
+ *   fingerprint icon or a sign-in badge. It is hidden while [loading].
+ * @param enabled false greys the container and ignores taps.
+ * @param loading true shows an aloe spinner in place of [leadingIcon] and
+ *   ignores taps.
+ * @param loadingText label shown next to the spinner while [loading]. When null,
+ *   the button shows only the spinner.
+ */
+@Composable
+fun OnBrandButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
+    loading: Boolean = false,
+    loadingText: String? = null
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled && !loading,
+        modifier = modifier.heightIn(min = Sizes.onBrandButton),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Ink,
+            disabledContainerColor = Color.White.copy(alpha = 0.7f),
+            disabledContentColor = Ink
+        ),
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.sm)
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(Sizes.spinner),
+                strokeWidth = Sizes.stroke,
+                color = Aloe
+            )
+            if (loadingText != null) {
+                Spacer(Modifier.size(Spacing.md))
+                Text(loadingText, style = MaterialTheme.typography.titleSmall)
+            }
+        } else {
+            if (leadingIcon != null) {
+                leadingIcon()
+                Spacer(Modifier.size(Spacing.md))
+            }
+            Text(text, style = MaterialTheme.typography.titleSmall)
+        }
     }
 }
 
