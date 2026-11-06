@@ -76,3 +76,23 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
     }
 }
+
+/**
+ * v3 -> v4 (RM-0018): the outbox keeps the Storage paths of photos picked for a
+ * queued bill, so the worker can link them once the bill exists on the server.
+ * A new table records changes the server refused, for RM-0019 to show. Columns
+ * and tables are only added, so every queued entry and cached row is kept.
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `outbox` ADD COLUMN `attachmentPaths` TEXT NOT NULL DEFAULT '[]'")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `sync_rejections` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`op` TEXT NOT NULL, `tableName` TEXT NOT NULL, `entityId` TEXT NOT NULL, `reason` TEXT NOT NULL, " +
+                "`message` TEXT, `dependant` INTEGER NOT NULL, `rejectedAt` INTEGER NOT NULL)"
+        )
+    }
+}
+
+/** Every migration, oldest first. Pass these to every database builder. */
+val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)

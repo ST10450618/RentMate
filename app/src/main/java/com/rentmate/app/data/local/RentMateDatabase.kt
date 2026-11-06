@@ -12,6 +12,7 @@ import androidx.room.TypeConverters
  * real Migration rather than silently wipe them. v2 (RM-0016) stores money as
  * integer cents and adds the bill repeat columns; see [MIGRATION_1_2]. v3
  * (RM-0017) adds outbox replay fields and the member roster; see [MIGRATION_2_3].
+ * v4 (RM-0018) adds outbox photo paths and the rejection log; see [MIGRATION_3_4].
  */
 @Database(
     entities = [
@@ -20,9 +21,10 @@ import androidx.room.TypeConverters
         ChoreEntity::class,
         ShoppingItemEntity::class,
         OutboxEntry::class,
-        HouseholdMemberEntity::class
+        HouseholdMemberEntity::class,
+        SyncRejectionEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -41,4 +43,7 @@ abstract class RentMateDatabase : RoomDatabase() {
 
     /** DAO for the cached household roster. */
     abstract fun memberDao(): MemberDao
+
+    /** DAO for changes the server refused (RM-0018). */
+    abstract fun syncRejectionDao(): SyncRejectionDao
 }

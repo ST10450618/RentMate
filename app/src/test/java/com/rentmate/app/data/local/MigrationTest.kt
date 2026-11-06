@@ -25,7 +25,8 @@ private const val TEST_DB = "migration-test.db"
 /**
  * RM-0016: the v1 -> v2 migration keeps every cached bill and share (including
  * offline edits) and turns Rand into exact cents. RM-0017: v2 -> v3 keeps queued
- * outbox entries and adds the replay fields and the member roster.
+ * outbox entries and adds the replay fields and the member roster. RM-0018:
+ * v3 -> v4 adds outbox photo paths and the rejection log.
  *
  * Room's MigrationTestHelper reads schemas from APK assets, which Robolectric
  * unit tests do not get from the test source set. So this test builds the v1
@@ -99,7 +100,7 @@ class MigrationTest {
         }
 
         val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
+            .addMigrations(*ALL_MIGRATIONS).allowMainThreadQueries().build()
         room = db
 
         val bills = runBlocking { db.billDao().observeBills("h1").first() }.associateBy { it.bill.id }
@@ -132,7 +133,7 @@ class MigrationTest {
             )
         }
         val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
+            .addMigrations(*ALL_MIGRATIONS).allowMainThreadQueries().build()
         room = db
 
         runBlocking {
@@ -157,7 +158,7 @@ class MigrationTest {
         }
 
         val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
+            .addMigrations(*ALL_MIGRATIONS).allowMainThreadQueries().build()
         room = db
 
         runBlocking {
@@ -176,6 +177,42 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate3To4_keepsOutboxEntriesAndAddsPhotoPathsAndRejections() {
+        createVersion(3) {
+            execSQL(
+                "INSERT INTO outbox (op, tableName, payloadJson, createdAt, entityId, attemptCount, lastError) VALUES " +
+                    "('RPC', 'create_bill', '{}', 7, 'b1', 2, 'HTTP 500')"
+            )
+            execSQL(
+                "INSERT INTO bills (id, household_id, title, amount_cents, due_date, split_method, issued_by_user_id, " +
+                    "created_at, server_updated_at, syncState, updatedAt, repeat, repeat_stopped) VALUES " +
+                    "('b1', 'h1', 'Rent', 1000, 'd', 'Equal', 'u1', 'c', '', 'PENDING_CREATE', 1, 'Never', 0)"
+            )
+        }
+
+        val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
+            .addMigrations(*ALL_MIGRATIONS).allowMainThreadQueries().build()
+        room = db
+
+        runBlocking {
+            val entry = db.outboxDao().getAllOldestFirst().single()
+            assertEquals("b1", entry.entityId)
+            assertEquals(2, entry.attemptCount)
+            assertEquals("HTTP 500", entry.lastError)
+            assertEquals(emptyList<String>(), entry.attachmentPaths)
+            assertEquals(SyncState.PENDING_CREATE, db.billDao().getBill("b1")?.syncState)
+
+            // The new column and table work.
+            db.outboxDao().enqueue(entry.copy(id = 0, attachmentPaths = listOf("h1/bill/p.jpg")))
+            assertEquals(listOf("h1/bill/p.jpg"), db.outboxDao().getAllOldestFirst().last().attachmentPaths)
+            db.syncRejectionDao().insert(
+                SyncRejectionEntity(op = "RPC", tableName = "create_bill", entityId = "b1", reason = "INVALID", rejectedAt = 1)
+            )
+            assertEquals("INVALID", db.syncRejectionDao().observeAll().first().single().reason)
+        }
+    }
+
+    @Test
     fun migrate1To3_runsBothSteps() {
         createVersion1 {
             execSQL(
@@ -185,7 +222,7 @@ class MigrationTest {
             )
         }
         val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
+            .addMigrations(*ALL_MIGRATIONS).allowMainThreadQueries().build()
         room = db
         assertEquals(1_050L, runBlocking { db.billDao().observeBills("h1").first() }.single().bill.amount_cents)
     }
