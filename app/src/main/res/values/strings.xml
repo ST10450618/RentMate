@@ -189,6 +189,9 @@
     <string name="settle_up">Settle up</string>
     <string name="settle_up_none">The household is already settled.</string>
     <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Preview: based on data on this phone. It may change after sync.</string>
+    <string name="settle_up_preview_pill">Preview</string>
+    <string name="settle_up_confirm_needs_sync">You can confirm once this phone is back online and synced.</string>
     <plurals name="bills_count">
         <item quantity="one">%d bill</item>
         <item quantity="other">%d bills</item>

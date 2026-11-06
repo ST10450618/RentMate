@@ -183,6 +183,9 @@
     <string name="settle_up">Vereffen</string>
     <string name="settle_up_none">Die huishouding is reeds vereffen.</string>
     <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Voorskou: gebaseer op data op hierdie foon. Dit kan na sinkronisering verander.</string>
+    <string name="settle_up_preview_pill">Voorskou</string>
+    <string name="settle_up_confirm_needs_sync">Jy kan bevestig sodra hierdie foon weer aanlyn en gesinkroniseer is.</string>
     <plurals name="bills_count">
         <item quantity="one">%d rekening</item>
         <item quantity="other">%d rekeninge</item>

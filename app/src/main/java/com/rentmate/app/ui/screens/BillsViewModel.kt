@@ -6,6 +6,8 @@ import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.data.BillsRepository
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.SettleUpRow
+import com.rentmate.app.data.SettleUpSource
+import com.rentmate.app.data.sync.SyncStatusTracker
 import com.rentmate.app.network.toRpcParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
@@ -38,14 +40,16 @@ data class BillsUiState(
     @StringRes val error: Int? = null,
     val settleUp: List<SettleUpRow>? = null,
     val settleUpLoading: Boolean = false,
+    /**
+     * RM-0031: true when [settleUp] was computed on this phone (offline, or a
+     * bill still waits to sync). The dialog labels it and blocks Confirm received.
+     */
+    val settleUpProvisional: Boolean = false,
     /** The signed-in user; only the creditor sees Mark paid / Confirm received (RM-0010). */
     val currentUserId: String? = null,
     /** RM-0029: thumbnails per bill ID, with short-lived signed URLs. */
     val photos: Map<String, List<PhotoLink>> = emptyMap()
 )
-
-@Serializable
-private data class SettleUpParams(val household_id_in: String)
 
 @Serializable
 private data class StopRepeatParams(val bill_id_in: String)
@@ -65,12 +69,36 @@ class BillsViewModel @Inject constructor(
     private val attachments: AttachmentRepository,
     private val activity: ActivityLogger,
     private val billsRepository: BillsRepository,
-    private val feedback: FeedbackCenter
+    private val feedback: FeedbackCenter,
+    settleUpSource: SettleUpSource,
+    syncStatus: SyncStatusTracker
 ) : ViewModel() {
     private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
 
+    /** RM-0031: server plan when online, a labelled local preview when not. */
+    private val settleUp: SettleUpCoordinator = SettleUpCoordinator(
+        scope = viewModelScope,
+        source = settleUpSource,
+        householdId = { currentHousehold.id.first() },
+        bills = billsRepository.bills,
+        members = billsRepository.members,
+        syncStatus = syncStatus.status,
+        onError = { feedback.failure(it, R.string.feedback_settle_up_failed, retry = ::loadSettleUp) }
+    )
+
     init {
+        viewModelScope.launch {
+            settleUp.state.collect { s ->
+                _state.update {
+                    it.copy(
+                        settleUp = if (s.visible && !s.loading) s.rows else null,
+                        settleUpLoading = s.visible && s.loading,
+                        settleUpProvisional = s.provisional
+                    )
+                }
+            }
+        }
         // RM-0016: the list always comes from the Room cache, so it survives a failed refresh.
         viewModelScope.launch {
             billsRepository.bills
@@ -86,7 +114,10 @@ class BillsViewModel @Inject constructor(
             _state.value = _state.value.copy(loading = true, error = null)
             Log.d(TAG, "refresh household=$householdId")
             runCatching { billsRepository.refresh() }
-                .onSuccess { _state.update { it.copy(loading = false) } }
+                .onSuccess {
+                    _state.update { it.copy(loading = false) }
+                    settleUp.onBillsRefreshed()
+                }
                 .onFailure { e -> _state.update { it.copy(loading = false, error = ErrorMapper.toMessage(e)) } }
             loadPhotos()
         }
@@ -139,23 +170,22 @@ class BillsViewModel @Inject constructor(
         }
     }
 
-    /** US-11: the smallest set of payments that would settle the household right now. */
+    /**
+     * US-11: the smallest set of payments that would settle the household right now.
+     * RM-0031: offline this is a local preview, replaced by the server plan after a sync.
+     */
     fun loadSettleUp() {
-        viewModelScope.launch {
-            val householdId = currentHousehold.id.first() ?: return@launch
-            _state.value = _state.value.copy(settleUpLoading = true)
-            runCatching {
-                supabase.postgrest.rpc("settle_up", SettleUpParams(householdId).toRpcParams()).decodeList<SettleUpRow>()
-            }.onSuccess { _state.value = _state.value.copy(settleUpLoading = false, settleUp = it) }
-                .onFailure {
-                    _state.value = _state.value.copy(settleUpLoading = false)
-                    feedback.failure(it, R.string.feedback_settle_up_failed, retry = ::loadSettleUp)
-                }
-        }
+        settleUp.open()
     }
 
     /** RM-0010: only the creditor confirms; [fromUserId] is the person who paid the caller. */
     fun confirmSettlement(fromUserId: String, amount: Double) {
+        // RM-0031: a preview is not the server's plan, so do not confirm from it.
+        settleUp.confirmBlockedReason()?.let { reason ->
+            Log.d(TAG, "confirm blocked: the plan is a local preview")
+            feedback.show(reason)
+            return
+        }
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             runCatching {
@@ -163,7 +193,7 @@ class BillsViewModel @Inject constructor(
             }.onSuccess {
                 val fromName = _state.value.settleUp?.firstOrNull { it.from_user_id == fromUserId }?.from_display_name
                 activity.settlementConfirmed(fromName ?: "a housemate", amount)
-                _state.value = _state.value.copy(settleUp = null)
+                settleUp.dismiss()
                 refresh()
             }.onFailure {
                 // The dialog stays open; the snackbar is drawn in front of it (see BillsScreen).
@@ -175,7 +205,8 @@ class BillsViewModel @Inject constructor(
         }
     }
 
+    /** Closes the Settle-up dialog. */
     fun dismissSettleUp() {
-        _state.value = _state.value.copy(settleUp = null)
+        settleUp.dismiss()
     }
 }
