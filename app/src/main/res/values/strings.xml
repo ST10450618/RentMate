@@ -318,4 +318,18 @@
     <string name="money_tap_received">Tap when you have received it</string>
     <string name="undo_marked_received">Marked %1$s as received</string>
     <string name="save_bill">Save bill</string>
+    <string name="setup_title">Set up your home</string>
+    <string name="setup_welcome">Welcome, %1$s</string>
+    <string name="setup_join_title">Join a household</string>
+    <string name="setup_join_body">Your housemate already uses RentMate and has a code for you.</string>
+    <string name="setup_create_title">Create a household</string>
+    <string name="setup_create_body">You are the first one here. You will get a code to share.</string>
+    <string name="setup_code_help">Six letters and numbers. Paste it from WhatsApp, capitals and spaces do not matter.</string>
+    <string name="setup_name_help">The name your housemates will see, for example Observatory house.</string>
+    <string name="setup_share_title">Share your code</string>
+    <string name="setup_share_body">Your household is ready. Send this code to your housemates so they can join.</string>
+    <string name="setup_copy_code">Copy code</string>
+    <string name="setup_code_copied">Invite code copied</string>
+    <string name="lock_body">Unlock with your fingerprint, face or phone PIN.</string>
+    <string name="lock_note">Locked after a minute away. Turn this off in Settings.</string>
 </resources>

@@ -311,4 +311,18 @@
     <string name="money_tap_received">Tik sodra jy dit ontvang het</string>
     <string name="undo_marked_received">%1$s as ontvang gemerk</string>
     <string name="save_bill">Stoor rekening</string>
+    <string name="setup_title">Stel jou huis op</string>
+    <string name="setup_welcome">Welkom, %1$s</string>
+    <string name="setup_join_title">Sluit by \'n huishouding aan</string>
+    <string name="setup_join_body">Jou huisgenoot gebruik reeds RentMate en het \'n kode vir jou.</string>
+    <string name="setup_create_title">Skep \'n huishouding</string>
+    <string name="setup_create_body">Jy is die eerste een hier. Jy sal \'n kode kry om te deel.</string>
+    <string name="setup_code_help">Ses letters en syfers. Plak dit uit WhatsApp, hoofletters en spasies maak nie saak nie.</string>
+    <string name="setup_name_help">Die naam wat jou huisgenote sal sien, byvoorbeeld Observatory-huis.</string>
+    <string name="setup_share_title">Deel jou kode</string>
+    <string name="setup_share_body">Jou huishouding is gereed. Stuur hierdie kode aan jou huisgenote sodat hulle kan aansluit.</string>
+    <string name="setup_copy_code">Kopieer kode</string>
+    <string name="setup_code_copied">Uitnodigingskode gekopieer</string>
+    <string name="lock_body">Ontsluit met jou vingerafdruk, gesig of foon-PIN.</string>
+    <string name="lock_note">Gesluit na \'n minuut weg. Skakel dit af in Instellings.</string>
 </resources>
