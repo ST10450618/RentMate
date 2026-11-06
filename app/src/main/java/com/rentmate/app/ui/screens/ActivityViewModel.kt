@@ -8,9 +8,11 @@ import com.rentmate.app.data.activity.ActivityEvent
 import com.rentmate.app.data.activity.ActivityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -37,8 +39,11 @@ class ActivityViewModel @Inject constructor(
     currentHousehold: CurrentHousehold
 ) : ViewModel() {
 
+    /** Bumped by [retry]; each new value starts a fresh subscription. */
+    private val retryCount = MutableStateFlow(0)
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val state: StateFlow<ActivityUiState> = currentHousehold.id
+    val state: StateFlow<ActivityUiState> = combine(currentHousehold.id, retryCount) { householdId, _ -> householdId }
         .flatMapLatest { householdId ->
             if (householdId == null) {
                 flowOf<ActivityUiState>(ActivityUiState.Loading)
@@ -54,6 +59,12 @@ class ActivityViewModel @Inject constructor(
         }
         .onEach { Log.d(TAG, "state -> ${it::class.simpleName}") }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActivityUiState.Loading)
+
+    /** RM-0035: called by the error state's Retry button after the feed failed. */
+    fun retry() {
+        Log.d(TAG, "retry")
+        retryCount.value++
+    }
 
     private companion object {
         const val TAG = "ActivityViewModel"
