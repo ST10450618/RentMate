@@ -113,7 +113,7 @@ private fun ChoreRow(
         val housemate = stringResource(R.string.housemate_fallback)
         val current = chore.currentAssignee()?.let { memberNames[it] ?: housemate }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = Spacing.xs)) {
-            MemberAvatar(current ?: "?", size = 28.dp)
+            MemberAvatar(current ?: "?", size = 28.dp, userId = chore.currentAssignee())
             Text(
                 stringResource(R.string.chores_this_cycle, current ?: stringResource(R.string.chores_unassigned)),
                 style = MaterialTheme.typography.bodyMedium,
@@ -142,7 +142,7 @@ private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("${index + 1}", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(end = Spacing.sm))
-                MemberAvatar(entry.display_name, size = 28.dp)
+                MemberAvatar(entry.display_name, size = 28.dp, userId = entry.user_id)
                 Text(entry.display_name, modifier = Modifier.weight(1f).padding(start = Spacing.sm))
                 Text(
                     pluralStringResource(R.plurals.leaderboard_points, entry.month_points.toInt(), entry.month_points, entry.total_points),
