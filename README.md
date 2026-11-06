@@ -503,7 +503,7 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 - **Biometric unlock.** After Google sign-in the app asks for a fingerprint, face or the device PIN, and locks again after a minute in the background. You can turn it off in Settings. Phones without biometrics fall back to the PIN or show an explanation (RM-0013, RM-0014).
 - **Stay signed in.** The Supabase session is saved, so reopening the app goes straight to the Dashboard (RM-0002).
 - **Offline reading.** Bills, chores, shopping items and the Dashboard come from a local Room database and refresh from Supabase. In airplane mode the app shows the cached data with an offline message instead of an empty screen (RM-0015, RM-0016).
-- **Offline writes.** A shopping item, a bought item or a bill added offline is saved locally with a "Waiting to sync" badge (RM-0017). Uploading them is RM-0018, still open.
+- **Offline writes and sync.** A shopping item, a bought item or a bill added offline is saved locally with a "Waiting to sync" badge (RM-0017). A WorkManager job uploads the queue when the network is back, in the order the changes were made, and the badges clear once the server has them (RM-0018).
 - **Push notifications.** Firebase Cloud Messaging with separate channels for bills, chores and repairs. A Supabase Edge Function sends a push for a new bill, a chore that is due and a repair status change. Tapping a push opens Bills, Chores or Maintenance, and each type can be turned off in Settings (RM-0020 to RM-0023).
 - **Activity feed.** Household events are written to Firestore, and the Activity screen shows them live. Firestore security rules keep other households out (RM-0032, RM-0033).
 - **Photo attachments.** Add photos to bills and maintenance requests from the camera or the gallery. Photos are compressed to under 1 MB, upload with a progress bar and offer Retry on failure. They are stored in a household-only Supabase Storage bucket and linked in the landlord email (RM-0027 to RM-0029).
@@ -540,7 +540,7 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 - Only the creditor can confirm a settle-up payment (RM-0010).
 
 **Still open before submission**
-- Upload of offline changes (RM-0018), the offline banner (RM-0019) and the offline settle-up preview (RM-0031).
+- The offline banner (RM-0019) and the offline settle-up preview (RM-0031).
 - The full device check on the test tablet (RM-0047), the store screenshots (RM-0041) and the demo video (RM-0044).
 
 ### 0.x: Part 2 prototype
