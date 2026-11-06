@@ -160,7 +160,7 @@
     <string name="split_error_exact">Die bedrae moet saam R%2$s wees. Hulle is saam R%1$s.</string>
     <string name="split_error_number">Voer \'n getal vir elke lid in (of laat dit leeg vir 0).</string>
     <string name="split_error_negative">Verdelingswaardes kan nie negatief wees nie.</string>
-    <string name="split_error_too_large">Daardie bedrag is te groot.</string>
+    <string name="split_error_too_large">Die bedrag kan nie meer as R999,999.99 wees nie.</string>
     <string name="bills_confirm_received">Bevestig ontvangs</string>
     <string name="bills_waiting_for">Wag vir %1$s om te bevestig</string>
     <string name="bills_ask_to_confirm">Vra %1$s om te bevestig dat jy betaal het</string>
@@ -244,4 +244,11 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Voorbeeld</string>
     <string name="activity_sample_body">Voorbeeld van aktiwiteit. Jou huishouding se regte aktiwiteit verskyn hier sodra dit gekoppel is.</string>
+    <string name="repeat_label">Herhaal</string>
+    <string name="repeat_never">Nooit</string>
+    <string name="repeat_weekly">Weekliks</string>
+    <string name="repeat_monthly">Maandeliks</string>
+    <string name="bills_repeats_weekly">Herhaal weekliks</string>
+    <string name="bills_repeats_monthly">Herhaal maandeliks</string>
+    <string name="bills_stop_repeat">Stop herhaling</string>
 </resources>

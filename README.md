@@ -365,6 +365,9 @@ Schema, Row Level Security and functions are numbered SQL migrations in `supabas
 | `0002_functions.sql` | `create_household`, `join_household`, `complete_chore`, `forecast_chore`, `settle_up`, `confirm_settlement`, `leaderboard` |
 | `0003_send_to_landlord.sql` | Groups open maintenance requests into one request to the landlord |
 | `0004`–`0006` | Members can read the household roster and each other's display names |
+| `0012_deterministic_settle_up.sql` | `settle_up` gives the same payments every time it runs |
+| `0013_lock_chores_households.sql` | Members can edit only the chore and household fields the app uses |
+| `0014_recurring_bills.sql` | Weekly or monthly repeat on bills, `stop_bill_repeat`, and a daily `pg_cron` job that copies due bills once |
 
 The repo is linked to the hosted project with the Supabase CLI:
 

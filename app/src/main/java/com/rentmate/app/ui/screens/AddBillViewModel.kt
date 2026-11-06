@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.ProfileNameRow
+import com.rentmate.app.data.RepeatMode
 import com.rentmate.app.data.SplitMode
 import com.rentmate.app.data.SplitShare
 import com.rentmate.app.network.toRpcParams
@@ -54,7 +55,8 @@ private data class CreateBillParams(
     val amount_in: Double,
     val due_date_in: String,
     val split_method_in: String,
-    val shares_in: List<CreateBillShareParam>
+    val shares_in: List<CreateBillShareParam>,
+    val repeat_in: String
 )
 
 @Serializable
@@ -103,6 +105,7 @@ class AddBillViewModel @Inject constructor(
         dueDate: LocalDate,
         mode: SplitMode,
         shares: List<SplitShare>,
+        repeat: RepeatMode = RepeatMode.Never,
         photoPaths: List<String> = emptyList()
     ) {
         if (validateRequiredText(title, Limits.TITLE_MAX) != null ||
@@ -129,7 +132,8 @@ class AddBillViewModel @Inject constructor(
                     amount_in = amount.toDouble(),
                     due_date_in = "${dueDate}T00:00:00Z",
                     split_method_in = mode.wire,
-                    shares_in = shares.map { CreateBillShareParam(it.userId, it.value.toDouble()) }
+                    shares_in = shares.map { CreateBillShareParam(it.userId, it.value.toDouble()) },
+                    repeat_in = repeat.wire
                 )
                 supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<CreatedBillRow>()
             }.onSuccess { bill ->
