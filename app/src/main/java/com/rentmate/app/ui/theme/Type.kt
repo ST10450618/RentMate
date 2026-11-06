@@ -7,28 +7,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * RentMate type scale.
+ * RentMate type scale (RM-0050): seven styles, body at 16 sp, nothing under 12 sp.
  *
- * One family (the platform sans-serif) in a deliberate set of weights, so every
- * screen reads the same way: SemiBold for headings, Medium for labels and
- * buttons, Normal for body copy. Sizes follow the Material 3 type scale
- * (https://m3.material.io/styles/typography/type-scale-tokens) with tighter
- * line heights on display and headline styles for the banner headers.
+ * Figure     displaySmall   32/40 600  the one big number on a screen
+ * Screen     headlineSmall  24/32 600
+ * Card title titleMedium    18/24 600
+ * Body       bodyLarge      16/24 400
+ * Body small bodyMedium     14/20 400
+ * Label      labelLarge     14/20 500
+ * Caption    bodySmall      12/16 400
+ *
+ * Material slots the app does not use as their own style point at the nearest
+ * of the seven, so a stray `labelSmall` can never be smaller than 12 sp.
+ * The font is the platform sans-serif; bundling Public Sans was left out on purpose.
  */
 private val Sans = FontFamily.SansSerif
 
+private val Figure = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 32.sp, lineHeight = 40.sp, fontFeatureSettings = "tnum")
+private val ScreenTitle = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, lineHeight = 32.sp)
+private val CardTitle = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, lineHeight = 24.sp)
+private val Body = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp)
+private val BodySmall = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp)
+private val Label = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp)
+private val Caption = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp)
+
 val Typography = Typography(
-    displaySmall = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 36.sp, lineHeight = 42.sp, letterSpacing = (-0.5).sp),
-    headlineLarge = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-0.25).sp),
-    headlineMedium = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 26.sp, lineHeight = 32.sp),
-    headlineSmall = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
-    titleLarge = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 26.sp),
-    titleMedium = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp, letterSpacing = 0.1.sp),
-    titleSmall = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp),
-    bodyLarge = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp, letterSpacing = 0.15.sp),
-    bodyMedium = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.15.sp),
-    bodySmall = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.2.sp),
-    labelLarge = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp),
-    labelMedium = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.8.sp),
-    labelSmall = TextStyle(fontFamily = Sans, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp)
+    displayLarge = Figure,
+    displayMedium = Figure,
+    displaySmall = Figure,
+    headlineLarge = ScreenTitle,
+    headlineMedium = ScreenTitle,
+    headlineSmall = ScreenTitle,
+    titleLarge = CardTitle,
+    titleMedium = CardTitle,
+    titleSmall = Label,
+    bodyLarge = Body,
+    bodyMedium = BodySmall,
+    bodySmall = Caption,
+    labelLarge = Label,
+    labelMedium = Caption,
+    labelSmall = Caption
 )
