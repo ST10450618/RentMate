@@ -178,5 +178,8 @@ dependencies {
     implementation(libs.supabase.storage)
     // Reads the camera's rotation tag so compressed photos stay upright.
     implementation(libs.androidx.exifinterface)
+    // RM-0029: attachment thumbnails, loaded from short-lived signed URLs.
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.ktor.client.okhttp)
 }

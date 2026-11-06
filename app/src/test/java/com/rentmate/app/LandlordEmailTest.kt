@@ -24,6 +24,7 @@ class LandlordEmailTest {
         itemCategory = "Category: %1\$s",
         itemUrgency = "Urgency: %1\$s",
         itemLogged = "Logged: %1\$s",
+        itemPhotos = "Photos:",
         signOff = "Kind regards,\nThe tenants at %1\$s",
         categoryLabel = { it.name.lowercase() },
         urgencyLabel = { it.name.lowercase() }
@@ -57,6 +58,28 @@ class LandlordEmailTest {
     @Test
     fun usesAGenericGreetingWithoutALandlordName() {
         assertTrue(build(LandlordContact("12 Long St", landlordName = " ")).body.startsWith("Dear landlord,"))
+    }
+
+    @Test
+    fun listsEachRequestsPhotoLinksUnderTheItem() {
+        val links = mapOf(
+            "1" to listOf("https://x.supabase.co/storage/v1/object/sign/attachments/h/maintenance/a.jpg?token=t1",
+                          "https://x.supabase.co/storage/v1/object/sign/attachments/h/maintenance/b.jpg?token=t2")
+        )
+        val email = buildLandlordEmail(LandlordContact("12 Long St"), listOf(tap, light), text, links) { "day $it" }
+
+        assertTrue(email.body.contains(
+            "   Kitchen tap drips\n   Photos:\n" +
+                "   https://x.supabase.co/storage/v1/object/sign/attachments/h/maintenance/a.jpg?token=t1\n" +
+                "   https://x.supabase.co/storage/v1/object/sign/attachments/h/maintenance/b.jpg?token=t2\n\n2. Hall light"
+        ))
+        // The hall light has no photos, so no heading.
+        assertEquals(1, Regex("Photos:").findAll(email.body).count())
+    }
+
+    @Test
+    fun noPhotosMeansNoPhotoHeading() {
+        assertFalse(build(LandlordContact("12 Long St")).body.contains("Photos:"))
     }
 
     @Test

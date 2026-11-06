@@ -11,4 +11,4 @@ Supabase Storage bucket 'attachments', private. Path convention households/<hous
 |---|---|---|---|---|---|---|
 | RM-0027 | supabase | Supabase Storage bucket with household-scoped access policies | Member can upload/read own household's photos; non-member gets 403 | RM-0006 | - | 🟩 Done · b42f9a2 · 2026-11-06 · tests passed · Note: Code done; device/live check pending |
 | RM-0028 | android | Camera/gallery picker with compression and upload progress | Photo picked on phone uploads under 1 MB with progress shown; failure shows retry | RM-0027 | - | 🟩 Done · d8def55 · 2026-11-06 · tests passed · Note: Code done; device/live check pending |
-| RM-0029 | android | Show attachments on maintenance requests and bills, included in landlord email | Maintenance and bill detail show thumbnails; landlord email contains photo links | RM-0009, RM-0028 | - | 🟥 Pending |
+| RM-0029 | android | Show attachments on maintenance requests and bills, included in landlord email | Maintenance and bill detail show thumbnails; landlord email contains photo links | RM-0009, RM-0028 | - | 🟨 In progress |

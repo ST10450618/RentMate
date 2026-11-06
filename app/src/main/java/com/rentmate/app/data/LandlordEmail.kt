@@ -22,6 +22,7 @@ data class LandlordEmailText(
     val itemCategory: String,     // %1$s = category label
     val itemUrgency: String,      // %1$s = urgency label
     val itemLogged: String,       // %1$s = date
+    val itemPhotos: String,       // heading above a request's photo links (RM-0029)
     val signOff: String,          // %1$s = household name
     val categoryLabel: (MaintenanceCategory) -> String,
     val urgencyLabel: (Urgency) -> String
@@ -32,11 +33,16 @@ data class LandlordEmail(val to: String, val subject: String, val body: String)
 /**
  * RM-0009: one itemised email listing every open fault, numbered, with its
  * category, urgency, description and the date it was logged.
+ *
+ * RM-0029: [photoLinks] maps a request ID to signed URLs for its photos; the
+ * bucket is private, so the landlord opens them through these links (valid
+ * for [com.rentmate.app.data.attachments.EMAIL_LINK_EXPIRY]).
  */
 fun buildLandlordEmail(
     contact: LandlordContact,
     openRequests: List<MaintenanceRequest>,
     text: LandlordEmailText,
+    photoLinks: Map<String, List<String>> = emptyMap(),
     formatDate: (Long) -> String
 ): LandlordEmail {
     val greeting = contact.landlordName?.takeIf { it.isNotBlank() }
@@ -50,6 +56,11 @@ fun buildLandlordEmail(
             append("   ${text.itemUrgency.fill(text.urgencyLabel(request.urgency))}\n")
             append("   ${text.itemLogged.fill(formatDate(request.createdAt))}\n")
             if (request.description.isNotBlank()) append("   ${request.description.trim()}\n")
+            val links = photoLinks[request.id].orEmpty()
+            if (links.isNotEmpty()) {
+                append("   ${text.itemPhotos}\n")
+                links.forEach { append("   $it\n") }
+            }
         }
     }
 

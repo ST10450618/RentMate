@@ -29,7 +29,9 @@ import com.rentmate.app.data.BillSplit
 import com.rentmate.app.data.SplitError
 import com.rentmate.app.data.SplitMode
 import com.rentmate.app.data.SplitResult
+import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.ui.components.DatePickerField
+import com.rentmate.app.ui.components.PhotoAttachmentPicker
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.ValidatedTextField
@@ -53,9 +55,15 @@ import java.time.LocalDate
  * checks it again on the server.
  */
 @Composable
-fun AddBillScreen(onClose: () -> Unit, viewModel: AddBillViewModel = hiltViewModel()) {
+fun AddBillScreen(
+    onClose: () -> Unit,
+    viewModel: AddBillViewModel = hiltViewModel(),
+    photosViewModel: PhotoAttachmentsViewModel = hiltViewModel()
+) {
     val members by viewModel.members.collectAsState()
     val state by viewModel.state.collectAsState()
+    val photos by photosViewModel.photos.collectAsState()
+    val photosBusy = photos.any { it.status is PhotoStatus.Compressing || it.status is PhotoStatus.Uploading }
 
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
@@ -168,14 +176,32 @@ fun AddBillScreen(onClose: () -> Unit, viewModel: AddBillViewModel = hiltViewMod
             message?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
         }
 
+        // RM-0029: a photo of the bill or slip, e.g. the municipal account.
+        SectionLabel(stringResource(R.string.photo_section_bill), modifier = Modifier.padding(top = Spacing.sm))
+        PhotoAttachmentPicker(
+            photos = photos,
+            onPicked = { photosViewModel.add(it, AttachmentKind.BILL) },
+            onRetry = photosViewModel::retry,
+            onRemove = photosViewModel::remove,
+            maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
+        )
+        if (photosBusy) {
+            Text(
+                stringResource(R.string.photo_wait_for_upload),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         PrimaryButton(
             text = stringResource(R.string.save),
+            enabled = !photosBusy,
             loading = state is AddBillUiState.Loading,
             onClick = {
                 submitted = true
                 val date = dueDate
                 if (formValid && parsedAmount != null && date != null && split is SplitResult.Valid) {
-                    viewModel.createBill(title.trim(), parsedAmount, date, mode, split.shares)
+                    viewModel.createBill(title.trim(), parsedAmount, date, mode, split.shares, photosViewModel.uploadedPaths)
                 }
             },
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)

@@ -53,6 +53,8 @@ import com.rentmate.app.data.TitleError
 import com.rentmate.app.data.Urgency
 import androidx.compose.ui.text.input.ImeAction
 import com.rentmate.app.data.attachments.AttachmentKind
+import com.rentmate.app.data.attachments.PhotoLink
+import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ValidatedTextField
@@ -93,15 +95,19 @@ fun MaintenanceScreen(
     val context = LocalContext.current
     val emailText = landlordEmailText()
     var askForEmail by remember { mutableStateOf(false) }
+    // RM-0029: each fault lists 7-day signed links to its photos.
     val openEmail: (LandlordContact) -> Unit = { contact ->
-        val email = buildLandlordEmail(contact, openRequests, emailText) { millis ->
-            DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(millis))
-        }
-        try {
-            context.startActivity(email.toSendIntent())
-            viewModel.sendOpenRequests()
-        } catch (e: ActivityNotFoundException) {
-            viewModel.noEmailApp()
+        val toSend = openRequests
+        viewModel.photoLinksForEmail(toSend.map { it.id }) { photoLinks ->
+            val email = buildLandlordEmail(contact, toSend, emailText, photoLinks) { millis ->
+                DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(millis))
+            }
+            try {
+                context.startActivity(email.toSendIntent())
+                viewModel.sendOpenRequests()
+            } catch (e: ActivityNotFoundException) {
+                viewModel.noEmailApp()
+            }
         }
     }
 
@@ -216,9 +222,18 @@ fun MaintenanceScreen(
                         maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
                     )
 
+                    val photosBusy = photos.any { it.status is PhotoStatus.Compressing || it.status is PhotoStatus.Uploading }
+                    if (photosBusy) {
+                        Text(
+                            stringResource(R.string.photo_wait_for_upload),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     Button(
+                        enabled = !photosBusy,
                         onClick = {
-                            error = viewModel.log(title, description, category, urgency, null)
+                            error = viewModel.log(title, description, category, urgency, photosViewModel.uploadedPaths)
                             if (error == null) {
                                 title = ""
                                 description = ""
@@ -270,6 +285,7 @@ fun MaintenanceScreen(
         items(requests, key = { it.id }) { request ->
             RequestCard(
                 request = request,
+                photos = uiState.photos[request.id].orEmpty(),
                 canChangeStatus = request.canChangeStatus(uiState.currentUserId),
                 onAdvance = { viewModel.advance(request.id) }
             )
@@ -299,7 +315,12 @@ private fun ErrorCard(message: String, onRetry: () -> Unit, onDismiss: () -> Uni
 }
 
 @Composable
-private fun RequestCard(request: MaintenanceRequest, canChangeStatus: Boolean, onAdvance: () -> Unit) {
+private fun RequestCard(
+    request: MaintenanceRequest,
+    photos: List<PhotoLink>,
+    canChangeStatus: Boolean,
+    onAdvance: () -> Unit
+) {
     RentMateCard {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Text(request.title, style = MaterialTheme.typography.titleMedium)
@@ -310,6 +331,8 @@ private fun RequestCard(request: MaintenanceRequest, canChangeStatus: Boolean, o
                 AssistChip(onClick = {}, label = { Text(stringResource(request.category.labelRes)) })
                 AssistChip(onClick = {}, label = { Text(stringResource(request.urgency.labelRes)) })
             }
+
+            if (photos.isNotEmpty()) AttachmentThumbnails(photos)
 
             StatusTimeline(request)
 
@@ -381,6 +404,7 @@ private fun landlordEmailText(): LandlordEmailText {
         itemCategory = stringResource(R.string.landlord_email_category),
         itemUrgency = stringResource(R.string.landlord_email_urgency),
         itemLogged = stringResource(R.string.landlord_email_logged),
+        itemPhotos = stringResource(R.string.landlord_email_photos),
         signOff = stringResource(R.string.landlord_email_sign_off),
         categoryLabel = { context.getString(it.labelRes) },
         urgencyLabel = { context.getString(it.labelRes) }

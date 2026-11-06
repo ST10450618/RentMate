@@ -68,8 +68,8 @@ interface MaintenanceRepository {
     /** Reloads every request for the current household. */
     suspend fun refresh()
 
-    /** Inserts a new request and prepends it to [requests]. */
-    suspend fun add(request: MaintenanceRequest)
+    /** Inserts a new request, prepends it to [requests] and returns it with its server ID. */
+    suspend fun add(request: MaintenanceRequest): MaintenanceRequest?
 
     /** Advances one request through open -> sent -> acknowledged -> resolved. */
     suspend fun advance(id: String)
@@ -107,9 +107,9 @@ class SupabaseMaintenanceRepository @Inject constructor(
         _requests.value = rows.map { it.toLocal() }
     }
 
-    override suspend fun add(request: MaintenanceRequest) {
-        val householdId = currentHousehold.id.first() ?: return
-        val userId = supabase.auth.currentUserOrNull()?.id ?: return
+    override suspend fun add(request: MaintenanceRequest): MaintenanceRequest? {
+        val householdId = currentHousehold.id.first() ?: return null
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return null
         val created = supabase.from("maintenance_requests").insert(
             MaintenanceInsert(
                 household_id = householdId,
@@ -119,8 +119,9 @@ class SupabaseMaintenanceRepository @Inject constructor(
                 category = request.category.toDto(),
                 urgency = request.urgency.toDto()
             )
-        ) { select() }.decodeSingle<MaintenanceRow>()
-        _requests.value = listOf(created.toLocal()) + _requests.value
+        ) { select() }.decodeSingle<MaintenanceRow>().toLocal()
+        _requests.value = listOf(created) + _requests.value
+        return created
     }
 
     /**
@@ -211,7 +212,6 @@ private fun MaintenanceRow.toLocal() = MaintenanceRequest(
     category = category.toLocalCategory(),
     urgency = urgency.toLocalUrgency(),
     status = status.toLocalStatus(),
-    photo = null,
     createdAt = parseMillis(created_at) ?: System.currentTimeMillis(),
     sentAt = parseMillis(sent_to_landlord_at),
     acknowledgedAt = parseMillis(acknowledged_at),

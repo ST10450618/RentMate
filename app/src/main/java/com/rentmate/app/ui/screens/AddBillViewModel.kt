@@ -28,6 +28,8 @@ import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.R
 import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.data.attachments.AttachmentParent
+import com.rentmate.app.data.attachments.AttachmentRepository
 
 private const val TAG = "AddBillViewModel"
 
@@ -54,11 +56,20 @@ private data class CreateBillParams(
     val shares_in: List<CreateBillShareParam>
 )
 
+@Serializable
+private data class CreatedBillRow(val id: String)
+
 @HiltViewModel
 class AddBillViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val attachments: AttachmentRepository
 ) : ViewModel() {
+    /**
+     * Set once create_bill succeeded. If linking the photos then fails, Save
+     * only retries the link, so the bill is never created twice.
+     */
+    private var createdBillId: String? = null
     private val _members = MutableStateFlow<List<HouseholdMemberWithProfile>>(emptyList())
     val members: StateFlow<List<HouseholdMemberWithProfile>> = _members
 
@@ -84,7 +95,14 @@ class AddBillViewModel @Inject constructor(
      * The screen validates first; these checks are a last guard so an invalid
      * bill never reaches Supabase even if the UI is bypassed (RM-0036).
      */
-    fun createBill(title: String, amount: BigDecimal, dueDate: LocalDate, mode: SplitMode, shares: List<SplitShare>) {
+    fun createBill(
+        title: String,
+        amount: BigDecimal,
+        dueDate: LocalDate,
+        mode: SplitMode,
+        shares: List<SplitShare>,
+        photoPaths: List<String> = emptyList()
+    ) {
         if (validateRequiredText(title, Limits.TITLE_MAX) != null ||
             validateAmount(amount.toPlainString()) != null ||
             validateDueDate(dueDate) != null ||
@@ -96,6 +114,12 @@ class AddBillViewModel @Inject constructor(
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             _state.value = AddBillUiState.Loading
+            createdBillId?.let { billId ->
+                runCatching { attachments.link(AttachmentParent.Bill(billId), photoPaths) }
+                    .onSuccess { _state.value = AddBillUiState.Saved }
+                    .onFailure { linkFailed(it) }
+                return@launch
+            }
             runCatching {
                 val params = CreateBillParams(
                     household_id_in = householdId,
@@ -105,9 +129,19 @@ class AddBillViewModel @Inject constructor(
                     split_method_in = mode.wire,
                     shares_in = shares.map { CreateBillShareParam(it.userId, it.value.toDouble()) }
                 )
-                supabase.postgrest.rpc("create_bill", params.toRpcParams())
-            }.onSuccess { _state.value = AddBillUiState.Saved }
-                .onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
+                supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<CreatedBillRow>()
+            }.onSuccess { bill ->
+                createdBillId = bill.id
+                runCatching { attachments.link(AttachmentParent.Bill(bill.id), photoPaths) }
+                    .onSuccess { _state.value = AddBillUiState.Saved }
+                    .onFailure { linkFailed(it) }
+            }.onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
         }
+    }
+
+    private fun linkFailed(cause: Throwable) {
+        if (cause is kotlinx.coroutines.CancellationException) throw cause
+        Log.e(TAG, "Bill saved but its photos could not be linked", cause)
+        _state.value = AddBillUiState.Error(R.string.photo_error_link)
     }
 }
