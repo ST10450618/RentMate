@@ -75,4 +75,15 @@ class BillSplitTest {
         assertEquals(SplitError.InvalidAmount, error(BillSplit.compute(SplitMode.Equal, BigDecimal.ZERO, ids, emptyMap())))
         assertEquals(SplitError.NoMembers, error(BillSplit.compute(SplitMode.Equal, BigDecimal.TEN, emptyList(), emptyMap())))
     }
+
+    @Test
+    fun totalAtTheAmountLimitSplits() {
+        val r = BillSplit.compute(SplitMode.Equal, BigDecimal("999999.99"), ids, emptyMap())
+        assertEquals(99_999_999L, cents(r).sum())
+    }
+
+    @Test
+    fun totalAboveTheAmountLimitIsTooLarge() {
+        assertEquals(SplitError.TooLarge, error(BillSplit.compute(SplitMode.Equal, BigDecimal("1000000"), ids, emptyMap())))
+    }
 }

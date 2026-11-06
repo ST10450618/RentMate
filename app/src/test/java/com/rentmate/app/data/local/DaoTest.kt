@@ -32,10 +32,10 @@ class DaoTest {
     fun tearDown() = db.close()
 
     private fun bill(id: String, hh: String = "h1", state: SyncState = SyncState.SYNCED) =
-        BillEntity(id, hh, "Bill $id", 100.0, "2026-01-01", "EQUAL", "u1", "c", "u", state, 1L)
+        BillEntity(id, hh, "Bill $id", 10_000L, "2026-01-01", "EQUAL", "u1", "c", "u", state, 1L)
 
     private fun share(id: String, billId: String, hh: String = "h1") =
-        BillShareEntity(id, billId, hh, "u1", 50.0, false)
+        BillShareEntity(id, billId, hh, "u1", 5_000L, false)
 
     private fun chore(id: String, hh: String = "h1", state: SyncState = SyncState.SYNCED) =
         ChoreEntity(id, hh, "Chore $id", "WEEKLY", 5, listOf("a", "b", "c"), 0, "c", state)

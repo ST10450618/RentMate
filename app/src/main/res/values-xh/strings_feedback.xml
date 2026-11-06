@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_retry">Zama kwakhona</string>
+    <string name="feedback_setting_failed">Asikwazanga ukugcina olu lungiselelo. Zama kwakhona.</string>
+    <string name="feedback_language_failed">Asikwazanga ukugcina ulwimi. Zama kwakhona.</string>
+    <string name="feedback_sign_out_partial">Uphume kule fowuni. Asikwazanga ukufikelela kwiseva ukuphelisa iseshoni kuyo yonke indawo.</string>
+    <string name="feedback_save_bill_failed">Asikwazanga ukugcina ibhili. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_add_chore_failed">Asikwazanga ukongeza umsebenzi. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_add_item_failed">Asikwazanga ukongeza into. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_mark_bought_failed">Asikwazanga ukuphawula into njengethengiweyo. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_mark_paid_failed">Asikwazanga ukuphawula esi sabelo njengesihlawulweyo. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_mark_paid_not_allowed">Ngumntu kuphela owongeze eli bhili onokulibhala njengelihlawulweyo.</string>
+    <string name="feedback_stop_repeat_failed">Asikwazanga ukumisa eli bhili ukuphindaphinda. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_settle_up_failed">Asikwazanga ukubala ukuba ngubani ofanele ahlawule. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_confirm_settlement_failed">Asikwazanga ukuqinisekisa intlawulo. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_complete_chore_failed">Asikwazanga ukuphawula umsebenzi njengowenziweyo. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_create_household_failed">Asikwazanga ukwenza indlu. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="feedback_join_household_failed">Asikwazanga ukujoyina indlu. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+</resources>

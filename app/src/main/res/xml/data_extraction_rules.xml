@@ -5,6 +5,8 @@
    Supabase after sign-in, so it is excluded from cloud backup and device transfer.
    com.rentmate.app_preferences.xml holds the saved Supabase session tokens; a
    restored copy would sign another phone in without Google, so it is excluded too.
+   datastore/rentmate_household.preferences_pb holds the selected household id
+   (RM-0016). It belongs to this sign-in only, so it is excluded as well.
 -->
 <data-extraction-rules>
     <cloud-backup>
@@ -12,11 +14,13 @@
         <exclude domain="database" path="rentmate.db-wal" />
         <exclude domain="database" path="rentmate.db-shm" />
         <exclude domain="sharedpref" path="com.rentmate.app_preferences.xml" />
+        <exclude domain="file" path="datastore/rentmate_household.preferences_pb" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="database" path="rentmate.db" />
         <exclude domain="database" path="rentmate.db-wal" />
         <exclude domain="database" path="rentmate.db-shm" />
         <exclude domain="sharedpref" path="com.rentmate.app_preferences.xml" />
+        <exclude domain="file" path="datastore/rentmate_household.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>

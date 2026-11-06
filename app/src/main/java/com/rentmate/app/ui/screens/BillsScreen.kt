@@ -4,6 +4,8 @@ import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.rentmate.app.R
+import com.rentmate.app.data.RepeatMode
+import com.rentmate.app.data.isRepeating
 import com.rentmate.app.ui.components.EmptyState
 import com.rentmate.app.ui.components.ErrorState
 import com.rentmate.app.ui.components.InlineError
@@ -39,6 +41,8 @@ import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.data.attachments.PhotoLink
 import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.MemberAvatar
+import androidx.compose.material3.SnackbarHost
+import com.rentmate.app.ui.feedback.LocalSnackbarHostState
 import com.rentmate.app.ui.components.PillTone
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.RentMateCard
@@ -90,7 +94,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         modifier = Modifier.padding(top = Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
-                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare) }
+                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat) }
                     }
                 }
             }
@@ -102,6 +106,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
             onDismissRequest = { viewModel.dismissSettleUp() },
             title = { Text(stringResource(R.string.settle_up)) },
             text = {
+              Column {
                 if (state.settleUpLoading) {
                     CircularProgressIndicator()
                 } else {
@@ -137,6 +142,10 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         }
                     }
                 }
+                // RM-0052: the dialog is its own window, so the app's snackbar would be
+                // hidden behind it. Show the same snackbar state here, in front.
+                SnackbarHost(LocalSnackbarHostState.current)
+              }
             },
             confirmButton = {
                 PrimaryButton(stringResource(R.string.close), onClick = { viewModel.dismissSettleUp() })
@@ -147,7 +156,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 
 @Composable
 /** One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010). */
-private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPaid: Boolean, onPay: (String) -> Unit) {
+private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPaid: Boolean, onPay: (String) -> Unit, onStopRepeat: (String) -> Unit) {
     val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { it.is_paid }
     RentMateCard {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -162,6 +171,20 @@ private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPai
             Text(stringResource(R.string.bills_due, bill.due_date.take(10)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
         }
+        if (isRepeating(bill.repeat, bill.repeat_stopped)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(if (RepeatMode.fromWire(bill.repeat) == RepeatMode.Weekly) R.string.bills_repeats_weekly else R.string.bills_repeats_monthly),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (canMarkPaid) SecondaryButton(stringResource(R.string.bills_stop_repeat), onClick = { onStopRepeat(bill.id) })
+            }
+        }
         if (photos.isNotEmpty()) AttachmentThumbnails(photos, modifier = Modifier.padding(top = Spacing.xs))
         bill.bill_shares.forEach { share ->
             Row(
@@ -170,7 +193,7 @@ private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPai
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
-                MemberAvatar(name, size = 28.dp)
+                MemberAvatar(name, size = 28.dp, userId = share.user_id)
                 Text(
                     stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
                     style = MaterialTheme.typography.bodyMedium,

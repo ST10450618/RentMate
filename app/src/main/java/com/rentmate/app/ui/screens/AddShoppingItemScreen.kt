@@ -66,9 +66,5 @@ fun AddShoppingItemScreen(onClose: () -> Unit, viewModel: AddShoppingItemViewMod
             },
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
         )
-
-        (state as? AddShoppingItemUiState.Error)?.let {
-            Text(stringResource(it.messageRes), color = MaterialTheme.colorScheme.error)
-        }
     }
 }

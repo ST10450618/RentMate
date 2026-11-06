@@ -125,9 +125,5 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
             },
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
         )
-
-        (state as? AddChoreUiState.Error)?.let {
-            Text(stringResource(it.messageRes), color = MaterialTheme.colorScheme.error)
-        }
     }
 }

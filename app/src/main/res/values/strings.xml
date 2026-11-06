@@ -9,6 +9,7 @@
     <string name="notif_maintenance">Maintenance updates</string>
 
     <string name="section_language">Language</string>
+    <string name="language_translation_disclaimer">Afrikaans and isiXhosa are machine-translated, similar to Google Translate, and may contain mistakes.</string>
     <!-- RM-0026: each language is shown in its own name, whatever language the
          app is in now, so these are not translated. -->
     <string name="lang_english" translatable="false">English</string>
@@ -89,7 +90,7 @@
     <string name="channel_maintenance_desc">Updates on repair requests</string>
 
     <!-- RM-0035: list screen states -->
-    <string name="state_error_generic">Something went wrong. Check your connection and try again.</string>
+    <string name="state_error_generic">Couldn\'t load this screen. Check your connection and tap Retry.</string>
     <string name="state_retry">Try again</string>
     <string name="empty_bills_title">No bills yet</string>
     <string name="empty_bills_body">Add the first bill and RentMate will split it for everyone.</string>
@@ -129,7 +130,7 @@
     <string name="error_session_expired">Your session has expired. Please sign in again.</string>
     <string name="error_not_allowed">You don\'t have permission to do that.</string>
     <string name="error_already_exists">That already exists.</string>
-    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_generic">That didn\'t work. Check your connection and try again.</string>
     <string name="error_invalid_invite_code">That invite code isn\'t valid. Check it and try again.</string>
     <string name="error_sign_in_failed">Sign-in didn\'t work. Please try again.</string>
     <string name="error_amount_positive">Amount must be greater than 0.</string>
@@ -144,7 +145,7 @@
     <string name="lock_error_cancelled">Unlock cancelled. Try again to continue.</string>
     <string name="lock_error_lockout">Too many attempts. Wait a moment, then try again.</string>
     <string name="lock_error_no_credentials">No fingerprint, face or screen lock is set up on this device.</string>
-    <string name="lock_error_other">Something went wrong while unlocking. Try again.</string>
+    <string name="lock_error_other">Unlocking didn\'t work. Try again.</string>
 
     <string name="biometric_note_no_hardware">This device has no fingerprint or face unlock, so this setting is unavailable.</string>
     <string name="biometric_note_unavailable">Biometric unlock is not available on this device right now.</string>
@@ -165,7 +166,7 @@
     <string name="split_error_exact">Amounts must add up to R%2$s. They add up to R%1$s.</string>
     <string name="split_error_number">Enter a number for every member (or leave it blank for 0).</string>
     <string name="split_error_negative">Split values cannot be negative.</string>
-    <string name="split_error_too_large">That amount is too large.</string>
+    <string name="split_error_too_large">Amount can\'t be more than R999,999.99.</string>
     <string name="bills_confirm_received">Confirm received</string>
     <string name="bills_waiting_for">Waiting for %1$s to confirm</string>
     <string name="bills_ask_to_confirm">Ask %1$s to confirm you paid</string>
@@ -250,4 +251,11 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Sample</string>
     <string name="activity_sample_body">Example activity. Your household\'s real feed appears here once it\'s connected.</string>
+    <string name="repeat_label">Repeat</string>
+    <string name="repeat_never">Never</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
+    <string name="bills_repeats_weekly">Repeats weekly</string>
+    <string name="bills_repeats_monthly">Repeats monthly</string>
+    <string name="bills_stop_repeat">Stop repeating</string>
 </resources>

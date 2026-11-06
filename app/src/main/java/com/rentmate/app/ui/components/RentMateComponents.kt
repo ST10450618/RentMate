@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -30,9 +29,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.rentmate.app.R
 import com.rentmate.app.ui.theme.Aloe
+import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.theme.Spacing
 import java.text.NumberFormat
 import java.util.Locale
@@ -46,7 +45,7 @@ import java.util.Locale
  */
 
 /**
- * The standard content card: white surface, 1dp hairline border, 16dp padding.
+ * The standard content card: white surface, hairline border, 16dp padding.
  *
  * @param accent border colour; pass the secondary (amber) colour for cards that
  *   need a decision from the user, e.g. an overdue bill.
@@ -63,7 +62,7 @@ fun RentMateCard(
     OutlinedCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.dp, accent),
+        border = BorderStroke(Sizes.border, accent),
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
@@ -74,12 +73,12 @@ fun RentMateCard(
     }
 }
 
-/** Small upper-case caption that introduces a card or a group of rows. */
+/** Short caption in sentence case that introduces a card or a group of rows. */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.onSurfaceVariant) {
     Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelMedium,
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
         color = color,
         modifier = modifier.semantics { heading() }
     )
@@ -97,14 +96,14 @@ fun PrimaryButton(
     Button(
         onClick = onClick,
         enabled = enabled && !loading,
-        modifier = modifier.heightIn(min = 48.dp),
+        modifier = modifier.heightIn(min = Sizes.minTouch),
         shape = CircleShape,
         contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
     ) {
         if (loading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(18.dp),
-                strokeWidth = 2.dp,
+                modifier = Modifier.size(Sizes.spinner),
+                strokeWidth = Sizes.stroke,
                 color = MaterialTheme.colorScheme.onPrimary
             )
         } else {
@@ -119,9 +118,9 @@ fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modi
     OutlinedButton(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier.heightIn(min = 40.dp),
+        modifier = modifier.heightIn(min = Sizes.minTouch),
         shape = CircleShape,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        border = BorderStroke(Sizes.border, MaterialTheme.colorScheme.primary),
         contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
     ) {
         Text(text, style = MaterialTheme.typography.labelLarge)
@@ -143,33 +142,40 @@ fun StatusPill(text: String, tone: PillTone, modifier: Modifier = Modifier) {
     }
     Box(
         modifier = modifier
-            .background(bg, RoundedCornerShape(50))
-            .padding(horizontal = Spacing.sm + 2.dp, vertical = 2.dp)
+            .background(bg, CircleShape)
+            .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
     ) {
-        Text(text, style = MaterialTheme.typography.labelSmall, color = fg)
+        Text(text, style = MaterialTheme.typography.bodySmall, color = fg)
     }
 }
 
-/** Circle with a housemate's initial, used wherever a person is shown. */
+/**
+ * Circle with a housemate's initial, used wherever a person is shown.
+ *
+ * @param userId stable id that picks the colour, so one housemate keeps one colour
+ *   on every screen. Without it the colour comes from [name].
+ * @param size [Sizes.avatarRow] in rows, [Sizes.avatarHeader] in headers.
+ */
 @Composable
-fun MemberAvatar(name: String, modifier: Modifier = Modifier, size: Dp = 32.dp) {
+fun MemberAvatar(name: String, modifier: Modifier = Modifier, size: Dp = Sizes.avatarRow, userId: String? = null) {
+    val colors = avatarColorsFor(userId ?: name)
     Box(
         modifier = modifier
             .size(size)
-            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+            .background(colors.background, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Text(
             name.trim().take(1).uppercase().ifEmpty { "?" },
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = colors.foreground
         )
     }
 }
 
 /** The RentMate house mark on an aloe disc, the same artwork as the launcher icon. */
 @Composable
-fun BrandMark(modifier: Modifier = Modifier, size: Dp = 96.dp) {
+fun BrandMark(modifier: Modifier = Modifier, size: Dp = Sizes.brandMark) {
     Box(
         modifier = modifier
             .size(size)

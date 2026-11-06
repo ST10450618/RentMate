@@ -9,6 +9,7 @@
     <string name="notif_maintenance">Opdaterings oor onderhoud</string>
 
     <string name="section_language">Taal</string>
+    <string name="language_translation_disclaimer">Afrikaans en isiXhosa is masjienvertaal, soortgelyk aan Google Translate, en kan foute bevat.</string>
 
     <string name="section_security">Sekuriteit en vertoning</string>
     <string name="biometric_title">Ontsluit met biometrie</string>
@@ -84,7 +85,7 @@
     <string name="channel_maintenance_desc">Opdaterings oor herstelversoeke</string>
 
     <!-- RM-0035: list screen states -->
-    <string name="state_error_generic">Iets het verkeerd geloop. Gaan jou verbinding na en probeer weer.</string>
+    <string name="state_error_generic">Kon nie hierdie skerm laai nie. Gaan jou verbinding na en tik Probeer weer.</string>
     <string name="state_retry">Probeer weer</string>
     <string name="empty_bills_title">Nog geen rekeninge nie</string>
     <string name="empty_bills_body">Voeg die eerste rekening by en RentMate verdeel dit vir almal.</string>
@@ -124,7 +125,7 @@
     <string name="error_session_expired">Jou sessie het verval. Meld asseblief weer aan.</string>
     <string name="error_not_allowed">Jy het nie toestemming om dit te doen nie.</string>
     <string name="error_already_exists">Dit bestaan reeds.</string>
-    <string name="error_generic">Iets het verkeerd geloop. Probeer asseblief weer.</string>
+    <string name="error_generic">Dit het nie gewerk nie. Gaan jou verbinding na en probeer weer.</string>
     <string name="error_invalid_invite_code">Daardie uitnodigingskode is ongeldig. Gaan dit na en probeer weer.</string>
     <string name="error_sign_in_failed">Aanmelding het nie gewerk nie. Probeer asseblief weer.</string>
     <string name="error_amount_positive">Die bedrag moet meer as 0 wees.</string>
@@ -139,7 +140,7 @@
     <string name="lock_error_cancelled">Ontsluiting gekanselleer. Probeer weer om voort te gaan.</string>
     <string name="lock_error_lockout">Te veel pogings. Wag \'n oomblik en probeer dan weer.</string>
     <string name="lock_error_no_credentials">Geen vingerafdruk, gesig of skermslot is op hierdie toestel opgestel nie.</string>
-    <string name="lock_error_other">Iets het met die ontsluiting verkeerd geloop. Probeer weer.</string>
+    <string name="lock_error_other">Die ontsluiting het nie gewerk nie. Probeer weer.</string>
 
     <string name="biometric_note_no_hardware">Hierdie toestel het nie vingerafdruk- of gesigontsluiting nie, so hierdie instelling is nie beskikbaar nie.</string>
     <string name="biometric_note_unavailable">Biometriese ontsluiting is tans nie op hierdie toestel beskikbaar nie.</string>
@@ -160,7 +161,7 @@
     <string name="split_error_exact">Die bedrae moet saam R%2$s wees. Hulle is saam R%1$s.</string>
     <string name="split_error_number">Voer \'n getal vir elke lid in (of laat dit leeg vir 0).</string>
     <string name="split_error_negative">Verdelingswaardes kan nie negatief wees nie.</string>
-    <string name="split_error_too_large">Daardie bedrag is te groot.</string>
+    <string name="split_error_too_large">Die bedrag kan nie meer as R999,999.99 wees nie.</string>
     <string name="bills_confirm_received">Bevestig ontvangs</string>
     <string name="bills_waiting_for">Wag vir %1$s om te bevestig</string>
     <string name="bills_ask_to_confirm">Vra %1$s om te bevestig dat jy betaal het</string>
@@ -244,4 +245,11 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Voorbeeld</string>
     <string name="activity_sample_body">Voorbeeld van aktiwiteit. Jou huishouding se regte aktiwiteit verskyn hier sodra dit gekoppel is.</string>
+    <string name="repeat_label">Herhaal</string>
+    <string name="repeat_never">Nooit</string>
+    <string name="repeat_weekly">Weekliks</string>
+    <string name="repeat_monthly">Maandeliks</string>
+    <string name="bills_repeats_weekly">Herhaal weekliks</string>
+    <string name="bills_repeats_monthly">Herhaal maandeliks</string>
+    <string name="bills_stop_repeat">Stop herhaling</string>
 </resources>

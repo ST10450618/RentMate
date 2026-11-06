@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.HouseholdRow
+import com.rentmate.app.data.activity.FirebaseSession
 import com.rentmate.app.network.toRpcParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
@@ -18,7 +19,7 @@ import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.R
-import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.ui.feedback.FeedbackCenter
 
 sealed interface HouseholdSetupUiState {
     data object Idle : HouseholdSetupUiState
@@ -26,7 +27,6 @@ sealed interface HouseholdSetupUiState {
     /** Created shows the invite code (S2's "generate code with share action") before continuing. */
     data class Created(val inviteCode: String) : HouseholdSetupUiState
     data object Joined : HouseholdSetupUiState
-    data class Error(@StringRes val messageRes: Int) : HouseholdSetupUiState
 }
 
 @Serializable
@@ -38,7 +38,9 @@ private data class JoinHouseholdParams(val code: String)
 @HiltViewModel
 class HouseholdSetupViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val firebaseSession: FirebaseSession,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val _state = MutableStateFlow<HouseholdSetupUiState>(HouseholdSetupUiState.Idle)
     val state: StateFlow<HouseholdSetupUiState> = _state
@@ -54,9 +56,12 @@ class HouseholdSetupViewModel @Inject constructor(
                     .decodeAs<HouseholdRow>()
             }.onSuccess {
                 currentHousehold.set(it.id)
+                // RM-0032: the Firebase token must list the new household.
+                firebaseSession.refreshClaims()
                 _state.value = HouseholdSetupUiState.Created(it.invite_code)
             }.onFailure {
-                _state.value = HouseholdSetupUiState.Error(ErrorMapper.toMessage(it))
+                _state.value = HouseholdSetupUiState.Idle
+                feedback.failure(it, R.string.feedback_create_household_failed, retry = { create(name) })
             }
         }
     }
@@ -71,9 +76,17 @@ class HouseholdSetupViewModel @Inject constructor(
                     .decodeAs<HouseholdRow>()
             }.onSuccess {
                 currentHousehold.set(it.id)
+                // RM-0032: the Firebase token must list the new household.
+                firebaseSession.refreshClaims()
                 _state.value = HouseholdSetupUiState.Joined
             }.onFailure {
-                _state.value = HouseholdSetupUiState.Error(ErrorMapper.toMessage(it, fallback = R.string.error_invalid_invite_code))
+                _state.value = HouseholdSetupUiState.Idle
+                // A server rejection with no better cause most likely means a wrong code.
+                feedback.failure(
+                    it, R.string.feedback_join_household_failed,
+                    retry = { join(inviteCode) },
+                    unknownRes = R.string.error_invalid_invite_code
+                )
             }
         }
     }

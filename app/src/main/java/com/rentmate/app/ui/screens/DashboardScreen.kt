@@ -63,7 +63,8 @@ fun DashboardScreen(
         val hasStarted = rememberHasStartedLoading(state.loading)
         LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
         val genericError = state.error?.let { stringResource(it) } ?: stringResource(R.string.state_error_generic)
-        val noData = state.households.isEmpty()
+        // RM-0016: offline the household list cannot load, but a saved household still has cached cards.
+        val noData = state.households.isEmpty() && state.currentHouseholdId == null
         when {
             noData && state.error != null -> ErrorState(message = genericError, onRetry = viewModel::refresh)
             noData && (state.loading || !hasStarted) -> LoadingState()

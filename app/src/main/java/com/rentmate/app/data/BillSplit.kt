@@ -1,5 +1,6 @@
 package com.rentmate.app.data
 
+import com.rentmate.app.ui.validation.Limits
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -9,6 +10,22 @@ enum class SplitMode(val wire: String) {
     Percentage("Percentage"),
     ExactAmount("ExactAmount")
 }
+
+/** How often a bill repeats. [wire] is the value stored in bills.repeat. */
+enum class RepeatMode(val wire: String) {
+    Never("Never"),
+    Weekly("Weekly"),
+    Monthly("Monthly");
+
+    companion object {
+        /** Unknown or missing values count as Never, so old rows still show. */
+        fun fromWire(value: String?): RepeatMode = entries.firstOrNull { it.wire == value } ?: Never
+    }
+}
+
+/** True while a bill still makes new copies of itself. */
+fun isRepeating(repeat: String?, stopped: Boolean): Boolean =
+    !stopped && RepeatMode.fromWire(repeat) != RepeatMode.Never
 
 /** One member's share in cents, plus the raw value the server's create_bill expects. */
 data class SplitShare(val userId: String, val cents: Long, val value: BigDecimal) {
@@ -57,7 +74,8 @@ object BillSplit {
         if (amount == null || amount.signum() <= 0) return SplitResult.Invalid(SplitError.InvalidAmount)
         val totalCents = amount.movePointRight(2).setScale(0, RoundingMode.HALF_UP)
         if (totalCents.signum() <= 0) return SplitResult.Invalid(SplitError.InvalidAmount)
-        if (totalCents > BigDecimal(99_999_999L)) return SplitResult.Invalid(SplitError.TooLarge)
+        // Same limit as the Amount field, so a total the field accepts always splits.
+        if (totalCents > Limits.AMOUNT_MAX.movePointRight(2)) return SplitResult.Invalid(SplitError.TooLarge)
         if (memberIds.isEmpty()) return SplitResult.Invalid(SplitError.NoMembers)
         val total = totalCents.toLong()
 

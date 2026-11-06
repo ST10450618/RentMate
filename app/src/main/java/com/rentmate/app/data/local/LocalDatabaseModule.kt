@@ -18,7 +18,9 @@ object LocalDatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): RentMateDatabase =
-        Room.databaseBuilder(context, RentMateDatabase::class.java, "rentmate.db").build()
+        Room.databaseBuilder(context, RentMateDatabase::class.java, "rentmate.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     /** Bill DAO. */
     @Provides

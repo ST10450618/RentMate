@@ -9,5 +9,5 @@ Port the greedy debt simplification in settle_up (largest creditor matched with 
 
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
-| RM-0030 | android | Port debt-simplification to Kotlin with unit tests matching server settle_up | Kotlin tests produce identical results to settle_up for shared fixtures | RM-0010 | - | 🟥 Pending |
+| RM-0030 | android | Port debt-simplification to Kotlin with unit tests matching server settle_up | Kotlin tests produce identical results to settle_up for shared fixtures | RM-0010 | - | 🟩 Done · 538db26 · 2026-11-06 · tests passed · Note: 0012 makes settle_up deterministic (cents, amount desc then user_id). Kotlin DebtSimplifier mirrors it; both checked against supabase/tests/fixtures/settle_up_fixtures.json (7 cases). settle_up_test 8 PASS, fails without 0012. Not yet applied to live DB. |
 | RM-0031 | android | Offline settle-up preview from Room ledger, marked provisional, reconciled on sync | In airplane mode Settle-up shows provisional payments; after reconnect it matches server | RM-0016, RM-0030 | - | 🟥 Pending |
