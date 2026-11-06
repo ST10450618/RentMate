@@ -63,12 +63,15 @@ object Sizes {
 }
 
 /**
- * Corner radii: 6 chips, 10 inputs, 14 cards, 18 sheets, full for buttons.
+ * Corner radii: 6 chips, 10 inputs, 14 cards, 18 sheets and dialogs. Buttons
+ * are full pills through CircleShape, not through this scale.
  */
 val RentMateShapes = Shapes(
     extraSmall = RoundedCornerShape(6.dp),
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(14.dp),
     large = RoundedCornerShape(18.dp),
-    extraLarge = RoundedCornerShape(percent = 50)
+    // AlertDialog and DatePickerDialog take their corners from extraLarge, so it
+    // is the 18 dp sheet radius. Buttons use CircleShape directly for the pill.
+    extraLarge = RoundedCornerShape(18.dp)
 )
