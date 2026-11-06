@@ -66,18 +66,20 @@ This README is the project's technical report. It covers purpose, design conside
 
 ## 1. Demonstration video
 
-**▶ Watch the demo:** _unlisted YouTube link added before submission_
+**▶ Watch the demo: https://youtu.be/hNj_BwcDxGE** (unlisted)
+
+[![RentMate demo video](https://img.youtube.com/vi/hNj_BwcDxGE/hqdefault.jpg)](https://youtu.be/hNj_BwcDxGE)
 
 Recorded on a physical Android device with voice-over. It shows:
 
 | Brief requirement | Where in the video |
 |---|---|
-| SSO registration and login with biometric verification | _timestamp_ |
-| Changing and saving settings | _timestamp_ |
-| Real-time data round-trips with the cloud-hosted REST API | _timestamp_ |
-| Going offline, acting, reconnecting and syncing | _timestamp_ |
-| Live data changes in Supabase Auth, the API and the database | _timestamp_ |
-| Each user-defined feature | _timestamp_ |
+| SSO registration and login with biometric verification | Opening section: sign-up with Google, creating and joining a household, app lock with fingerprint or PIN |
+| Changing and saving settings | Settings section: notification switches, language picker |
+| Real-time data round-trips with the cloud-hosted REST API | Money section: a new bill saved through the create_bill RPC |
+| Going offline, acting, reconnecting and syncing | Offline section: airplane mode, queued changes, sync on reconnect |
+| Live data changes in Supabase Auth, the API and the database | Supabase and Firebase sections: new user, bills, photo in Storage, Firestore events, push |
+| Each user-defined feature | House section (4: photo attachments) and offline section (5: offline settle-up preview) |
 
 ## 2. Purpose and scope
 
