@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
+import com.rentmate.app.data.ChoresRepository
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.data.LeaderboardRow
@@ -25,7 +26,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
@@ -76,13 +79,20 @@ class ChoresViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     @ApplicationContext private val context: Context,
-    private val activity: ActivityLogger
+    private val activity: ActivityLogger,
+    private val choresRepository: ChoresRepository
 ) : ViewModel() {
     private val settingsRepository = SettingsRepository(context)
     private val _state = MutableStateFlow(ChoresUiState())
     val state: StateFlow<ChoresUiState> = _state
 
     init {
+        // RM-0016: the list always comes from the Room cache, so it survives a failed refresh.
+        viewModelScope.launch {
+            choresRepository.chores
+                .catch { Log.e(TAG, "could not read cached chores", it) }
+                .collect { chores -> _state.update { it.copy(chores = chores) } }
+        }
         refresh()
     }
 
@@ -90,10 +100,10 @@ class ChoresViewModel @Inject constructor(
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching {
-                supabase.from("chores").select { filter { eq("household_id", householdId) } }.decodeList<ChoreRow>()
-            }.onSuccess { _state.value = _state.value.copy(loading = false, chores = it) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
+            Log.d(TAG, "refresh household=$householdId")
+            runCatching { choresRepository.refresh() }
+                .onSuccess { _state.update { it.copy(loading = false) } }
+                .onFailure { e -> _state.update { it.copy(loading = false, error = ErrorMapper.toMessage(e)) } }
 
             // Names come from the household roster, not the leaderboard, so members who hide
             // themselves from the leaderboard still show a name instead of a raw user ID.
@@ -108,7 +118,7 @@ class ChoresViewModel @Inject constructor(
             }
 
             // RM-0007: the rotation forecast is computed by the server (forecast_chore).
-            val chores = _state.value.chores
+            val chores = choresRepository.chores.first()
             val forecasts = runCatching {
                 coroutineScope {
                     chores.map { chore ->
