@@ -16,6 +16,9 @@ import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -65,7 +68,19 @@ class AddBillViewModel @Inject constructor(
     private val _state = MutableStateFlow<AddBillUiState>(AddBillUiState.Idle)
     val state: StateFlow<AddBillUiState> = _state
 
+    private val household = MutableStateFlow(HouseholdStatus.Unknown)
+    private val rosterRefresh = MutableStateFlow(RosterRefresh.Running)
+
+    /** RM-0056: LoadingState, EmptyState or ErrorState until the form can be filled in. */
+    val loadState: StateFlow<FormLoadState> = combine(household, _members, rosterRefresh) { h, m, r ->
+        formLoadState(h, needsRoster = true, rosterSize = m.size, refresh = r)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, FormLoadState.Loading)
+
     init {
+        viewModelScope.launch {
+            currentHousehold.awaitRestored()
+            currentHousehold.id.collect { household.value = if (it == null) HouseholdStatus.None else HouseholdStatus.Present }
+        }
         // RM-0017: members come from the Room roster, so the split works offline too.
         viewModelScope.launch {
             billsRepository.members
@@ -74,9 +89,21 @@ class AddBillViewModel @Inject constructor(
                     _members.value = rows.map { HouseholdMemberWithProfile(it.user_id, it.display_name?.let(::ProfileNameRow)) }
                 }
         }
+        refreshMembers()
+    }
+
+    /** Reloads the housemates. The ErrorState's Retry button calls it again. */
+    fun refreshMembers() {
+        Log.d(TAG, "refreshMembers")
+        rosterRefresh.value = RosterRefresh.Running
         viewModelScope.launch {
             runCatching { billsRepository.refreshMembers() }
-                .onFailure { Log.w(TAG, "members refresh failed, using the cached roster", it) }
+                .onSuccess { rosterRefresh.value = RosterRefresh.Done }
+                .onFailure {
+                    if (it is kotlinx.coroutines.CancellationException) throw it
+                    Log.w(TAG, "members refresh failed, using the cached roster", it)
+                    rosterRefresh.value = RosterRefresh.Failed
+                }
         }
     }
 

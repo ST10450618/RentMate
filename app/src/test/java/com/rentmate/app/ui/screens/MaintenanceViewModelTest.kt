@@ -1,6 +1,7 @@
 package com.rentmate.app.ui.screens
 
 import com.rentmate.app.data.MaintenanceCategory
+import com.rentmate.app.R
 import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.data.activity.NoOpActivityLogger
 import com.rentmate.app.data.LandlordContact
@@ -126,6 +127,19 @@ class MaintenanceViewModelTest {
         // offline load error from init, not the save error.
         assertEquals(MaintenanceError.LOAD.messageRes, viewModel.state.value.error)
         assertEquals(listOf(MaintenanceError.SAVE.messageRes), feedback.drain().map { it.messageRes })
+    }
+
+    /** RM-0059: a status change confirms with a snackbar naming the new status. */
+    @Test
+    fun `advancing online confirms the new status`() {
+        val viewModel = viewModel(FakeMaintenanceRepository(offline = false))
+        feedback.drain()
+
+        viewModel.advance("any-id", "Sent")
+
+        val message = feedback.drain().single()
+        assertEquals(R.string.house_status_changed, message.messageRes)
+        assertEquals(listOf<Any>("Sent"), message.formatArgs)
     }
 
     @Test

@@ -17,11 +17,14 @@ import javax.inject.Singleton
  * the UI layer resolves the text in the user's language.
  *
  * When [retry] is set the snackbar shows a Retry button that calls it.
+ * RM-0056: when [undo] is set it shows an Undo button instead, for exactly
+ * [UndoQueue.UNDO_WINDOW_MS]. [UndoQueue] sets [undo]; ViewModels do not.
  */
 data class UserMessage(
     @StringRes val messageRes: Int,
     val formatArgs: List<Any> = emptyList(),
-    val retry: (() -> Unit)? = null
+    val retry: (() -> Unit)? = null,
+    val undo: (() -> Unit)? = null
 ) {
     /** The snackbar stays longer when there is a button to tap. */
     val longDuration: Boolean get() = retry != null
@@ -78,7 +81,8 @@ class FeedbackCenter @Inject constructor() {
 
     fun show(message: UserMessage) {
         val time = now()
-        if (message.messageRes == lastRes && time - lastAt < DUPLICATE_WINDOW_MS) return
+        // An Undo message is never dropped: each one belongs to a different change.
+        if (message.undo == null && message.messageRes == lastRes && time - lastAt < DUPLICATE_WINDOW_MS) return
         lastRes = message.messageRes
         lastAt = time
         channel.trySend(message)

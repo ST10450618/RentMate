@@ -20,6 +20,8 @@ import com.rentmate.app.data.sync.FakeAttachments
 import com.rentmate.app.data.sync.RecordingActivity
 import com.rentmate.app.data.sync.SyncStatusTracker
 import com.rentmate.app.ui.feedback.FeedbackCenter
+import com.rentmate.app.ui.feedback.UndoQueue
+import kotlinx.coroutines.test.TestScope
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.MemoryCodeVerifierCache
 import io.github.jan.supabase.auth.MemorySessionManager
@@ -110,7 +112,10 @@ class BillsSettleUpViewModelTest {
         val source = FakeSource(offline = true)
         val feedback = FeedbackCenter()
         val tracker = SyncStatusTracker(OutboxQueue(db), db.syncRejectionDao())
-        val vm = BillsViewModel(supabase, household, FakeAttachments(), RecordingActivity(), repository, feedback, source, tracker)
+        val vm = BillsViewModel(
+            supabase, household, FakeAttachments(), RecordingActivity(), repository, feedback,
+            UndoQueue(feedback, TestScope(), UndoQueue.UNDO_WINDOW_MS), source, tracker
+        )
 
         vm.loadSettleUp()
         val offline = vm.state.value
@@ -120,7 +125,8 @@ class BillsSettleUpViewModelTest {
         feedback.drain()
         vm.confirmSettlement("b", 100.0)
         assertEquals(listOf(R.string.settle_up_confirm_needs_sync), feedback.drain().map { it.messageRes })
-        assertTrue("dialog stays open", vm.state.value.settleUp != null)
+        assertTrue("the preview rows stay on screen", vm.state.value.settleUp != null)
+        assertTrue("a blocked confirm starts no Undo window", vm.state.value.pendingReceived.isEmpty())
 
         repository.offline = false
         source.offline = false

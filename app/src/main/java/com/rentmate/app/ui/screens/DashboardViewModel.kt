@@ -17,14 +17,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
+import com.rentmate.app.data.activity.ActivityEvent
+import com.rentmate.app.data.activity.ActivityRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import java.time.Instant
 import javax.inject.Inject
 import androidx.annotation.StringRes
@@ -36,22 +39,27 @@ data class DashboardUiState(
     val myUserId: String? = null,
     val households: List<HouseholdRow> = emptyList(),
     val currentHouseholdId: String? = null,
-    val members: List<String> = emptyList(),
+    /** RM-0056: housemates' names by user id, from the cached roster, so Home works offline. */
+    val memberNames: Map<String, String> = emptyMap(),
     val overdueBills: List<BillWithSharesRow> = emptyList(),
     val nextChore: ChoreRow? = null,
     val youOwe: Double = 0.0,
-    val owedToYou: Double = 0.0
-)
-
-@Serializable
-private data class MemberNameRow(val display_name: String)
-
-@Serializable
-private data class MemberWrapperRow(val profiles: MemberNameRow? = null)
-
-private val MEMBER_COLUMNS = Columns.raw("profiles(display_name)")
+    val owedToYou: Double = 0.0,
+    /** RM-0056: the answer at the top of Home. */
+    val headline: HomeHeadline = HomeHeadline.Settled,
+    /** RM-0056: the newest few household events, shown under the headline. */
+    val recentActivity: List<ActivityEvent> = emptyList(),
+    /** True when [recentActivity] is sample data; Home then labels it. */
+    val activityIsSample: Boolean = false
+) {
+    /** The current household's name, used as the Home title. */
+    val householdName: String? get() = households.firstOrNull { it.id == currentHouseholdId }?.name
+}
 
 private const val TAG = "DashboardViewModel"
+
+/** How many events Home shows under "Recent activity". The Activity screen has the rest. */
+internal const val RECENT_ACTIVITY_LIMIT = 3
 
 /** The Dashboard cards derived from cached bills and chores. */
 internal data class DashboardSummary(
@@ -87,12 +95,14 @@ internal fun summarise(
 }
 
 /** S3 Dashboard. Cards come from the Room cache; [refresh] updates it from Supabase. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     private val billsRepository: BillsRepository,
-    private val choresRepository: ChoresRepository
+    private val choresRepository: ChoresRepository,
+    private val activityRepository: ActivityRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(DashboardUiState())
     val state: StateFlow<DashboardUiState> = _state
@@ -102,18 +112,38 @@ class DashboardViewModel @Inject constructor(
         // survive a failed refresh.
         viewModelScope.launch {
             combine(currentHousehold.id, billsRepository.bills, choresRepository.chores) { id, bills, chores ->
-                id to summarise(bills, chores, supabase.auth.currentUserOrNull()?.id, Instant.now().toString())
+                val myId = supabase.auth.currentUserOrNull()?.id
+                Triple(id, summarise(bills, chores, myId, Instant.now().toString()), homeHeadline(bills, myId))
             }.catch { Log.e(TAG, "could not read cached dashboard data", it) }
-                .collect { (id, summary) ->
+                .collect { (id, summary, headline) ->
+                    Log.d(TAG, "headline -> ${headline::class.simpleName}")
                     _state.update {
                         it.copy(
                             currentHouseholdId = id,
                             overdueBills = summary.overdueBills,
                             nextChore = summary.nextChore,
                             youOwe = summary.youOwe,
-                            owedToYou = summary.owedToYou
+                            owedToYou = summary.owedToYou,
+                            headline = headline
                         )
                     }
+                }
+        }
+        // RM-0056: names for "Pay Sipho" come from the Room roster, so they show offline.
+        viewModelScope.launch {
+            billsRepository.members
+                .catch { Log.e(TAG, "could not read cached members", it) }
+                .collect { rows ->
+                    _state.update { s -> s.copy(memberNames = rows.mapNotNull { r -> r.display_name?.let { r.user_id to it } }.toMap()) }
+                }
+        }
+        // RM-0056: recent activity moves into Home. A failing feed leaves the list empty.
+        viewModelScope.launch {
+            currentHousehold.id
+                .flatMapLatest { id -> if (id == null) flowOf(emptyList()) else activityRepository.observe(id, RECENT_ACTIVITY_LIMIT) }
+                .catch { Log.w(TAG, "recent activity failed", it) }
+                .collect { events ->
+                    _state.update { it.copy(recentActivity = events, activityIsSample = activityRepository.isSampleData) }
                 }
         }
         refresh()
@@ -144,13 +174,7 @@ class DashboardViewModel @Inject constructor(
                 .onFailure { if (error == null) error = ErrorMapper.toMessage(it) }
             runCatching { choresRepository.refresh() }
                 .onFailure { if (error == null) error = ErrorMapper.toMessage(it) }
-            runCatching {
-                supabase.from("household_members")
-                    .select(columns = MEMBER_COLUMNS) { filter { eq("household_id", householdId) } }
-                    .decodeList<MemberWrapperRow>()
-                    .mapNotNull { it.profiles?.display_name }
-            }.onSuccess { members -> _state.update { it.copy(members = members) } }
-                .onFailure { if (error == null) error = ErrorMapper.toMessage(it) }
+            // Members are refreshed with the bills (BillsRepository.refresh) and read from Room above.
 
             _state.update { it.copy(loading = false, error = error) }
         }

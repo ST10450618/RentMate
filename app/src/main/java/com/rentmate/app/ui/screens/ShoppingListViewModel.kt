@@ -22,12 +22,28 @@ import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
 import com.rentmate.app.R
 import com.rentmate.app.ui.feedback.FeedbackCenter
+import com.rentmate.app.ui.feedback.UndoQueue
+import com.rentmate.app.ui.feedback.UndoableAction
+import com.rentmate.app.ui.feedback.UserMessage
 
 data class ShoppingListUiState(
     val items: List<ShoppingItemRow> = emptyList(),
     val loading: Boolean = false,
-    @StringRes val error: Int? = null
-)
+    @StringRes val error: Int? = null,
+    /** RM-0056: items deleted but still inside their Undo window. They are hidden. */
+    val hiddenItems: Set<String> = emptySet(),
+    /** RM-0059: items tapped as bought but still inside their Undo window. They show as bought. */
+    val boughtPending: Set<String> = emptySet()
+) {
+    /** The items the screen lists: everything except those waiting to be deleted. */
+    val visibleItems: List<ShoppingItemRow> get() = items.filterNot { it.id in hiddenItems }
+
+    /** RM-0059: items still to buy, shown first. */
+    val toBuy: List<ShoppingItemRow> get() = visibleItems.filterNot { it.is_purchased || it.id in boughtPending }
+
+    /** RM-0059: bought items, folded under "Bought (n)". */
+    val bought: List<ShoppingItemRow> get() = visibleItems.filter { it.is_purchased || it.id in boughtPending }
+}
 
 private const val TAG = "ShoppingListViewModel"
 
@@ -37,7 +53,8 @@ class ShoppingListViewModel @Inject constructor(
     private val currentHousehold: CurrentHousehold,
     private val activity: ActivityLogger,
     private val shoppingRepository: ShoppingRepository,
-    private val feedback: FeedbackCenter
+    private val feedback: FeedbackCenter,
+    private val undoQueue: UndoQueue
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShoppingListUiState())
     val state: StateFlow<ShoppingListUiState> = _state
@@ -64,22 +81,57 @@ class ShoppingListViewModel @Inject constructor(
     }
 
     /**
-     * Marks an item bought. RM-0017: offline the change is queued and the row
-     * shows as pending; the repository refreshes the cache after an online save.
+     * Marks an item bought. RM-0059: the item moves to Bought at once and a
+     * snackbar offers Undo for 5 s; the server call runs only after that (see
+     * [UndoQueue]). RM-0017: offline the change is queued and the row shows as
+     * pending; the repository refreshes the cache after an online save.
      */
     fun purchase(id: String) {
-        val name = _state.value.items.firstOrNull { it.id == id }?.name
-        viewModelScope.launch {
-            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
-            runCatching { shoppingRepository.markPurchased(id, userId) }
-                .onSuccess { result ->
-                    when (result) {
-                        is WriteResult.Sent -> if (name != null) activity.shoppingBought(name, id)
+        val name = _state.value.items.firstOrNull { it.id == id }?.name ?: return
+        Log.d(TAG, "purchase $id, waiting for Undo")
+        undoQueue.submit(
+            UserMessage(R.string.house_undo_bought, listOf(name)),
+            UndoableAction(
+                key = "buy:$id",
+                hide = { _state.update { it.copy(boughtPending = it.boughtPending + id) } },
+                restore = { _state.update { it.copy(boughtPending = it.boughtPending - id) } },
+                commit = {
+                    val userId = supabase.auth.currentUserOrNull()?.id
+                        ?: throw IllegalStateException("not signed in")
+                    when (shoppingRepository.markPurchased(id, userId)) {
+                        is WriteResult.Sent -> activity.shoppingBought(name, id)
                         // RM-0018: SyncWorker posts shoppingBought once the queued purchase uploads.
                         is WriteResult.Queued -> Log.d(TAG, "purchase of $id queued offline")
                     }
+                    _state.update { it.copy(boughtPending = it.boughtPending - id) }
+                },
+                onCommitFailed = { feedback.failure(it, R.string.feedback_mark_bought_failed, retry = { purchase(id) }) }
+            )
+        )
+    }
+
+    /**
+     * RM-0056: deletes an item. It disappears at once and a snackbar offers
+     * Undo for 5 s; the server delete runs only after that. See [UndoQueue].
+     * Delete is online only: offline the item comes back with a Retry snackbar.
+     */
+    fun delete(id: String) {
+        Log.d(TAG, "delete $id, waiting for Undo")
+        undoQueue.submit(
+            UserMessage(R.string.undo_item_deleted),
+            UndoableAction(
+                key = "delete:$id",
+                hide = { _state.update { it.copy(hiddenItems = it.hiddenItems + id) } },
+                restore = { _state.update { it.copy(hiddenItems = it.hiddenItems - id) } },
+                commit = {
+                    shoppingRepository.deleteItem(id)
+                    _state.update { it.copy(hiddenItems = it.hiddenItems - id) }
+                },
+                onCommitFailed = {
+                    if (it is IllegalStateException) feedback.show(R.string.feedback_delete_item_pending)
+                    else feedback.failure(it, R.string.feedback_delete_item_failed, retry = { delete(id) })
                 }
-                .onFailure { feedback.failure(it, R.string.feedback_mark_bought_failed, retry = { purchase(id) }) }
-        }
+            )
+        )
     }
 }

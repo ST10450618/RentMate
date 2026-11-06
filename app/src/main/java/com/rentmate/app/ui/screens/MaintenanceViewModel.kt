@@ -20,6 +20,7 @@ import com.rentmate.app.data.attachments.THUMBNAIL_URL_EXPIRY
 import com.rentmate.app.data.attachments.loadLinks
 import kotlinx.coroutines.CancellationException
 import com.rentmate.app.ui.feedback.FeedbackCenter
+import com.rentmate.app.ui.feedback.UserMessage
 import com.rentmate.app.ui.feedback.actionErrorRes
 import com.rentmate.app.ui.error.ErrorMapper
 import com.rentmate.app.ui.launchSafely
@@ -202,10 +203,15 @@ class MaintenanceViewModel @Inject constructor(
         return null
     }
 
-    fun advance(id: String) {
+    /**
+     * Moves a request one step on. RM-0059: when [statusLabel] (the new
+     * status, already translated) is given, a snackbar confirms the change.
+     */
+    fun advance(id: String, statusLabel: String? = null) {
         Log.d(TAG, "advance $id")
         launchSafely(TAG, onError = { fail(it, MaintenanceError.UPDATE) }) {
             repository.advance(id)
+            if (statusLabel != null) feedback.show(UserMessage(R.string.house_status_changed, listOf(statusLabel)))
             repository.requests.value.firstOrNull { it.id == id }?.let {
                 activity.maintenanceStatus(it.title, it.status.name.lowercase().replaceFirstChar { c -> c.uppercase() }, id)
             }

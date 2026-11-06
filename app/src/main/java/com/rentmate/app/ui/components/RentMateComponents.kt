@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -26,7 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -35,8 +39,8 @@ import com.rentmate.app.ui.theme.Aloe
 import com.rentmate.app.ui.theme.Ink
 import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.theme.Spacing
-import java.text.NumberFormat
-import java.util.Locale
+import com.rentmate.app.ui.format.RandFormat
+import java.math.BigDecimal
 
 /*
  * Shared building blocks for every RentMate screen (RM-0034).
@@ -86,7 +90,16 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier, color: Color = Mat
     )
 }
 
-/** Filled pill button for the main action on a screen or card. Shows a spinner while [loading]. */
+/**
+ * The one large filled pill button for the main action on a screen, such as
+ * "Pay Sipho" on Home or "Save bill" on the bill form. Use one per screen;
+ * other actions use [SecondaryButton] or a text button.
+ *
+ * RM-0056: it is 52 dp tall with SemiBold text, and pass
+ * Modifier.fillMaxWidth() for the mockups' full-width look. When disabled it
+ * stays aloe but faded, so a form shows where Save is before it is valid.
+ * Shows a spinner while [loading].
+ */
 @Composable
 fun PrimaryButton(
     text: String,
@@ -95,11 +108,16 @@ fun PrimaryButton(
     enabled: Boolean = true,
     loading: Boolean = false
 ) {
+    val scheme = MaterialTheme.colorScheme
     Button(
         onClick = onClick,
         enabled = enabled && !loading,
-        modifier = modifier.heightIn(min = Sizes.minTouch),
+        modifier = modifier.heightIn(min = Sizes.primaryButton),
         shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            disabledContainerColor = scheme.primary.copy(alpha = DISABLED_ALPHA),
+            disabledContentColor = scheme.onPrimary.copy(alpha = DISABLED_CONTENT_ALPHA)
+        ),
         contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
     ) {
         if (loading) {
@@ -109,10 +127,14 @@ fun PrimaryButton(
                 color = MaterialTheme.colorScheme.onPrimary
             )
         } else {
-            Text(text, style = MaterialTheme.typography.labelLarge)
+            Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
         }
     }
 }
+
+/** How faded a disabled [PrimaryButton] is, matching the mockup (opacity 0.45). */
+private const val DISABLED_ALPHA = 0.45f
+private const val DISABLED_CONTENT_ALPHA = 0.8f
 
 /** Outlined pill button for secondary actions that sit next to a [PrimaryButton]. */
 @Composable
@@ -189,6 +211,25 @@ fun OnBrandButton(
     }
 }
 
+/**
+ * A row of chips or pills that wraps onto the next line when it runs out of
+ * room. RM-0056: at the largest font size three chips no longer fit on a
+ * phone, and a plain Row clips the last one.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ChipRow(
+    modifier: Modifier = Modifier,
+    spacing: Dp = Spacing.sm,
+    content: @Composable () -> Unit
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(spacing),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+    ) { content() }
+}
+
 /** Visual weight of a [StatusPill]. */
 enum class PillTone { Positive, Attention, Danger, Neutral }
 
@@ -221,10 +262,13 @@ fun StatusPill(text: String, tone: PillTone, modifier: Modifier = Modifier) {
 @Composable
 fun MemberAvatar(name: String, modifier: Modifier = Modifier, size: Dp = Sizes.avatarRow, userId: String? = null) {
     val colors = avatarColorsFor(userId ?: name)
+    // The initial is decoration: the name always sits next to the avatar, so
+    // TalkBack skips it instead of reading a lone letter.
     Box(
         modifier = modifier
             .size(size)
-            .background(colors.background, CircleShape),
+            .background(colors.background, CircleShape)
+            .clearAndSetSemantics { },
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -252,10 +296,15 @@ fun BrandMark(modifier: Modifier = Modifier, size: Dp = Sizes.brandMark) {
     }
 }
 
-private val zarFormat: NumberFormat = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
-
 /**
- * Formats an amount as South African rand, e.g. `R1 250,00`, so money looks the
- * same on every screen instead of each one using its own `"R%.2f"` template.
+ * Formats an amount as South African rand, for example `R 1 250,00`.
+ * Every screen uses it, so money looks the same everywhere. RM-0056: it calls
+ * [RandFormat], the one shared en-ZA formatter.
  */
-fun formatRand(amount: Double): String = zarFormat.format(amount)
+fun formatRand(amount: Double): String = RandFormat.format(amount)
+
+/** Short rand for list rows: `R 1 245`, or `R 12,50` when there are cents. See [RandFormat.formatShort]. */
+fun formatRandShort(amount: Double): String = RandFormat.formatShort(amount)
+
+/** [formatRand] for exact amounts, such as the split totals on Add Bill. */
+fun formatRand(amount: BigDecimal): String = RandFormat.format(amount)

@@ -1,51 +1,42 @@
 package com.rentmate.app.ui.screens
 
-import com.rentmate.app.ui.components.StatusPill
-import com.rentmate.app.ui.components.PillTone
+import android.util.Log
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material.icons.filled.ShoppingBasket
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.activity.ActivityEvent
 import com.rentmate.app.data.activity.ActivityType
+import com.rentmate.app.ui.components.EmptyState
 import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.ListGroup
+import com.rentmate.app.ui.components.ListHeading
+import com.rentmate.app.ui.components.ListRow
+import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.MemberAvatar
-import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.components.PillTone
 import com.rentmate.app.ui.components.ScreenHeader
-import com.rentmate.app.ui.components.SectionLabel
+import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.theme.RentMateTheme
 import com.rentmate.app.ui.theme.Spacing
 import java.time.Instant
@@ -54,22 +45,36 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** Household activity feed: what housemates did recently, newest first, grouped by day. */
+private const val TAG = "ActivityScreen"
+
+/**
+ * Household activity feed: what housemates did recently, newest first, grouped by day.
+ *
+ * RM-0060: opens from See all on Home, so it has a back arrow. [onBack] defaults
+ * to the system back action, so the navigation graph does not need to pass it.
+ */
 @Composable
-fun ActivityScreen(viewModel: ActivityViewModel = hiltViewModel()) {
+fun ActivityScreen(onBack: (() -> Unit)? = null, viewModel: ActivityViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
-    ActivityContent(state, onRetry = viewModel::retry)
+    val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    ActivityContent(
+        state,
+        onRetry = viewModel::retry,
+        onBack = onBack ?: { dispatcher?.onBackPressed(); Unit }
+    )
 }
 
 @Composable
-private fun ActivityContent(state: ActivityUiState, now: Instant = Instant.now(), onRetry: () -> Unit = {}) {
+private fun ActivityContent(
+    state: ActivityUiState,
+    now: Instant = Instant.now(),
+    onRetry: () -> Unit = {},
+    onBack: (() -> Unit)? = null
+) {
     Column(modifier = Modifier.fillMaxSize()) {
-        ScreenHeader(
-            title = stringResource(R.string.activity_title),
-            subtitle = stringResource(R.string.activity_subtitle)
-        )
+        ScreenHeader(title = stringResource(R.string.activity_title), onBack = onBack)
         when (state) {
-            ActivityUiState.Loading -> CenteredBox { CircularProgressIndicator() }
+            ActivityUiState.Loading -> LoadingState()
             // RM-0035: same retry error state as the other list screens.
             is ActivityUiState.Error -> ErrorState(
                 message = stringResource(R.string.activity_error),
@@ -106,41 +111,35 @@ private fun SampleDataBanner() {
     }
 }
 
-@Composable
-private fun CenteredBox(content: @Composable () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize().padding(Spacing.screen), contentAlignment = Alignment.Center) {
-        content()
-    }
-}
-
+/** RM-0056: the shared EmptyState, with the activity illustration and no action. */
 @Composable
 private fun ActivityEmpty() {
-    CenteredBox {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            Image(painterResource(R.drawable.illus_empty_activity), contentDescription = null)
-            Text(stringResource(R.string.activity_empty_title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(R.string.activity_empty_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+    EmptyState(
+        illustration = R.drawable.illus_empty_activity,
+        title = stringResource(R.string.activity_empty_title),
+        body = stringResource(R.string.activity_empty_body)
+    )
 }
 
+/**
+ * RM-0060: one heading per day (Today, Yesterday, then the date) and that
+ * day's events as rows in one rounded group, as in the Activity mockup.
+ */
 @Composable
 private fun ActivityList(events: List<ActivityEvent>, now: Instant) {
     val zone = remember { ZoneId.systemDefault() }
     val groups = remember(events, now) { groupByDay(events, LocalDate.now(zone), zone) }
+    Log.d(TAG, "showing ${events.size} events in ${groups.size} days")
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.screen),
+        contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.sm),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         groups.forEach { group ->
-            item(key = "header-${group.bucket}") { SectionLabel(dayLabel(group.bucket)) }
-            items(group.events, key = { it.id }) { ActivityRow(it, now) }
+            item(key = "header-${group.bucket}") { ListHeading(dayLabel(group.bucket)) }
+            item(key = "group-${group.bucket}") {
+                ListGroup(group.events) { ActivityRow(it, zone) }
+            }
         }
     }
 }
@@ -152,40 +151,53 @@ private fun dayLabel(bucket: DayBucket): String = when (bucket) {
     is DayBucket.On -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(bucket.date)
 }
 
+/** The "5 min ago" label for an event. Home reuses it (RM-0056). */
 @Composable
-private fun relativeTimeLabel(time: RelativeTime): String = when (time) {
+internal fun relativeTimeLabel(time: RelativeTime): String = when (time) {
     RelativeTime.JustNow -> stringResource(R.string.activity_just_now)
     is RelativeTime.Minutes -> pluralStringResource(R.plurals.activity_minutes_ago, time.count, time.count)
     is RelativeTime.Hours -> pluralStringResource(R.plurals.activity_hours_ago, time.count, time.count)
     is RelativeTime.Days -> pluralStringResource(R.plurals.activity_days_ago, time.count, time.count)
 }
 
-@Composable
-private fun ActivityRow(event: ActivityEvent, now: Instant) {
-    RentMateCard {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
-            MemberAvatar(event.actorName)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.activity_event, event.actorName, event.summary), style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    relativeTimeLabel(relativeTime(event.createdAt, now)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(iconFor(event.type), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        }
-    }
+/** RM-0060: the part of the household an event is about, shown after the time. */
+@StringRes
+internal fun activityContextRes(type: ActivityType): Int = when (type) {
+    ActivityType.BILL_ADDED, ActivityType.BILL_PAID -> R.string.activity_context_bills
+    ActivityType.CHORE_COMPLETED -> R.string.activity_context_chores
+    ActivityType.SHOPPING_ADDED, ActivityType.SHOPPING_BOUGHT -> R.string.activity_context_shopping
+    ActivityType.MAINTENANCE_LOGGED, ActivityType.MAINTENANCE_STATUS -> R.string.activity_context_repairs
 }
 
-private fun iconFor(type: ActivityType): ImageVector = when (type) {
-    ActivityType.BILL_ADDED -> Icons.Filled.ReceiptLong
-    ActivityType.BILL_PAID -> Icons.Filled.Payments
-    ActivityType.CHORE_COMPLETED -> Icons.Filled.CheckCircle
-    ActivityType.SHOPPING_ADDED -> Icons.Filled.ShoppingCart
-    ActivityType.SHOPPING_BOUGHT -> Icons.Filled.ShoppingBasket
-    ActivityType.MAINTENANCE_LOGGED -> Icons.Filled.Build
-    ActivityType.MAINTENANCE_STATUS -> Icons.Filled.Sync
+/**
+ * RM-0060: the status pill at the end of a row, for events that finish
+ * something, or null when the sentence says it all.
+ */
+internal fun activityStatusPill(type: ActivityType): Pair<Int, PillTone>? = when (type) {
+    ActivityType.BILL_PAID -> R.string.activity_pill_paid to PillTone.Positive
+    ActivityType.CHORE_COMPLETED -> R.string.activity_pill_done to PillTone.Positive
+    ActivityType.SHOPPING_BOUGHT -> R.string.activity_pill_bought to PillTone.Positive
+    ActivityType.MAINTENANCE_STATUS -> R.string.activity_pill_updated to PillTone.Neutral
+    ActivityType.BILL_ADDED, ActivityType.SHOPPING_ADDED, ActivityType.MAINTENANCE_LOGGED -> null
+}
+
+/**
+ * One event as a plain sentence ("Thandi added a bill: Wi-Fi"), with the
+ * actor's avatar colour and initial, a muted line with the clock time and the
+ * part of the household, and a status pill when the event finished something.
+ */
+@Composable
+internal fun ActivityRow(event: ActivityEvent, zone: ZoneId) {
+    val time = remember(event.createdAt, zone) {
+        DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(event.createdAt.atZone(zone))
+    }
+    val pill = activityStatusPill(event.type)
+    ListRow(
+        title = stringResource(R.string.activity_event, event.actorName, event.summary),
+        supporting = stringResource(R.string.activity_row_meta, time, stringResource(activityContextRes(event.type))),
+        leading = { MemberAvatar(event.actorName) },
+        trailing = pill?.let { (res, tone) -> { StatusPill(stringResource(res), tone) } }
+    )
 }
 
 @Preview(showBackground = true)

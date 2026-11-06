@@ -93,7 +93,9 @@ fun RentMateTheme(
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = Typography,
-        shapes = RentMateShapes,
-        content = content
-    )
+        shapes = RentMateShapes
+    ) {
+        // RM-0056: gutter and list columns follow the window width.
+        ProvideScreenLayout(content)
+    }
 }
