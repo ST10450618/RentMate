@@ -13,6 +13,9 @@ import androidx.room.TypeConverters
  * integer cents and adds the bill repeat columns; see [MIGRATION_1_2]. v3
  * (RM-0017) adds outbox replay fields and the member roster; see [MIGRATION_2_3].
  * v4 (RM-0018) adds outbox photo paths and the rejection log; see [MIGRATION_3_4].
+ *
+ * Based on: Android Developers, Save data in a local database using Room,
+ * https://developer.android.com/training/data-storage/room (accessed 2026-11-06)
  */
 @Database(
     entities = [

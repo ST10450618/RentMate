@@ -238,4 +238,17 @@ class DaoTest {
         assertTrue(db.shoppingItemDao().observeItems("h1").first().isEmpty())
         assertTrue(db.outboxDao().getAllOldestFirst().isEmpty())
     }
+
+    /** RM-0019: dismissing the notice removes only the rejections it showed. */
+    @Test
+    fun syncRejections_deleteByIds_keepsOthers() = runBlocking {
+        val dao = db.syncRejectionDao()
+        val first = dao.insert(SyncRejectionEntity(op = "INSERT", tableName = "bills", entityId = "b1", reason = "INVALID", rejectedAt = 1))
+        val second = dao.insert(SyncRejectionEntity(op = "UPDATE", tableName = "shopping_items", entityId = "i1", reason = "NOT_ALLOWED", rejectedAt = 2))
+        val third = dao.insert(SyncRejectionEntity(op = "INSERT", tableName = "chores", entityId = "c1", reason = "INVALID", rejectedAt = 3))
+
+        dao.deleteByIds(listOf(first, third))
+
+        assertTrue(dao.observeAll().first().map { it.id } == listOf(second))
+    }
 }

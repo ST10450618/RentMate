@@ -1,6 +1,7 @@
 package com.rentmate.app.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -8,6 +9,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+
+private const val TAG = "LocalDatabaseModule"
 
 /** Provides the Room database and its DAOs. */
 @Module
@@ -21,6 +24,7 @@ object LocalDatabaseModule {
         Room.databaseBuilder(context, RentMateDatabase::class.java, "rentmate.db")
             .addMigrations(*ALL_MIGRATIONS)
             .build()
+            .also { Log.d(TAG, "Room database built with ${ALL_MIGRATIONS.size} migrations") }
 
     /** Bill DAO. */
     @Provides

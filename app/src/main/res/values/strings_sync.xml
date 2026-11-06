@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- RM-0019: the app-wide offline and sync banner. -->
+    <string name="sync_banner_offline">You\'re offline. Changes will sync when you reconnect.</string>
+    <plurals name="sync_banner_offline_pending">
+        <item quantity="one">%d change is waiting.</item>
+        <item quantity="other">%d changes are waiting.</item>
+    </plurals>
+    <plurals name="sync_banner_syncing">
+        <item quantity="one">Syncing %d change…</item>
+        <item quantity="other">Syncing %d changes…</item>
+    </plurals>
+    <plurals name="sync_banner_failed">
+        <item quantity="one">Could not sync %d change.</item>
+        <item quantity="other">Could not sync %d changes.</item>
+    </plurals>
+    <string name="sync_banner_synced">All changes synced</string>
+
+    <!-- RM-0019: shown once for changes the server refused for good. -->
+    <string name="sync_rejected_not_allowed">A change you made offline was not saved. You are not allowed to make it.</string>
+    <string name="sync_rejected_gone">A change you made offline was not saved. The item no longer exists.</string>
+    <string name="sync_rejected_not_saved">A change you made offline could not be saved.</string>
+    <plurals name="sync_rejected_more">
+        <item quantity="one">%d more change was not saved.</item>
+        <item quantity="other">%d more changes were not saved.</item>
+    </plurals>
+    <string name="sync_rejected_dismiss">Dismiss</string>
+</resources>

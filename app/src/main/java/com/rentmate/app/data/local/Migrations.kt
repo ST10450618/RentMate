@@ -1,7 +1,13 @@
 package com.rentmate.app.data.local
 
+import android.util.Log
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+
+private const val TAG = "Migrations"
+
+// Based on: Android Developers, Migrate your Room database,
+// https://developer.android.com/training/data-storage/room/migrating-db-versions (accessed 2026-11-06)
 
 /**
  * v1 -> v2 (RM-0016): money moves from REAL Rand to INTEGER cents, and bills get
@@ -15,6 +21,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  */
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        Log.i(TAG, "migrating Room schema 1 -> 2")
         db.execSQL("ALTER TABLE `bills` RENAME TO `bills_v1`")
         db.execSQL("ALTER TABLE `bill_shares` RENAME TO `bill_shares_v1`")
         // The renamed tables keep their index names, which the new tables need.
@@ -67,6 +74,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
  */
 val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        Log.i(TAG, "migrating Room schema 2 -> 3")
         db.execSQL("ALTER TABLE `outbox` ADD COLUMN `entityId` TEXT NOT NULL DEFAULT ''")
         db.execSQL("ALTER TABLE `outbox` ADD COLUMN `attemptCount` INTEGER NOT NULL DEFAULT 0")
         db.execSQL("ALTER TABLE `outbox` ADD COLUMN `lastError` TEXT")
@@ -85,6 +93,7 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
  */
 val MIGRATION_3_4 = object : Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        Log.i(TAG, "migrating Room schema 3 -> 4")
         db.execSQL("ALTER TABLE `outbox` ADD COLUMN `attachmentPaths` TEXT NOT NULL DEFAULT '[]'")
         db.execSQL(
             "CREATE TABLE IF NOT EXISTS `sync_rejections` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +

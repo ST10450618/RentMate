@@ -15,7 +15,9 @@ private const val TAG = "StartupViewModel"
 
 /** Splash while the saved session loads, then the screen to start on. */
 sealed interface StartupState {
+    /** The saved session is still loading; show the splash. */
     data object Loading : StartupState
+    /** The first screen is known. */
     data class Ready(val destination: StartDestination) : StartupState
 }
 
@@ -29,6 +31,8 @@ class StartupViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<StartupState>(StartupState.Loading)
+
+    /** Splash or the chosen start destination. */
     val state: StateFlow<StartupState> = _state.asStateFlow()
 
     init {

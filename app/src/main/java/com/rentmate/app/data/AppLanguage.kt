@@ -19,10 +19,16 @@ private const val TAG = "AppLanguage"
  * "af" -> values-af, "xh" -> values-xh, English is the default in values/.
  * [labelRes] is the language's name in that language (an endonym), so a user
  * can always find their own language in the picker whatever the app shows now.
+ *
+ * Based on: Android Developers, Per-app language preferences,
+ * https://developer.android.com/guide/topics/resources/app-languages (accessed 2026-11-06)
  */
 enum class AppLanguage(val tag: String, @StringRes val labelRes: Int) {
+    /** English, the default in values/. */
     ENGLISH("en", R.string.lang_english),
+    /** Afrikaans, in values-af/. */
     AFRIKAANS("af", R.string.lang_afrikaans),
+    /** isiXhosa, in values-xh/. */
     XHOSA("xh", R.string.lang_xhosa);
 
     companion object {
@@ -81,6 +87,7 @@ suspend fun applyLanguage(language: AppLanguage) = withContext(Dispatchers.Main.
 suspend fun reconcileLanguage(repository: SettingsRepository) {
     val stored = repository.storedLanguageTag.first()?.let(AppLanguage::fromTag)
     val applied = withContext(Dispatchers.Main.immediate) { appliedLanguage() }
+    Log.d(TAG, "reconcile: stored=${stored?.tag} applied=${applied?.tag}")
     when {
         applied != null && applied != stored -> repository.setLanguage(applied)
         applied == null && stored != null -> applyLanguage(stored)

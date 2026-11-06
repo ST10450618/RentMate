@@ -15,14 +15,17 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
 
+    /** Maintenance requests go straight to Supabase. They have no offline cache. */
     @Binds
     @Singleton
     abstract fun bindMaintenanceRepository(impl: SupabaseMaintenanceRepository): MaintenanceRepository
 
+    /** RM-0028: stores photos in Supabase Storage. */
     @Binds
     @Singleton
     abstract fun bindAttachmentRepository(impl: SupabaseAttachmentRepository): AttachmentRepository
 
+    /** RM-0028: compresses photos to JPEG with Bitmap before upload. */
     @Binds
     @Singleton
     abstract fun bindPhotoCompressor(impl: AndroidPhotoCompressor): PhotoCompressor
@@ -61,4 +64,9 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindShoppingRepository(impl: CachedShoppingRepository): ShoppingRepository
+
+    /** RM-0031: the server's settle_up plan. */
+    @Binds
+    @Singleton
+    abstract fun bindSettleUpSource(impl: SupabaseSettleUpSource): SettleUpSource
 }

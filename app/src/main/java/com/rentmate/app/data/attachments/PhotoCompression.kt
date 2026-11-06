@@ -22,10 +22,15 @@ data class PixelSize(val width: Int, val height: Int)
  * [SCALE_STEP] and try again, down to [MIN_EDGE].
  */
 object PhotoCompression {
+    /** Upload limit in bytes. It matches the bucket's file size limit. */
     const val MAX_BYTES = 1_000_000
+    /** Longest edge of the first attempt, in pixels. */
     const val MAX_EDGE = 2048
+    /** Smallest longest edge tried before giving up. */
     const val MIN_EDGE = 320
+    /** Factor that shrinks the edge once every quality at the current size has failed. */
     const val SCALE_STEP = 0.75
+    /** JPEG qualities tried at each size, best first. */
     val QUALITIES = listOf(85, 75, 65, 55, 45)
 
     /** Fits [width] x [height] inside a [maxEdge] square, keeping the aspect ratio and never upscaling. */

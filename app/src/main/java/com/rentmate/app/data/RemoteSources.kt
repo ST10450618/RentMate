@@ -1,5 +1,6 @@
 package com.rentmate.app.data
 
+import android.util.Log
 import com.rentmate.app.network.toRpcParams
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
@@ -9,10 +10,17 @@ import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val TAG = "RemoteSources"
+
 /**
  * RM-0016: the network calls behind the cached repositories. Each call may throw
  * (IOException offline, RestException from Supabase). Kept as interfaces so tests
  * can pass a fake that fails on purpose. RM-0017 added the writes.
+ *
+ * Based on: Supabase Kotlin reference, Fetch data,
+ * https://supabase.com/docs/reference/kotlin/select (accessed 2026-11-06)
+ * Based on: Supabase Kotlin reference, Call a Postgres function,
+ * https://supabase.com/docs/reference/kotlin/rpc (accessed 2026-11-06)
  */
 interface BillsRemoteSource {
     /** Every bill of [householdId] with its shares and debtor names. */
@@ -64,11 +72,14 @@ interface ShoppingRemoteSource {
     suspend fun deleteItem(id: String): Unit = throw UnsupportedOperationException("deleteItem")
 }
 
+/** Member id plus the embedded profile name. */
 private val MEMBER_COLUMNS = Columns.raw("user_id, profiles(display_name)")
 
+/** Decoded shape of [MEMBER_COLUMNS], flattened into [HouseholdMemberRow]. */
 @Serializable
 private data class MemberWithProfileRow(val user_id: String, val profiles: ProfileNameRow? = null)
 
+/** Every bill column, with its shares and each debtor's name embedded. */
 private val BILL_WITH_SHARES_COLUMNS = Columns.raw("*, bill_shares(*, profiles(display_name))")
 
 // Explicit column list (no "*"): the raw FK columns would otherwise collide
@@ -84,20 +95,33 @@ private val SHOPPING_ITEM_COLUMNS = Columns.raw(
 class SupabaseBillsRemoteSource @Inject constructor(
     private val supabase: SupabaseClient
 ) : BillsRemoteSource {
-    override suspend fun fetchBills(householdId: String): List<BillWithSharesRow> =
-        supabase.from("bills")
+    /** One select on `bills` with the shares embedded. */
+    override suspend fun fetchBills(householdId: String): List<BillWithSharesRow> {
+        Log.d(TAG, "GET bills")
+        return supabase.from("bills")
             .select(columns = BILL_WITH_SHARES_COLUMNS) { filter { eq("household_id", householdId) } }
             .decodeList<BillWithSharesRow>()
+            .also { Log.d(TAG, "GET bills -> ${it.size}") }
+    }
 
-    override suspend fun fetchMembers(householdId: String): List<HouseholdMemberRow> =
-        supabase.from("household_members")
+    /** One select on `household_members` with the profile name embedded. */
+    override suspend fun fetchMembers(householdId: String): List<HouseholdMemberRow> {
+        Log.d(TAG, "GET household_members")
+        return supabase.from("household_members")
             .select(columns = MEMBER_COLUMNS) { filter { eq("household_id", householdId) } }
             .decodeList<MemberWithProfileRow>()
             .map { HouseholdMemberRow(it.user_id, it.profiles?.display_name) }
+            .also { Log.d(TAG, "GET household_members -> ${it.size}") }
+    }
 
-    override suspend fun createBill(params: CreateBillParams): String =
-        supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<IdRow>().id
+    /** create_bill inserts the bill and its shares in one server transaction. */
+    override suspend fun createBill(params: CreateBillParams): String {
+        Log.d(TAG, "RPC create_bill")
+        return supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<IdRow>().id
+            .also { Log.d(TAG, "RPC create_bill -> ok") }
+    }
 
+    /** Matches on household, title, amount, due date, issuer and a creation time window. */
     override suspend fun findMatchingBill(
         params: CreateBillParams,
         issuerId: String?,
@@ -124,8 +148,12 @@ class SupabaseBillsRemoteSource @Inject constructor(
 class SupabaseChoresRemoteSource @Inject constructor(
     private val supabase: SupabaseClient
 ) : ChoresRemoteSource {
-    override suspend fun fetchChores(householdId: String): List<ChoreRow> =
-        supabase.from("chores").select { filter { eq("household_id", householdId) } }.decodeList<ChoreRow>()
+    /** One select on `chores` for the household. */
+    override suspend fun fetchChores(householdId: String): List<ChoreRow> {
+        Log.d(TAG, "GET chores")
+        return supabase.from("chores").select { filter { eq("household_id", householdId) } }.decodeList<ChoreRow>()
+            .also { Log.d(TAG, "GET chores -> ${it.size}") }
+    }
 }
 
 /** Supabase [ShoppingRemoteSource]. */
@@ -133,18 +161,28 @@ class SupabaseChoresRemoteSource @Inject constructor(
 class SupabaseShoppingRemoteSource @Inject constructor(
     private val supabase: SupabaseClient
 ) : ShoppingRemoteSource {
-    override suspend fun fetchItems(householdId: String): List<ShoppingItemRow> =
-        supabase.from("shopping_items")
+    /** One select on `shopping_items` with the adder's and buyer's names embedded. */
+    override suspend fun fetchItems(householdId: String): List<ShoppingItemRow> {
+        Log.d(TAG, "GET shopping_items")
+        return supabase.from("shopping_items")
             .select(columns = SHOPPING_ITEM_COLUMNS) { filter { eq("household_id", householdId) } }
             .decodeList<ShoppingItemRow>()
+            .also { Log.d(TAG, "GET shopping_items -> ${it.size}") }
+    }
 
-    override suspend fun insertItem(insert: ShoppingItemInsert): String =
-        supabase.from("shopping_items").insert(insert) { select() }.decodeSingle<IdRow>().id
+    /** Inserts the row and selects it back to read its id. */
+    override suspend fun insertItem(insert: ShoppingItemInsert): String {
+        Log.d(TAG, "POST shopping_items")
+        return supabase.from("shopping_items").insert(insert) { select() }.decodeSingle<IdRow>().id
+    }
 
+    /** Runs a plain update. It does not report whether a row matched. */
     override suspend fun markPurchased(id: String, update: ShoppingItemPurchase) {
+        Log.d(TAG, "PATCH shopping_items (purchase)")
         supabase.from("shopping_items").update(update) { filter { eq("id", id) } }
     }
 
+    /** Runs an update and selects the changed ids back, so the caller can count them. */
     override suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int =
         supabase.from("shopping_items")
             .update(update) {

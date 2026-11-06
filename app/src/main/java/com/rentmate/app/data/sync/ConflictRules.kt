@@ -169,5 +169,6 @@ object ConflictRules {
         }
     }
 
+    /** How many causes [outcomeOf] follows before it stops and treats the error as a server error. */
     private const val MAX_CAUSE_DEPTH = 5
 }

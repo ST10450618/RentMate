@@ -6,15 +6,21 @@ import java.math.RoundingMode
 
 /** The three ways a bill can be divided. [wire] is the value stored in bills.split_method. */
 enum class SplitMode(val wire: String) {
+    /** Everyone pays the same amount. The last share takes the rounding remainder. */
     Equal("Equal"),
+    /** Each member pays a percentage. The percentages total 100. */
     Percentage("Percentage"),
+    /** Each member pays a typed rand amount. The amounts total the bill. */
     ExactAmount("ExactAmount")
 }
 
 /** How often a bill repeats. [wire] is the value stored in bills.repeat. */
 enum class RepeatMode(val wire: String) {
+    /** A one-off bill. */
     Never("Never"),
+    /** The server makes a new copy every week. */
     Weekly("Weekly"),
+    /** The server makes a new copy every month. */
     Monthly("Monthly");
 
     companion object {
@@ -29,24 +35,33 @@ fun isRepeating(repeat: String?, stopped: Boolean): Boolean =
 
 /** One member's share in cents, plus the raw value the server's create_bill expects. */
 data class SplitShare(val userId: String, val cents: Long, val value: BigDecimal) {
+    /** [cents] as a rand amount with two decimals. */
     val amount: BigDecimal get() = BigDecimal.valueOf(cents, 2)
 }
 
+/** Why [BillSplit.compute] refused a split. The form maps each reason to a message. */
 sealed interface SplitError {
+    /** The bill total is missing, zero or negative. */
     data object InvalidAmount : SplitError
+    /** Nobody was picked to split with. */
     data object NoMembers : SplitError
     /** A member's field is not a number. */
     data object NotANumber : SplitError
+    /** A member's value is below zero. */
     data object Negative : SplitError
     /** Percentages must total 100; [total] is what they actually add up to. */
     data class PercentTotal(val total: BigDecimal) : SplitError
     /** Exact amounts must total the bill; [total] is what they add up to (rand). */
     data class ExactTotal(val total: BigDecimal) : SplitError
+    /** The total is above the Amount field's limit. */
     data object TooLarge : SplitError
 }
 
+/** The outcome of [BillSplit.compute]. */
 sealed interface SplitResult {
+    /** The split is valid. [shares] are in member order and total the bill. */
     data class Valid(val shares: List<SplitShare>) : SplitResult
+    /** [BillSplit.compute] refused the split because of [error]. */
     data class Invalid(val error: SplitError) : SplitResult
 }
 

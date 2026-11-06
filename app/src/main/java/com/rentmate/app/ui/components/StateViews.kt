@@ -42,10 +42,10 @@ import com.rentmate.app.ui.theme.Spacing
 /**
  * A column centred in the space it gets that scrolls when its content is taller.
  *
- * RM-0056: at the largest font size an empty or error state can be taller than
- * the screen. A plain centred Column then clips the button at the bottom. This
- * one keeps the content centred while it fits, and lets the user scroll once
- * it does not.
+ * RM-0056: at the largest font size, an empty or error state can be taller
+ * than the screen. A plain centred Column then cuts off the button at the
+ * bottom. This column keeps the content centred while it fits, and scrolls
+ * once it does not.
  */
 @Composable
 fun CenteredScrollColumn(

@@ -24,6 +24,7 @@ import javax.inject.Singleton
 
 private const val TAG = "FirebaseSession"
 
+/** Body of the `firebase-token` Edge Function response. */
 @Serializable
 private data class FirebaseTokenResponse(val token: String)
 
@@ -37,6 +38,9 @@ private data class FirebaseTokenResponse(val token: String)
  *
  * Every failure is logged and swallowed. Firestore being unavailable must never break
  * bills, chores or maintenance.
+ *
+ * Based on: Firebase docs, Authenticate with Firebase on Android Using a Custom Authentication System,
+ * https://firebase.google.com/docs/auth/android/custom-auth (accessed 2026-11-06)
  */
 @Singleton
 class FirebaseSession @Inject constructor(
@@ -53,6 +57,7 @@ class FirebaseSession @Inject constructor(
         scope.launch {
             try {
                 supabase.auth.sessionStatus.collect { status ->
+                    Log.d(TAG, "Supabase session status: ${status::class.simpleName}")
                     when (status) {
                         is SessionStatus.Authenticated -> ensureSignedIn()
                         is SessionStatus.NotAuthenticated -> signOut()
@@ -85,6 +90,7 @@ class FirebaseSession @Inject constructor(
      * just created or joined. Never throws.
      */
     fun refreshClaims() {
+        Log.d(TAG, "refreshing household claims")
         scope.launch {
             try {
                 if (supabase.auth.currentUserOrNull() != null) mint()
@@ -96,14 +102,17 @@ class FirebaseSession @Inject constructor(
         }
     }
 
+    /** Signs the Firebase user out so Firestore stops serving the old household. */
     private fun signOut() {
         try {
             FirebaseAuth.getInstance().signOut()
+            Log.d(TAG, "signed out of Firebase")
         } catch (e: Exception) {
             Log.w(TAG, "Firebase sign-out failed", e)
         }
     }
 
+    /** Exchanges the Supabase access token for a Firebase custom token and signs in with it. */
     private suspend fun mint() {
         mutex.withLock {
             val accessToken = supabase.auth.currentAccessTokenOrNull() ?: return@withLock
@@ -113,7 +122,9 @@ class FirebaseSession @Inject constructor(
         }
     }
 
+    /** Calls the `firebase-token` Edge Function. Throws on a non-200 response. */
     private suspend fun fetchCustomToken(accessToken: String): String = withContext(Dispatchers.IO) {
+        Log.d(TAG, "requesting a Firebase custom token")
         val conn = URL("${BuildConfig.SUPABASE_URL.trimEnd('/')}/functions/v1/firebase-token")
             .openConnection() as HttpURLConnection
         try {

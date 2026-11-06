@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.util.Log
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
@@ -15,6 +16,8 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "PhotoCompressor"
 
 /** The picked file could not be opened or is not an image. Nothing was uploaded. */
 class PhotoUnreadableException(message: String, cause: Throwable? = null) : IOException(message, cause)
@@ -32,16 +35,23 @@ interface PhotoCompressor {
     suspend fun compress(uri: String): ByteArray
 }
 
-/** Decodes with BitmapFactory, applies the EXIF rotation, then runs [PhotoCompression]. */
+/**
+ * Decodes with BitmapFactory, applies the EXIF rotation, then runs [PhotoCompression].
+ *
+ * Based on: Android Developers, Loading large bitmaps efficiently,
+ * https://developer.android.com/topic/performance/graphics/load-bitmap (accessed 2026-11-06)
+ */
 @Singleton
 class AndroidPhotoCompressor @Inject constructor(
     @ApplicationContext private val context: Context
 ) : PhotoCompressor {
 
+    /** Runs on [Dispatchers.Default] because decoding and compressing are CPU-bound. */
     override suspend fun compress(uri: String): ByteArray = withContext(Dispatchers.Default) {
         val bitmap = try {
             decodeUpright(uri.toUri())
         } catch (e: PhotoUnreadableException) {
+            Log.w(TAG, "photo unreadable", e)
             throw e
         } catch (e: IOException) {
             throw PhotoUnreadableException("Cannot read $uri", e)
@@ -50,6 +60,7 @@ class AndroidPhotoCompressor @Inject constructor(
         } catch (e: OutOfMemoryError) {
             throw PhotoUnreadableException("Not enough memory to decode $uri", e)
         }
+        Log.d(TAG, "decoded ${bitmap.width}x${bitmap.height}; compressing")
         try {
             PhotoCompression.compress(bitmap.width, bitmap.height) { size, quality ->
                 val scaled = if (size.width == bitmap.width && size.height == bitmap.height) bitmap
@@ -62,7 +73,7 @@ class AndroidPhotoCompressor @Inject constructor(
                 } finally {
                     if (scaled !== bitmap) scaled.recycle()
                 }
-            }
+            }.also { Log.d(TAG, "compressed to ${it.size} bytes") }
         } finally {
             bitmap.recycle()
         }
