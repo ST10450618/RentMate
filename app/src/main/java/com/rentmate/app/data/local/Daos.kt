@@ -180,6 +180,10 @@ abstract class ShoppingItemDao {
     @Query("UPDATE shopping_items SET syncState = 'SYNCED' WHERE id = :id")
     abstract suspend fun markSynced(id: String)
 
+    /** One item by id, or null. */
+    @Query("SELECT * FROM shopping_items WHERE id = :id")
+    abstract suspend fun getById(id: String): ShoppingItemEntity?
+
     /** Deletes an item. */
     @Query("DELETE FROM shopping_items WHERE id = :id")
     abstract suspend fun delete(id: String)
@@ -197,7 +201,7 @@ abstract class ShoppingItemDao {
     }
 }
 
-/** Queue of offline mutations for the sync worker. */
+/** Queue of offline mutations for the sync worker (RM-0018). */
 @Dao
 interface OutboxDao {
 
@@ -205,11 +209,50 @@ interface OutboxDao {
     @Insert
     suspend fun enqueue(entry: OutboxEntry): Long
 
-    /** All entries, oldest first. */
+    /**
+     * Pending entries, oldest first. Every row in the outbox is pending: an entry
+     * is deleted as soon as the server accepted it. Replay in this order.
+     */
     @Query("SELECT * FROM outbox ORDER BY createdAt ASC, id ASC")
     suspend fun getAllOldestFirst(): List<OutboxEntry>
+
+    /** Number of pending entries, updated live (RM-0019 shows it). */
+    @Query("SELECT COUNT(*) FROM outbox")
+    fun observePendingCount(): Flow<Int>
+
+    /** Records a failed replay of entry [id]: bumps its attempt count and keeps [error]. */
+    @Query("UPDATE outbox SET attemptCount = attemptCount + 1, lastError = :error WHERE id = :id")
+    suspend fun recordFailure(id: Long, error: String?)
 
     /** Removes the entry with [id] (after it was uploaded). */
     @Query("DELETE FROM outbox WHERE id = :id")
     suspend fun deleteById(id: Long)
+}
+
+/** Access to the cached household roster (RM-0017). */
+@Dao
+abstract class MemberDao {
+
+    /** Observes the members of a household. */
+    @Query("SELECT * FROM household_members WHERE household_id = :householdId ORDER BY display_name, user_id")
+    abstract fun observeMembers(householdId: String): Flow<List<HouseholdMemberEntity>>
+
+    /** One member of a household, or null if not cached. */
+    @Query("SELECT * FROM household_members WHERE household_id = :householdId AND user_id = :userId")
+    abstract suspend fun getMember(householdId: String, userId: String): HouseholdMemberEntity?
+
+    /** Inserts or replaces members. */
+    @Upsert
+    abstract suspend fun upsert(members: List<HouseholdMemberEntity>)
+
+    /** Deletes every cached member of a household. */
+    @Query("DELETE FROM household_members WHERE household_id = :householdId")
+    abstract suspend fun clearHousehold(householdId: String)
+
+    /** Replaces the household's roster with [members]. */
+    @Transaction
+    open suspend fun replaceForHousehold(householdId: String, members: List<HouseholdMemberEntity>) {
+        clearHousehold(householdId)
+        upsert(members)
+    }
 }
