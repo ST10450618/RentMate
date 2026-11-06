@@ -234,6 +234,7 @@
     </plurals>
     <string name="shopping_added_by">Bygevoeg deur %1$s</string>
     <string name="shopping_bought">Gekoop</string>
+    <string name="sync_pending">Wag om te sinkroniseer</string>
 
     <string name="household_setup_title">Stel jou huishouding op</string>
     <string name="household_setup_body">Skep \'n nuwe huishouding of sluit by jou huisgenote aan met hul uitnodigingskode.</string>
