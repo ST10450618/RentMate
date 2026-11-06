@@ -19,18 +19,25 @@ private const val TAG = "RentMateMessaging"
  *   PushTokenSync saves it after the next sign-in.
  * - [onMessageReceived]: a push arrived. It is shown on its channel unless the
  *   user switched that category off in RentMate's Settings.
+ *
+ * Based on: Firebase docs, Receive messages in Android apps,
+ * https://firebase.google.com/docs/cloud-messaging/android/receive-messages (accessed 2026-11-06)
  */
 @AndroidEntryPoint
 class RentMateMessagingService : FirebaseMessagingService() {
 
+    /** Saves FCM tokens for the signed-in user. */
     @Inject lateinit var registrar: DeviceTokenRegistrar
 
+    /** FCM rotated the token; save it without blocking the service. */
     override fun onNewToken(token: String) {
         Log.d(TAG, "new FCM token")
         registrar.registerInBackground(token)
     }
 
+    /** Parses the data payload, checks the user's toggle and posts the notification. */
     override fun onMessageReceived(message: RemoteMessage) {
+        Log.d(TAG, "push received: ${message.data.size} data key(s)")
         val push = PushMessage.parse(
             data = message.data,
             fallbackTitle = message.notification?.title,
