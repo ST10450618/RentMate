@@ -113,21 +113,15 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
     RM-0018, not yet.)
 
 
-7. TRANSLATION REVIEW (RM-0025) - for a native speaker, not Ali
----------------------------------------------------------------
-[ ] Afrikaans speaker reads every screen in Afrikaans.
-      Reviewer: ______________________   Date: ____________
-[ ] isiXhosa speaker reads every screen in isiXhosa (check plurals like
-    "iiyure ezi-5" closely).
-      Reviewer: ______________________   Date: ____________
-Write wrong wording here (screen, what it says, what it should say):
-
-
-
+7. TRANSLATIONS (RM-0025)
+------------------------
+The translations are machine-translated and not reviewed by a native speaker
+(see "Translation accuracy" in the README). Only check that nothing breaks:
+[ ] In Afrikaans and isiXhosa, no text is cut off or overflows its button or card.
+[ ] No screen shows a raw key or a placeholder such as %1$s.
 
 
 WHEN DONE
 ---------
 Send the failures to James and Michael. If everything passes:
   ajiya ticket done RM-0047 --test
-    ajiya ticket done RM-0025 --test   (after both reviewers sign; names go in README)
