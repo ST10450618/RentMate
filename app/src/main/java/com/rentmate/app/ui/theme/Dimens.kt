@@ -27,6 +27,9 @@ object Spacing {
 object Sizes {
     /** Minimum touch target (WCAG 2.5.8, Android accessibility). */
     val minTouch = 48.dp
+
+    /** Height of [com.rentmate.app.ui.components.OnBrandButton], the main action on the aloe gradient. */
+    val onBrandButton = 56.dp
     val border = 1.dp
     val stroke = 2.dp
     val spinner = 18.dp
