@@ -9,9 +9,11 @@
     <string name="notif_maintenance">Maintenance updates</string>
 
     <string name="section_language">Language</string>
-    <string name="lang_english">English</string>
-    <string name="lang_afrikaans">Afrikaans</string>
-    <string name="lang_xhosa">isiXhosa</string>
+    <!-- RM-0026: each language is shown in its own name, whatever language the
+         app is in now, so these are not translated. -->
+    <string name="lang_english" translatable="false">English</string>
+    <string name="lang_afrikaans" translatable="false">Afrikaans</string>
+    <string name="lang_xhosa" translatable="false">isiXhosa</string>
 
     <string name="section_security">Security and display</string>
     <string name="biometric_title">Unlock with biometrics</string>

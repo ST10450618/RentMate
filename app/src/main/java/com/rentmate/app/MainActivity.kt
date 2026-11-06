@@ -10,11 +10,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.rentmate.app.auth.BiometricLockHost
+import com.rentmate.app.data.SettingsRepository
+import com.rentmate.app.data.reconcileLanguage
 import com.rentmate.app.navigation.RentMateApp
 import com.rentmate.app.ui.theme.RentMateTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivity"
 private const val PREFS = "rentmate_launch"
@@ -31,9 +35,12 @@ private const val KEY_ASKED_NOTIFICATIONS = "asked_notification_permission"
  * On Android 13+ it asks once for the notification permission (RM-0021). The
  * request is made a single time per install; if the user declines, the app keeps
  * working and they can enable notifications later in system settings.
+ *
+ * It is an AppCompatActivity (RM-0026) so AppCompatDelegate.setApplicationLocales
+ * can switch the language in-app on Android 8-12 as well as 13+.
  */
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -46,6 +53,11 @@ class MainActivity : FragmentActivity() {
         Log.d(TAG, "onCreate")
         enableEdgeToEdge()
         maybeAskForNotificationPermission()
+        // RM-0026: re-apply the saved language if it is not the one in use. Only
+        // on a fresh start, not when the activity is recreated by a language switch.
+        if (savedInstanceState == null) {
+            lifecycleScope.launch { reconcileLanguage(SettingsRepository(applicationContext)) }
+        }
         setContent {
             RentMateTheme {
                 BiometricLockHost { RentMateApp() }

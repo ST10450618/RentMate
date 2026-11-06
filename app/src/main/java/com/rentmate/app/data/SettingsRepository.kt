@@ -36,6 +36,9 @@ class SettingsRepository(private val context: Context) {
         )
     }
 
+    /** RM-0026: the language tag the user (or their profile) chose, or null if never set. */
+    val storedLanguageTag: Flow<String?> = context.settingsDataStore.data.map { it[LANGUAGE_KEY] }
+
     suspend fun setToggle(toggle: SettingToggle, value: Boolean) {
         context.settingsDataStore.edit { it[toggle.key] = value }
     }

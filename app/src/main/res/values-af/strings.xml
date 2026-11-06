@@ -1,4 +1,6 @@
-﻿<resources>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Afrikaans (RM-0025). Keep the same keys and order as values/strings.xml. -->
+<resources>
     <string name="settings_title">Instellings</string>
     <string name="section_notifications">Stel my in kennis oor</string>
     <string name="notif_bills">Rekeninge wat betaalbaar is</string>
@@ -7,9 +9,6 @@
     <string name="notif_maintenance">Opdaterings oor onderhoud</string>
 
     <string name="section_language">Taal</string>
-    <string name="lang_english">Engels</string>
-    <string name="lang_afrikaans">Afrikaans</string>
-    <string name="lang_xhosa">isiXhosa</string>
 
     <string name="section_security">Sekuriteit en vertoning</string>
     <string name="biometric_title">Ontsluit met biometrie</string>
@@ -17,17 +16,112 @@
     <string name="leaderboard_title">Wys die puntelys</string>
     <string name="leaderboard_desc">Versteek dit vir die hele huishouding</string>
 
+    <string name="chore_error_not_assignee">Net die huisgenoot wie se beurt dit is, kan hierdie taak as klaar merk.</string>
+    <string name="chore_error_already_done">Hierdie taak is reeds in hierdie siklus gedoen.</string>
+
     <string name="sign_out">Teken uit</string>
+    <string name="login_tagline">Rekeninge, take en herstelwerk vir jou gedeelde huis, gesorteer.</string>
+    <string name="login_feature_bills">Verdeel rekeninge en vereffen met minder betalings</string>
+    <string name="login_feature_chores">Regverdige taakrotasie, vier weke vooruit beplan</string>
+    <string name="login_feature_maintenance">Teken foute aan en stuur dit na jou verhuurder</string>
+    <string name="login_continue_google">Gaan voort met Google</string>
+    <string name="login_try_again">Probeer weer met Google</string>
+    <string name="login_signing_in">Besig om jou aan te meld…</string>
+    <string name="login_error">Ons kon jou nie aanmeld nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="login_privacy_note">Ons gebruik net jou Google-naam en -e-posadres om jou profiel op te stel.</string>
+    <!-- Form validation (RM-0036) -->
+    <string name="error_required">Hierdie veld is verpligtend</string>
+    <string name="error_too_short">Te kort</string>
+    <string name="error_too_long">Te lank, maak dit asseblief korter</string>
+    <string name="error_not_a_number">Voer \'n getal in, bv. 1250.50</string>
+    <string name="error_must_be_positive">Moet meer as nul wees</string>
+    <string name="error_amount_too_large">Die bedrag kan nie meer as R999,999.99 wees nie</string>
+    <string name="error_too_many_decimals">Gebruik hoogstens 2 desimale plekke</string>
+    <string name="error_points_range">Punte moet \'n heelgetal van 1 tot 100 wees</string>
+    <string name="error_date_past">Die datum kan nie meer as \'n jaar gelede wees nie</string>
+    <string name="error_date_future">Die datum kan nie meer as twee jaar vooruit wees nie</string>
+    <string name="error_invite_code">Uitnodigingskodes is 6 letters en syfers, bv. K7M3QX</string>
+    <string name="error_no_members">Nog geen huisgenote gevind nie. Probeer oor \'n oomblik weer.</string>
+    <string name="pick_date">Kies \'n datum</string>
+    <string name="save">Stoor</string>
 
-    <string name="maintenance_error_load">Kon nie onderhoudsversoeke laai nie. Gaan jou verbinding na en probeer weer.</string>
-    <string name="maintenance_error_save">Kon nie jou versoek stoor nie. Gaan jou verbinding na en probeer weer.</string>
-    <string name="maintenance_error_update">Kon nie die status opdateer nie. Gaan jou verbinding na en probeer weer.</string>
-    <string name="maintenance_error_send">Kon nie aan die verhuurder stuur nie. Gaan jou verbinding na en probeer weer.</string>
-    <string name="action_retry">Probeer weer</string>
-    <string name="action_dismiss">Maak toe</string>
+    <string name="add_bill_title">Voeg rekening by</string>
+    <string name="add_bill_name">Waarvoor is die rekening?</string>
+    <string name="add_bill_amount">Bedrag (R)</string>
+    <string name="add_bill_due">Vervaldatum</string>
+    <plurals name="add_bill_split">
+        <item quantity="one">Verdeel gelykop met %d huisgenoot</item>
+        <item quantity="other">Verdeel gelykop tussen %d huisgenote</item>
+    </plurals>
 
+    <string name="add_chore_title">Voeg taak by</string>
+    <string name="add_chore_name">Naam van die taak</string>
+    <string name="add_chore_recurrence">Hoe gereeld?</string>
+    <string name="recurrence_once">Een keer</string>
+    <string name="recurrence_weekly">Weekliks</string>
+    <string name="recurrence_monthly">Maandeliks</string>
+    <string name="add_chore_points">Punte (1–100)</string>
+    <plurals name="add_chore_rotation">
+        <item quantity="one">Roteer tussen %d huisgenoot</item>
+        <item quantity="other">Roteer tussen %d huisgenote</item>
+    </plurals>
+
+    <string name="add_item_title">Voeg item by</string>
+    <string name="add_item_name">Naam van die item</string>
+
+    <string name="household_name">Naam van die huishouding</string>
+    <string name="household_invite_code">Uitnodigingskode</string>
+    <string name="household_create">Skep huishouding</string>
+    <string name="household_join">Sluit by huishouding aan</string>
+    <!-- Notification channels (RM-0021) -->
+    <string name="channel_bills_name">Rekeninge</string>
+    <string name="channel_bills_desc">Nuwe rekeninge en betalingsherinneringe</string>
+    <string name="channel_chores_name">Take</string>
+    <string name="channel_chores_desc">Take wat aan jou toegewys is en wanneer hulle gedoen moet word</string>
+    <string name="channel_shopping_name">Inkopielys</string>
+    <string name="channel_shopping_desc">Items wat by die gedeelde lys gevoeg of daarvan gekoop is</string>
+    <string name="channel_maintenance_name">Onderhoud</string>
+    <string name="channel_maintenance_desc">Opdaterings oor herstelversoeke</string>
+
+    <!-- RM-0035: list screen states -->
+    <string name="state_error_generic">Iets het verkeerd geloop. Gaan jou verbinding na en probeer weer.</string>
+    <string name="state_retry">Probeer weer</string>
+    <string name="empty_bills_title">Nog geen rekeninge nie</string>
+    <string name="empty_bills_body">Voeg die eerste rekening by en RentMate verdeel dit vir almal.</string>
+    <string name="empty_bills_action">Voeg \'n rekening by</string>
+    <string name="empty_chores_title">Nog geen take nie</string>
+    <string name="empty_chores_body">Voeg \'n taak by en RentMate roteer dit regverdig tussen huisgenote.</string>
+    <string name="empty_chores_action">Voeg \'n taak by</string>
+    <string name="empty_shopping_title">Jou inkopielys is leeg</string>
+    <string name="empty_shopping_body">Voeg by wat die huis nodig het, en almal kan dit afmerk sodra dit gekoop is.</string>
+    <string name="empty_shopping_action">Voeg \'n item by</string>
+    <string name="empty_dashboard_title">Nog geen huishouding nie</string>
+    <string name="empty_dashboard_body">Skep of sluit aan by \'n huishouding om rekeninge, take en saldo\'s hier te sien.</string>
+    <string name="activity_title">Aktiwiteit</string>
+    <string name="activity_subtitle">Waarmee jou huisgenote besig was</string>
+    <string name="activity_today">Vandag</string>
+    <string name="activity_yesterday">Gister</string>
+    <string name="activity_just_now">Sopas</string>
+    <string name="activity_empty_title">Nog geen aktiwiteit nie</string>
+    <string name="activity_empty_body">Rekeninge, take, inkopies en herstelwerk verskyn hier soos jou huishouding RentMate gebruik.</string>
+    <string name="activity_event">%1$s %2$s</string>
+    <string name="activity_error">Kon nie die aktiwiteit laai nie. Probeer asseblief later weer.</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%d min gelede</item>
+        <item quantity="other">%d min gelede</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%d uur gelede</item>
+        <item quantity="other">%d uur gelede</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%d dag gelede</item>
+        <item quantity="other">%d dae gelede</item>
+    </plurals>
+
+    <!-- RM-0004: friendly errors shown instead of raw exception text -->
     <string name="error_no_connection">Jy is vanlyn. Gaan jou verbinding na en probeer weer.</string>
-    <string name="error_session_expired">Jou sessie het verval. Teken asseblief weer in.</string>
+    <string name="error_session_expired">Jou sessie het verval. Meld asseblief weer aan.</string>
     <string name="error_not_allowed">Jy het nie toestemming om dit te doen nie.</string>
     <string name="error_already_exists">Dit bestaan reeds.</string>
     <string name="error_generic">Iets het verkeerd geloop. Probeer asseblief weer.</string>
@@ -43,11 +137,11 @@
     <string name="lock_locked">RentMate is gesluit</string>
     <string name="lock_unlock">Ontsluit</string>
     <string name="lock_error_cancelled">Ontsluiting gekanselleer. Probeer weer om voort te gaan.</string>
-    <string name="lock_error_lockout">Te veel pogings. Wag \'n oomblik en probeer weer.</string>
+    <string name="lock_error_lockout">Te veel pogings. Wag \'n oomblik en probeer dan weer.</string>
     <string name="lock_error_no_credentials">Geen vingerafdruk, gesig of skermslot is op hierdie toestel opgestel nie.</string>
-    <string name="lock_error_other">Iets het verkeerd gegaan met ontsluit. Probeer weer.</string>
+    <string name="lock_error_other">Iets het met die ontsluiting verkeerd geloop. Probeer weer.</string>
 
-    <string name="biometric_note_no_hardware">Hierdie toestel het nie vingerafdruk- of gesigsontsluiting nie, so hierdie instelling is nie beskikbaar nie.</string>
+    <string name="biometric_note_no_hardware">Hierdie toestel het nie vingerafdruk- of gesigontsluiting nie, so hierdie instelling is nie beskikbaar nie.</string>
     <string name="biometric_note_unavailable">Biometriese ontsluiting is tans nie op hierdie toestel beskikbaar nie.</string>
     <string name="biometric_note_none_enrolled">Stel eers \'n vingerafdruk, gesig of skermslot op.</string>
     <string name="biometric_enrol_title">Stel eers biometrie op</string>
@@ -55,4 +149,99 @@
     <string name="biometric_enrol_open">Maak instellings oop</string>
     <string name="biometric_enrol_cancel">Nie nou nie</string>
     <string name="housemate_fallback">Huisgenoot</string>
+    <string name="split_mode_label">Verdeel</string>
+    <string name="split_equal">Gelykop</string>
+    <string name="split_percentage">Persentasie</string>
+    <string name="split_exact">Presiese bedrag</string>
+    <string name="split_percent_for">%1$s (%%)</string>
+    <string name="split_amount_for">%1$s (R)</string>
+    <string name="split_unknown_member">Lid</string>
+    <string name="split_error_percent">Die persentasies moet saam 100 wees. Hulle is saam %1$s.</string>
+    <string name="split_error_exact">Die bedrae moet saam R%2$s wees. Hulle is saam R%1$s.</string>
+    <string name="split_error_number">Voer \'n getal vir elke lid in (of laat dit leeg vir 0).</string>
+    <string name="split_error_negative">Verdelingswaardes kan nie negatief wees nie.</string>
+    <string name="split_error_too_large">Daardie bedrag is te groot.</string>
+    <string name="bills_confirm_received">Bevestig ontvangs</string>
+    <string name="bills_waiting_for">Wag vir %1$s om te bevestig</string>
+    <string name="bills_ask_to_confirm">Vra %1$s om te bevestig dat jy betaal het</string>
+    <!-- RM-0024: navigation and screen text moved out of the Kotlin code -->
+    <string name="nav_sign_in">Meld aan</string>
+    <string name="nav_dashboard">Oorsig</string>
+    <string name="nav_bills">Rekeninge</string>
+    <string name="nav_chores">Take</string>
+    <string name="nav_shopping">Inkopielys</string>
+    <string name="nav_maintenance">Onderhoud</string>
+    <string name="nav_more">Meer</string>
+    <string name="more_subtitle">Inkopies, onderhoud en instellings</string>
+    <string name="more_shopping_desc">Gedeelde items om te koop</string>
+    <string name="more_maintenance_desc">Teken foute aan en volg dit op</string>
+    <string name="more_activity_desc">Aktiwiteit in die huishouding</string>
+    <string name="more_settings_desc">Kennisgewings, taal, profiel</string>
+    <string name="continue_label">Gaan voort</string>
+    <string name="close">Maak toe</string>
+
+    <string name="settle_up">Vereffen</string>
+    <string name="settle_up_none">Die huishouding is reeds vereffen.</string>
+    <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <plurals name="bills_count">
+        <item quantity="one">%d rekening</item>
+        <item quantity="other">%d rekeninge</item>
+    </plurals>
+    <string name="bills_due">Betaalbaar %1$s</string>
+    <string name="bills_paid">Betaal</string>
+    <string name="bills_outstanding">Uitstaande</string>
+    <string name="bills_owes">Skuld</string>
+    <string name="bills_mark_paid">Merk as betaal</string>
+    <string name="bills_share">%1$s · %2$s</string>
+
+    <string name="chores_subtitle">Hierdie week se rooster</string>
+    <string name="chores_this_cycle">Hierdie siklus: %1$s</string>
+    <string name="chores_unassigned">nie toegewys nie</string>
+    <string name="chores_next_cycles">Volgende 4 siklusse</string>
+    <string name="chores_forecast_row">%1$d. %2$s</string>
+    <string name="chores_mark_done">Merk as klaar</string>
+    <string name="chores_leaderboard">Puntelys</string>
+    <plurals name="chore_points">
+        <item quantity="one">%d punt</item>
+        <item quantity="other">%d punte</item>
+    </plurals>
+    <plurals name="leaderboard_points">
+        <item quantity="one">%1$d punt (%2$d altesaam)</item>
+        <item quantity="other">%1$d punte (%2$d altesaam)</item>
+    </plurals>
+
+    <plurals name="households_count">
+        <item quantity="one">%d huishouding</item>
+        <item quantity="other">%d huishoudings</item>
+    </plurals>
+    <plurals name="bills_overdue">
+        <item quantity="one">%d agterstallig</item>
+        <item quantity="other">%d agterstallig</item>
+    </plurals>
+    <string name="dashboard_view_bills">Bekyk rekeninge</string>
+    <string name="dashboard_balance">Jou saldo</string>
+    <string name="dashboard_owed_to_you">Jy word %1$s geskuld</string>
+    <string name="dashboard_you_owe">Jy skuld %1$s</string>
+    <string name="dashboard_settled">Jy is heeltemal vereffen</string>
+    <string name="dashboard_next_chore">Jou volgende taak</string>
+    <string name="dashboard_no_chore">Niks is nou aan jou toegewys nie.</string>
+    <string name="dashboard_view_chores">Bekyk take</string>
+    <string name="dashboard_household">Huishouding</string>
+
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="shopping_added_by">Bygevoeg deur %1$s</string>
+    <string name="shopping_bought">Gekoop</string>
+
+    <string name="household_setup_title">Stel jou huishouding op</string>
+    <string name="household_setup_body">Skep \'n nuwe huishouding of sluit by jou huisgenote aan met hul uitnodigingskode.</string>
+    <string name="household_new">Nuwe huishouding</string>
+    <string name="household_join_existing">Sluit by \'n bestaande een aan</string>
+    <string name="household_created">Huishouding geskep. Deel hierdie uitnodigingskode</string>
+
+    <!-- Activity sample feed -->
+    <string name="activity_sample_pill">Voorbeeld</string>
+    <string name="activity_sample_body">Voorbeeld van aktiwiteit. Jou huishouding se regte aktiwiteit verskyn hier sodra dit gekoppel is.</string>
 </resources>

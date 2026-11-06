@@ -1,6 +1,5 @@
 package com.rentmate.app.ui.screens
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -12,6 +11,13 @@ import com.rentmate.app.data.MaintenanceRequest
 import com.rentmate.app.data.TitleError
 import com.rentmate.app.data.Urgency
 import com.rentmate.app.data.validateTitle
+import com.rentmate.app.data.attachments.AttachmentParent
+import com.rentmate.app.data.attachments.AttachmentRepository
+import com.rentmate.app.data.attachments.EMAIL_LINK_EXPIRY
+import com.rentmate.app.data.attachments.PhotoLink
+import com.rentmate.app.data.attachments.THUMBNAIL_URL_EXPIRY
+import com.rentmate.app.data.attachments.loadLinks
+import kotlinx.coroutines.CancellationException
 import com.rentmate.app.ui.error.AppError
 import com.rentmate.app.ui.error.ErrorMapper
 import com.rentmate.app.ui.launchSafely
@@ -32,7 +38,8 @@ enum class MaintenanceError(@StringRes val messageRes: Int) {
     SAVE(R.string.maintenance_error_save),
     UPDATE(R.string.maintenance_error_update),
     SEND(R.string.maintenance_error_send),
-    NO_EMAIL_APP(R.string.maintenance_error_no_email_app)
+    NO_EMAIL_APP(R.string.maintenance_error_no_email_app),
+    LINK_PHOTOS(R.string.photo_error_link)
 }
 
 /**
@@ -45,7 +52,9 @@ data class MaintenanceUiState(
     @StringRes val error: Int? = null,
     /** RM-0009: who the "Send to landlord" email goes to; null until loaded. */
     val landlord: LandlordContact? = null,
-    val currentUserId: String? = null
+    val currentUserId: String? = null,
+    /** RM-0029: thumbnails per request ID, with short-lived signed URLs. */
+    val photos: Map<String, List<PhotoLink>> = emptyMap()
 )
 
 /**
@@ -54,8 +63,12 @@ data class MaintenanceUiState(
  */
 @HiltViewModel
 class MaintenanceViewModel @Inject constructor(
-    private val repository: MaintenanceRepository
+    private val repository: MaintenanceRepository,
+    private val attachments: AttachmentRepository
 ) : ViewModel() {
+
+    /** A saved request whose photos still need linking, retried by [refresh]. */
+    private var pendingLink: Pair<String, List<String>>? = null
 
     val requests: StateFlow<List<MaintenanceRequest>> = repository.requests
 
@@ -70,9 +83,67 @@ class MaintenanceViewModel @Inject constructor(
         Log.d(TAG, "refresh")
         _state.update { it.copy(loading = true, error = null) }
         launchSafely(TAG, onError = { fail(it, MaintenanceError.LOAD) }) {
+            pendingLink?.let { (requestId, paths) -> linkPhotos(requestId, paths) }
             repository.refresh()
             val landlord = repository.landlordContact()
             _state.update { it.copy(loading = false, landlord = landlord, currentUserId = repository.currentUserId) }
+            loadPhotos()
+        }
+    }
+
+    /**
+     * Photos are extra: if they fail to load the requests still show, without
+     * thumbnails. Cancellation is still passed on.
+     */
+    private suspend fun loadPhotos() {
+        try {
+            val links = attachments.loadLinks(THUMBNAIL_URL_EXPIRY)
+            _state.update { s ->
+                s.copy(photos = links.entries
+                    .filter { it.key is AttachmentParent.Maintenance }
+                    .associate { it.key.id to it.value })
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not load maintenance photos", e)
+        }
+    }
+
+    private suspend fun linkPhotos(requestId: String, paths: List<String>) {
+        pendingLink = requestId to paths
+        try {
+            attachments.link(AttachmentParent.Maintenance(requestId), paths)
+            pendingLink = null
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not link photos to $requestId", e)
+            _state.update { it.copy(error = MaintenanceError.LINK_PHOTOS.messageRes) }
+            throw e
+        }
+    }
+
+    /**
+     * RM-0029: signed links (valid 7 days) to each request's photos, for the
+     * landlord email. Calls [onReady] with request ID -> links. If the links
+     * cannot be made, the email still goes out, without them.
+     */
+    fun photoLinksForEmail(requestIds: Collection<String>, onReady: (Map<String, List<String>>) -> Unit) {
+        Log.d(TAG, "photoLinksForEmail")
+        launchSafely(TAG, onError = { fail(it, MaintenanceError.SEND) }) {
+            val ids = requestIds.toSet()
+            val links = try {
+                attachments.loadLinks(EMAIL_LINK_EXPIRY)
+                    .filterKeys { it is AttachmentParent.Maintenance && it.id in ids }
+                    .entries.associate { (parent, photos) -> parent.id to photos.map { it.url } }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Sending without photo links", e)
+                emptyMap()
+            }
+            onReady(links)
         }
     }
 
@@ -97,22 +168,31 @@ class MaintenanceViewModel @Inject constructor(
         description: String,
         category: MaintenanceCategory,
         urgency: Urgency,
-        photo: Bitmap?
+        photoPaths: List<String> = emptyList()
     ): TitleError? {
         val error = validateTitle(title)
         if (error != null) return error
 
         Log.d(TAG, "log request")
         launchSafely(TAG, onError = { fail(it, MaintenanceError.SAVE) }) {
-            repository.add(
+            val created = repository.add(
                 MaintenanceRequest(
                     title = title.trim(),
                     description = description.trim().take(Limits.DESCRIPTION_MAX),
                     category = category,
-                    urgency = urgency,
-                    photo = photo
+                    urgency = urgency
                 )
             )
+            if (created != null && photoPaths.isNotEmpty()) {
+                try {
+                    linkPhotos(created.id, photoPaths)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    return@launchSafely  // LINK_PHOTOS is already showing; Retry links again.
+                }
+                loadPhotos()
+            }
         }
         return null
     }
@@ -134,6 +214,10 @@ class MaintenanceViewModel @Inject constructor(
 
     /** [launchSafely] has already logged [cause]; this only picks the message. */
     private fun fail(cause: Throwable, action: MaintenanceError) {
+        if (action == MaintenanceError.LOAD && pendingLink != null) {
+            _state.update { it.copy(loading = false, error = MaintenanceError.LINK_PHOTOS.messageRes) }
+            return
+        }
         val message = when (ErrorMapper.classify(cause)) {
             AppError.NO_CONNECTION, AppError.GENERIC -> action.messageRes
             else -> ErrorMapper.classify(cause).messageRes

@@ -36,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.BillWithSharesRow
+import com.rentmate.app.data.attachments.PhotoLink
+import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.MemberAvatar
 import com.rentmate.app.ui.components.PillTone
 import com.rentmate.app.ui.components.PrimaryButton
@@ -88,7 +90,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         modifier = Modifier.padding(top = Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
-                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare) }
+                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId, onPay = viewModel::payShare) }
                     }
                 }
             }
@@ -145,7 +147,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
 
 @Composable
 /** One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010). */
-private fun BillRow(bill: BillWithSharesRow, canMarkPaid: Boolean, onPay: (String) -> Unit) {
+private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPaid: Boolean, onPay: (String) -> Unit) {
     val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { it.is_paid }
     RentMateCard {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -160,6 +162,7 @@ private fun BillRow(bill: BillWithSharesRow, canMarkPaid: Boolean, onPay: (Strin
             Text(stringResource(R.string.bills_due, bill.due_date.take(10)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
         }
+        if (photos.isNotEmpty()) AttachmentThumbnails(photos, modifier = Modifier.padding(top = Spacing.xs))
         bill.bill_shares.forEach { share ->
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),

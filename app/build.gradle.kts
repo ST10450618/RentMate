@@ -12,13 +12,12 @@ android {
     namespace = "com.rentmate.app"
     compileSdk = 36
     lint {
-        // Afrikaans and isiXhosa cover the Settings screen; remaining screens are
-        // translated for the final POE, where multi-language support is assessed.
         warningsAsErrors = false
-        disable += "MissingTranslation"
         // RM-0024: every UI string lives in strings.xml. Compose text is guarded by
         // NoHardcodedUiStringsTest, which lint cannot see.
-        error += setOf("HardcodedText", "SetTextI18n")
+        // RM-0025: values-af and values-xh must translate every key
+        // (also checked by TranslationCompletenessTest).
+        error += setOf("HardcodedText", "SetTextI18n", "MissingTranslation", "ExtraTranslation")
     }
     defaultConfig {
         applicationId = "com.rentmate.app"
@@ -111,6 +110,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    androidResources {
+        // RM-0026: generates the locale config from the values-* folders and adds
+        // android:localeConfig, so Android 13+ lists English, Afrikaans and
+        // isiXhosa under the app's language in system settings. The language of
+        // the default values/ folder is declared in res/resources.properties.
+        generateLocaleConfig = true
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -152,6 +158,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.biometric)
+    // RM-0026: per-app language (AppCompatDelegate.setApplicationLocales) on every API level.
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
@@ -174,5 +182,12 @@ dependencies {
     // API and Azure SQL now that Azure hosting isn't available.
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
+    // RM-0028: photo attachments in the private "attachments" bucket.
+    implementation(libs.supabase.storage)
+    // Reads the camera's rotation tag so compressed photos stay upright.
+    implementation(libs.androidx.exifinterface)
+    // RM-0029: attachment thumbnails, loaded from short-lived signed URLs.
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.ktor.client.okhttp)
 }
