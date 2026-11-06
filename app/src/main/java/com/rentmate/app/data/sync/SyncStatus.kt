@@ -37,6 +37,12 @@ data class SyncStatus(
     val rejected: List<SyncRejectionEntity>
 )
 
+/** RM-0019: where the UI reads sync state from. An interface so ViewModel tests can fake it. */
+interface SyncStatusSource {
+    /** Phase, last sync time, pending count and rejections, updated live. */
+    val status: Flow<SyncStatus>
+}
+
 /**
  * RM-0018: holds the worker's run state and combines it with the outbox count
  * and the rejection log into [status]. The run state is in memory only, so it
@@ -46,14 +52,13 @@ data class SyncStatus(
 class SyncStatusTracker @Inject constructor(
     outbox: OutboxQueue,
     rejectionDao: SyncRejectionDao
-) {
+) : SyncStatusSource {
     /** The in-memory part of [SyncStatus]: what the worker last reported. */
     private data class RunState(val phase: SyncPhase = SyncPhase.Idle, val lastSyncedAt: Long? = null)
 
     private val run = MutableStateFlow(RunState())
 
-    /** Phase, last sync time, pending count and rejections, updated live. */
-    val status: Flow<SyncStatus> = combine(run, outbox.pendingCount, rejectionDao.observeAll()) { r, count, rejected ->
+    override val status: Flow<SyncStatus> = combine(run, outbox.pendingCount, rejectionDao.observeAll()) { r, count, rejected ->
         SyncStatus(r.phase, r.lastSyncedAt, count, rejected)
     }
 

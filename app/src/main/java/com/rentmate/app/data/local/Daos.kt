@@ -262,6 +262,10 @@ interface SyncRejectionDao {
     @Query("DELETE FROM sync_rejections WHERE id = :id")
     suspend fun deleteById(id: Long)
 
+    /** RM-0019: removes the rejections the user has seen, so each one is shown once. */
+    @Query("DELETE FROM sync_rejections WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
+
     /** Removes every rejection. */
     @Query("DELETE FROM sync_rejections")
     suspend fun clear()

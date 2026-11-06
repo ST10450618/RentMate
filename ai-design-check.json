@@ -1,0 +1,41 @@
+{
+    "include": [
+        "app/src/main"
+    ],
+    "ignore": [],
+    "i18n": {
+        "files": [],
+        "keysAreSource": true
+    },
+    "properNouns": [
+        "RentMate"
+    ],
+    "componentDirs": [
+        "**/ui/components/**"
+    ],
+    "spacing": {
+        "base": 4
+    },
+    "rules": {},
+    "allow": {
+        "type-scale": [
+            "app/src/main/java/com/rentmate/app/ui/theme/Type.kt:fontSize = 32.sp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Type.kt:fontSize = 24.sp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Type.kt:fontSize = 18.sp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Type.kt:fontSize = 16.sp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Type.kt:fontSize = 14.sp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Type.kt:fontSize = 12.sp"
+        ],
+        "radius-scale": [
+            "app/src/main/java/com/rentmate/app/ui/theme/Dimens.kt:RoundedCornerShape(6.dp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Dimens.kt:RoundedCornerShape(10.dp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Dimens.kt:RoundedCornerShape(14.dp",
+            "app/src/main/java/com/rentmate/app/ui/theme/Dimens.kt:RoundedCornerShape(18.dp"
+        ],
+        "error-copy": [
+            "app/src/main/java/com/rentmate/app/ui/screens/AddBillViewModel.kt:\"createBill rejected invalid input\"",
+            "app/src/main/java/com/rentmate/app/ui/screens/AddChoreViewModel.kt:\"create rejected invalid input\""
+        ],
+        "glow-in-charts-only": []
+    }
+}

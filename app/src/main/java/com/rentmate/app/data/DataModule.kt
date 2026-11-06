@@ -64,4 +64,9 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindShoppingRepository(impl: CachedShoppingRepository): ShoppingRepository
+
+    /** RM-0031: the server's settle_up plan. */
+    @Binds
+    @Singleton
+    abstract fun bindSettleUpSource(impl: SupabaseSettleUpSource): SettleUpSource
 }
