@@ -21,8 +21,15 @@ interface SyncScheduler {
     /** Schedules an upload of the outbox for as soon as there is a network. Safe to call often. */
     fun requestSync()
 
+    /**
+     * RM-0019: starts an upload now, even if an earlier run is waiting out its
+     * retry delay. For the banner's Retry button. Still waits for a network.
+     */
+    fun syncNow() = requestSync()
+
     /** Does nothing. For tests and code paths without WorkManager. */
     object None : SyncScheduler {
+        /** Ignores the request. */
         override fun requestSync() = Unit
     }
 }
@@ -40,18 +47,38 @@ interface SyncScheduler {
  * When the network comes back, WorkManager starts waiting work within seconds,
  * which gives the "within a minute" target. A retry backs off exponentially
  * from [BACKOFF_SECONDS].
+ *
+ * Based on: Android Developers, Define work requests,
+ * https://developer.android.com/develop/background-work/background-tasks/persistent/getting-started/define-work (accessed 2026-11-06)
+ * Based on: Android Developers, Managing work,
+ * https://developer.android.com/develop/background-work/background-tasks/persistent/how-to/manage-work (accessed 2026-11-06)
  */
 @Singleton
 class WorkManagerSyncScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SyncScheduler {
 
+    /** Enqueues [SyncWorker] as unique work. If a sync is already waiting or running, it keeps that one. */
     override fun requestSync() {
         try {
             WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, buildRequest())
             Log.d(TAG, "sync requested")
         } catch (e: IllegalStateException) {
             // WorkManager not initialised (should not happen in the app). The entry stays queued.
+            Log.e(TAG, "could not schedule sync", e)
+        }
+    }
+
+    /**
+     * [ExistingWorkPolicy.REPLACE] drops a run that waits out its backoff and
+     * enqueues a fresh one without delay. The banner offers this only after a
+     * run failed, so no run is in progress to be cancelled.
+     */
+    override fun syncNow() {
+        try {
+            WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, buildRequest())
+            Log.d(TAG, "sync now requested")
+        } catch (e: IllegalStateException) {
             Log.e(TAG, "could not schedule sync", e)
         }
     }

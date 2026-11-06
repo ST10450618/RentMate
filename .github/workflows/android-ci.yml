@@ -27,6 +27,19 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
+      # Design rules from docs/ui-redesign-plan.html: the 4 dp spacing grid,
+      # radii 6/10/14/18 and the seven type sizes, all declared in
+      # ai-design-check.json. A literal size or radius outside the theme
+      # files fails the build. The version is pinned so a new rule upstream
+      # cannot turn the build red on its own.
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check design rules
+        run: npx --yes @enmera/ai-design-check@0.16.1 --format github app/src/main
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:

@@ -21,7 +21,8 @@ private const val TAG = "NotificationChannels"
  * The [id] is also the `channel` value the push Edge Function (RM-0022) sends
  * in each FCM data payload, so the client knows where to post the message.
  *
- * Reference: https://developer.android.com/develop/ui/views/notifications/channels
+ * Based on: Android Developers, Create and manage notification channels,
+ * https://developer.android.com/develop/ui/compose/notifications/channels (accessed 2026-11-06)
  */
 enum class RentMateChannel(
     val id: String,

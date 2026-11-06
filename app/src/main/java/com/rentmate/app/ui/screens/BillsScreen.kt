@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -247,44 +248,66 @@ private fun BillRow(
 /**
  * "Settle up": one row per payment. "You pay Sipho" says who must confirm it;
  * "Thandi pays you" can be tapped to mark it received, with Undo.
+ *
+ * RM-0031: when the plan was worked out on this phone (offline, or a bill still
+ * waits to sync), a line says it is a preview, each row has a Preview pill,
+ * and mark received is off until the server plan replaces it.
  */
 @Composable
 private fun SettleUpSection(state: BillsUiState, onReceived: (fromUserId: String, amount: Double) -> Unit) {
     val me = state.currentUserId
+    val provisional = state.settleUpProvisional
     val rows = visibleSettleUp(state.settleUp.orEmpty(), me, state.pendingReceived)
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         ListHeading(stringResource(R.string.settle_up))
+        if (provisional) {
+            Text(
+                stringResource(R.string.settle_up_preview_label),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         when {
             state.settleUp == null && state.settleUpLoading -> RefreshingIndicator()
             rows.isEmpty() -> ListGroup { ListRow(title = stringResource(R.string.settle_up_none)) }
-            else -> ListGroup(rows) { row -> SettleRow(row, settleRole(row, me), onReceived) }
+            else -> ListGroup(rows) { row -> SettleRow(row, settleRole(row, me), provisional, onReceived) }
         }
     }
 }
 
 @Composable
-private fun SettleRow(row: SettleUpRow, role: SettleRole, onReceived: (String, Double) -> Unit) {
-    val amount: @Composable () -> Unit = { ListAmount(formatRandShort(row.amount)) }
+private fun SettleRow(row: SettleUpRow, role: SettleRole, provisional: Boolean, onReceived: (String, Double) -> Unit) {
+    val fallback = stringResource(R.string.housemate_fallback)
+    val fromName = row.from_display_name.ifBlank { fallback }
+    val toName = row.to_display_name.ifBlank { fallback }
+    val trailing: @Composable () -> Unit = {
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            ListAmount(formatRandShort(row.amount))
+            if (provisional) StatusPill(stringResource(R.string.settle_up_preview_pill), PillTone.Neutral)
+        }
+    }
+    val avatar: @Composable () -> Unit = { MemberAvatar(fromName, userId = row.from_user_id) }
     when (role) {
         SettleRole.YouPay -> ListRow(
-            title = stringResource(R.string.money_you_pay, row.to_display_name),
-            supporting = stringResource(R.string.bills_ask_to_confirm, row.to_display_name),
-            leading = { MemberAvatar(row.from_display_name, userId = row.from_user_id) },
-            trailing = amount
+            title = stringResource(R.string.money_you_pay, toName),
+            supporting = stringResource(R.string.bills_ask_to_confirm, toName),
+            leading = avatar,
+            trailing = trailing
         )
         SettleRole.PaysYou -> ListRow(
-            title = stringResource(R.string.money_pays_you, row.from_display_name),
-            supporting = stringResource(R.string.money_tap_received),
-            leading = { MemberAvatar(row.from_display_name, userId = row.from_user_id) },
-            trailing = amount,
+            title = stringResource(R.string.money_pays_you, fromName),
+            // RM-0031: a preview is not the server plan, so it cannot be marked received yet.
+            supporting = stringResource(if (provisional) R.string.settle_up_confirm_needs_sync else R.string.money_tap_received),
+            leading = avatar,
+            trailing = trailing,
             // Only the person who is owed can confirm they received it (RM-0010).
-            onClick = { onReceived(row.from_user_id, row.amount) }
+            onClick = if (provisional) null else { { onReceived(row.from_user_id, row.amount) } }
         )
         SettleRole.Between -> ListRow(
-            title = stringResource(R.string.money_pays, row.from_display_name, row.to_display_name),
-            supporting = stringResource(R.string.bills_waiting_for, row.to_display_name),
-            leading = { MemberAvatar(row.from_display_name, userId = row.from_user_id) },
-            trailing = amount
+            title = stringResource(R.string.money_pays, fromName, toName),
+            supporting = stringResource(R.string.bills_waiting_for, toName),
+            leading = avatar,
+            trailing = trailing
         )
     }
 }

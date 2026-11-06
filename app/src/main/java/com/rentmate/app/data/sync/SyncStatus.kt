@@ -37,6 +37,12 @@ data class SyncStatus(
     val rejected: List<SyncRejectionEntity>
 )
 
+/** RM-0019: where the UI reads sync state from. An interface so ViewModel tests can fake it. */
+interface SyncStatusSource {
+    /** Phase, last sync time, pending count and rejections, updated live. */
+    val status: Flow<SyncStatus>
+}
+
 /**
  * RM-0018: holds the worker's run state and combines it with the outbox count
  * and the rejection log into [status]. The run state is in memory only, so it
@@ -46,13 +52,13 @@ data class SyncStatus(
 class SyncStatusTracker @Inject constructor(
     outbox: OutboxQueue,
     rejectionDao: SyncRejectionDao
-) {
+) : SyncStatusSource {
+    /** The in-memory part of [SyncStatus]. It holds what the worker last reported. */
     private data class RunState(val phase: SyncPhase = SyncPhase.Idle, val lastSyncedAt: Long? = null)
 
     private val run = MutableStateFlow(RunState())
 
-    /** Phase, last sync time, pending count and rejections, updated live. */
-    val status: Flow<SyncStatus> = combine(run, outbox.pendingCount, rejectionDao.observeAll()) { r, count, rejected ->
+    override val status: Flow<SyncStatus> = combine(run, outbox.pendingCount, rejectionDao.observeAll()) { r, count, rejected ->
         SyncStatus(r.phase, r.lastSyncedAt, count, rejected)
     }
 
@@ -63,10 +69,16 @@ class SyncStatusTracker @Inject constructor(
     val lastSyncedAt: Long? get() = run.value.lastSyncedAt
 
     /** Called when a run starts. */
-    fun started() = run.update { it.copy(phase = SyncPhase.Syncing) }
+    fun started() {
+        Log.d(TAG, "sync started")
+        run.update { it.copy(phase = SyncPhase.Syncing) }
+    }
 
     /** Called when a run emptied the queue at [at], epoch millis. */
-    fun succeeded(at: Long) = run.update { it.copy(phase = SyncPhase.Idle, lastSyncedAt = at) }
+    fun succeeded(at: Long) {
+        Log.d(TAG, "sync finished: queue empty")
+        run.update { it.copy(phase = SyncPhase.Idle, lastSyncedAt = at) }
+    }
 
     /** Called when a run stopped early and will retry. */
     fun failed(error: String?) {
