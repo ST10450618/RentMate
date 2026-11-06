@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sync_banner_offline">Jy is vanlyn. Veranderinge sal sinkroniseer wanneer jy weer koppel.</string>
+    <plurals name="sync_banner_offline_pending">
+        <item quantity="one">%d verandering wag.</item>
+        <item quantity="other">%d veranderinge wag.</item>
+    </plurals>
+    <plurals name="sync_banner_syncing">
+        <item quantity="one">Sinkroniseer %d verandering…</item>
+        <item quantity="other">Sinkroniseer %d veranderinge…</item>
+    </plurals>
+    <plurals name="sync_banner_failed">
+        <item quantity="one">Kon nie %d verandering sinkroniseer nie.</item>
+        <item quantity="other">Kon nie %d veranderinge sinkroniseer nie.</item>
+    </plurals>
+    <string name="sync_banner_synced">Alle veranderinge is gesinkroniseer</string>
+
+    <string name="sync_rejected_not_allowed">\'n Verandering wat jy vanlyn gemaak het, is nie gestoor nie. Jy mag dit nie doen nie.</string>
+    <string name="sync_rejected_gone">\'n Verandering wat jy vanlyn gemaak het, is nie gestoor nie. Die item bestaan nie meer nie.</string>
+    <string name="sync_rejected_not_saved">\'n Verandering wat jy vanlyn gemaak het, kon nie gestoor word nie.</string>
+    <plurals name="sync_rejected_more">
+        <item quantity="one">Nog %d verandering is nie gestoor nie.</item>
+        <item quantity="other">Nog %d veranderinge is nie gestoor nie.</item>
+    </plurals>
+    <string name="sync_rejected_dismiss">Maak toe</string>
+</resources>
