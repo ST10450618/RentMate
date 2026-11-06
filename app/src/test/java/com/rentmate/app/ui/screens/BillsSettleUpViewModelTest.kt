@@ -21,6 +21,7 @@ import com.rentmate.app.data.sync.RecordingActivity
 import com.rentmate.app.data.sync.SyncStatusTracker
 import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.ui.feedback.UndoQueue
+import kotlinx.coroutines.test.TestScope
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.MemoryCodeVerifierCache
 import io.github.jan.supabase.auth.MemorySessionManager
@@ -111,7 +112,10 @@ class BillsSettleUpViewModelTest {
         val source = FakeSource(offline = true)
         val feedback = FeedbackCenter()
         val tracker = SyncStatusTracker(OutboxQueue(db), db.syncRejectionDao())
-        val vm = BillsViewModel(supabase, household, FakeAttachments(), RecordingActivity(), repository, feedback, UndoQueue(feedback), source, tracker)
+        val vm = BillsViewModel(
+            supabase, household, FakeAttachments(), RecordingActivity(), repository, feedback,
+            UndoQueue(feedback, TestScope(), UndoQueue.UNDO_WINDOW_MS), source, tracker
+        )
 
         vm.loadSettleUp()
         val offline = vm.state.value

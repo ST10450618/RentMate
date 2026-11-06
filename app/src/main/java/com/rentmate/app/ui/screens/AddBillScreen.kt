@@ -189,7 +189,7 @@ fun AddBillScreen(
                     message?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 }
 
-                // RM-0029: a photo of the bill or slip, e.g. the municipal account.
+                // RM-0029: a photo of the bill or slip, for example the municipal account.
                 ListHeading(stringResource(R.string.photo_section_bill), modifier = Modifier.padding(top = Spacing.sm))
                 PhotoAttachmentPicker(
                     photos = photos,

@@ -46,7 +46,7 @@ data class BillsUiState(
     val settleUpLoading: Boolean = false,
     /**
      * RM-0031: true when [settleUp] was computed on this phone (offline, or a
-     * bill still waits to sync). The dialog labels it and blocks Confirm received.
+     * bill still waits to sync). Money labels it Preview and blocks mark received.
      */
     val settleUpProvisional: Boolean = false,
     /** The signed-in user; only the creditor sees Mark paid / Confirm received (RM-0010). */
@@ -112,7 +112,7 @@ class BillsViewModel @Inject constructor(
             settleUp.state.collect { s ->
                 _state.update {
                     it.copy(
-                        settleUp = if (s.visible && !s.loading) s.rows else null,
+                        settleUp = if (s.visible && !s.loading) s.rows else it.settleUp.takeIf { _ -> s.visible },
                         settleUpLoading = s.visible && s.loading,
                         settleUpProvisional = s.provisional
                     )
@@ -140,7 +140,7 @@ class BillsViewModel @Inject constructor(
                 }
                 .onFailure { e -> _state.update { it.copy(loading = false, error = ErrorMapper.toMessage(e)) } }
             // RM-0056: settle-up sits on the Money screen, so it loads with the bills.
-            // RM-0031: offline, the coordinator shows a labelled local preview instead.
+            // RM-0031: offline the coordinator shows a local preview instead.
             loadSettleUp()
             loadPhotos()
         }
@@ -260,4 +260,5 @@ class BillsViewModel @Inject constructor(
             )
         )
     }
+
 }
