@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- isiXhosa (RM-0025). Machine-drafted: needs review by an isiXhosa speaker
+     (see README, Translation review). Keep the same keys and order as
+     values/strings_maintenance.xml. -->
+<resources>
+    <string name="maintenance_title">Ulungiso</string>
+    <string name="maintenance_new">Isicelo esitsha</string>
+    <string name="maintenance_whats_wrong">Yintoni ingxaki?</string>
+    <string name="maintenance_detail">Iinkcukacha ezingakumbi (akunyanzelekanga)</string>
+    <string name="maintenance_category">Udidi</string>
+    <string name="maintenance_urgency">Ukungxamiseka</string>
+    <string name="maintenance_photo">Ifoto eqhotyoshelweyo</string>
+    <string name="maintenance_add_photo">Qhoboshela ifoto</string>
+    <string name="maintenance_retake_photo">Tshintsha ifoto</string>
+    <string name="maintenance_log_request">Bhala isicelo</string>
+    <plurals name="maintenance_send_to_landlord">
+        <item quantity="one">Thumela isicelo esi-%d esivulekileyo kumnini-ndlu</item>
+        <item quantity="other">Thumela izicelo ezi-%d ezivulekileyo kumnini-ndlu</item>
+    </plurals>
+    <string name="maintenance_logged">Izicelo ezibhaliweyo</string>
+    <string name="maintenance_empty">Akukabhalwa nto. Yongeza isicelo ngasentla.</string>
+    <string name="maintenance_mark_as">Phawula: %1$s</string>
+
+    <string name="error_title_blank">Nika ingxaki isihloko esifutshane</string>
+    <string name="error_title_long">Isihloko masingadluli koonobumba abangama-80</string>
+
+    <string name="category_plumbing">Imibhobho</string>
+    <string name="category_electrical">Umbane</string>
+    <string name="category_structural">Isakhiwo</string>
+    <string name="category_appliance">Isixhobo sasekhaya</string>
+    <string name="category_other">Okunye</string>
+
+    <string name="urgency_low">Iphantsi</string>
+    <string name="urgency_medium">Iphakathi</string>
+    <string name="urgency_high">Iphezulu</string>
+
+    <string name="status_open">Ibhaliwe</string>
+    <string name="status_sent">Ithunyelwe kumnini-ndlu</string>
+    <string name="status_acknowledged">Yamkelwe</string>
+    <string name="status_resolved">Isonjululwe</string>
+
+    <string name="maintenance_error_load">Asikwazanga ukulayisha izicelo zolungiso. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="maintenance_error_save">Asikwazanga ukugcina isicelo sakho. Jonga uqhagamshelo lwakho uze usibhale kwakhona.</string>
+    <string name="maintenance_error_update">Asikwazanga ukuhlaziya isimo sesicelo. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="maintenance_error_send">Asikwazanga ukuthumela kumnini-ndlu. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="action_retry">Zama kwakhona</string>
+    <string name="action_dismiss">Vala</string>
+
+    <!-- RM-0009: itemised email to the landlord -->
+    <string name="landlord_email_subject">Isicelo solungiso - %1$s</string>
+    <string name="landlord_email_greeting_named">Molo %1$s,</string>
+    <string name="landlord_email_greeting">Molo mnini-ndlu,</string>
+    <string name="landlord_email_intro">Ezi ngxaki zilandelayo e-%1$s zifuna ukulungiswa:</string>
+    <string name="landlord_email_category">Udidi: %1$s</string>
+    <string name="landlord_email_urgency">Ukungxamiseka: %1$s</string>
+    <string name="landlord_email_logged">Ibhaliwe: %1$s</string>
+    <string name="landlord_email_sign_off">Ngentlonipho,\nAbaqeshi abahlala e-%1$s</string>
+    <string name="landlord_email_dialog_title">I-imeyile yomnini-ndlu</string>
+    <string name="landlord_email_dialog_body">Siza kuyigcinela lonke ikhaya lakho, ukuze uyifake kanye kuphela.</string>
+    <string name="landlord_email_field">Idilesi ye-imeyile</string>
+    <string name="landlord_email_open">Bhala i-imeyile</string>
+    <string name="error_email_invalid">Faka idilesi ye-imeyile, umz. igama@example.com</string>
+    <string name="maintenance_error_no_email_app">Akukho app ye-imeyile kule fowuni. Faka enye, uze uzame kwakhona.</string>
+    <string name="maintenance_status_locked">Ngumhlali-kunye obhale okanye othumele esi sicelo kuphela onokusihlaziya.</string>
+</resources>

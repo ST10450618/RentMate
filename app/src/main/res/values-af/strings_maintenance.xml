@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Afrikaans (RM-0025). Keep the same keys and order as values/strings_maintenance.xml. -->
+<resources>
+    <string name="maintenance_title">Onderhoud</string>
+    <string name="maintenance_new">Nuwe versoek</string>
+    <string name="maintenance_whats_wrong">Wat is fout?</string>
+    <string name="maintenance_detail">Meer besonderhede (opsioneel)</string>
+    <string name="maintenance_category">Kategorie</string>
+    <string name="maintenance_urgency">Dringendheid</string>
+    <string name="maintenance_photo">Aangehegte foto</string>
+    <string name="maintenance_add_photo">Heg \'n foto aan</string>
+    <string name="maintenance_retake_photo">Vervang foto</string>
+    <string name="maintenance_log_request">Teken versoek aan</string>
+    <plurals name="maintenance_send_to_landlord">
+        <item quantity="one">Stuur %d oop versoek na die verhuurder</item>
+        <item quantity="other">Stuur %d oop versoeke na die verhuurder</item>
+    </plurals>
+    <string name="maintenance_logged">Aangetekende versoeke</string>
+    <string name="maintenance_empty">Nog niks aangeteken nie. Voeg hierbo \'n versoek by.</string>
+    <string name="maintenance_mark_as">Merk as %1$s</string>
+
+    <string name="error_title_blank">Gee die fout \'n kort titel</string>
+    <string name="error_title_long">Hou die titel korter as 80 karakters</string>
+
+    <string name="category_plumbing">Loodgieterswerk</string>
+    <string name="category_electrical">Elektries</string>
+    <string name="category_structural">Struktureel</string>
+    <string name="category_appliance">Toestel</string>
+    <string name="category_other">Ander</string>
+
+    <string name="urgency_low">Laag</string>
+    <string name="urgency_medium">Medium</string>
+    <string name="urgency_high">Hoog</string>
+
+    <string name="status_open">Aangeteken</string>
+    <string name="status_sent">Na verhuurder gestuur</string>
+    <string name="status_acknowledged">Erken</string>
+    <string name="status_resolved">Opgelos</string>
+
+    <string name="maintenance_error_load">Kon nie onderhoudsversoeke laai nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_save">Kon nie jou versoek stoor nie. Gaan jou verbinding na en teken dit weer aan.</string>
+    <string name="maintenance_error_update">Kon nie die status van die versoek opdateer nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="maintenance_error_send">Kon nie aan die verhuurder stuur nie. Gaan jou verbinding na en probeer weer.</string>
+    <string name="action_retry">Probeer weer</string>
+    <string name="action_dismiss">Maak toe</string>
+
+    <!-- RM-0009: itemised email to the landlord -->
+    <string name="landlord_email_subject">Onderhoudsversoek - %1$s</string>
+    <string name="landlord_email_greeting_named">Beste %1$s</string>
+    <string name="landlord_email_greeting">Beste verhuurder</string>
+    <string name="landlord_email_intro">Die volgende foute by %1$s het aandag nodig:</string>
+    <string name="landlord_email_category">Kategorie: %1$s</string>
+    <string name="landlord_email_urgency">Dringendheid: %1$s</string>
+    <string name="landlord_email_logged">Aangeteken: %1$s</string>
+    <string name="landlord_email_sign_off">Vriendelike groete\nDie huurders by %1$s</string>
+    <string name="landlord_email_dialog_title">Verhuurder se e-posadres</string>
+    <string name="landlord_email_dialog_body">Ons stoor dit vir jou hele huishouding, so jy hoef dit net een keer in te voer.</string>
+    <string name="landlord_email_field">E-posadres</string>
+    <string name="landlord_email_open">Skryf e-pos</string>
+    <string name="error_email_invalid">Voer \'n e-posadres in, bv. naam@voorbeeld.com</string>
+    <string name="maintenance_error_no_email_app">Daar is geen e-posprogram op hierdie foon nie. Installeer een en probeer dan weer.</string>
+    <string name="maintenance_status_locked">Net die huisgenoot wat hierdie versoek aangeteken of gestuur het, kan dit opdateer.</string>
+</resources>
