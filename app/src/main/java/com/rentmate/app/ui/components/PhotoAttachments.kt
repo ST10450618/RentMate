@@ -8,11 +8,15 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +45,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import com.rentmate.app.data.attachments.PhotoLink
 import androidx.core.content.FileProvider
 import com.rentmate.app.R
 import com.rentmate.app.ui.screens.PendingPhoto
@@ -169,6 +177,64 @@ fun PhotoUploadRow(photo: PendingPhoto, onRetry: () -> Unit, onRemove: () -> Uni
         IconButton(onClick = onRemove) {
             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.photo_remove))
         }
+    }
+}
+
+/**
+ * RM-0029: a row of saved photos for a maintenance request or bill. Tapping one
+ * opens it full size. Images load from signed URLs but cache by storage path,
+ * so a new URL after each refresh does not download the photo again.
+ */
+@Composable
+fun AttachmentThumbnails(photos: List<PhotoLink>, modifier: Modifier = Modifier) {
+    var open by remember { mutableStateOf<PhotoLink?>(null) }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+    ) {
+        photos.forEachIndexed { index, photo ->
+            AsyncImage(
+                model = photo.imageRequest(),
+                contentDescription = stringResource(R.string.photo_thumbnail_description, index + 1, photos.size),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { open = photo }
+            )
+        }
+    }
+    open?.let { photo ->
+        Dialog(onDismissRequest = { open = null }) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                TextButton(onClick = { open = null }) { Text(stringResource(R.string.close)) }
+                AsyncImage(
+                    model = photo.imageRequest(),
+                    contentDescription = stringResource(R.string.photo_full_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 560.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PhotoLink.imageRequest(): ImageRequest {
+    val context = LocalContext.current
+    return remember(path, url) {
+        ImageRequest.Builder(context)
+            .data(url)
+            .memoryCacheKey(path)
+            .diskCacheKey(path)
+            .build()
     }
 }
 

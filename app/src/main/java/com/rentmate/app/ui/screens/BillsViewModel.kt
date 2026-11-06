@@ -20,6 +20,13 @@ import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
+import android.util.Log
+import com.rentmate.app.data.attachments.AttachmentParent
+import com.rentmate.app.data.attachments.AttachmentRepository
+import com.rentmate.app.data.attachments.PhotoLink
+import com.rentmate.app.data.attachments.THUMBNAIL_URL_EXPIRY
+import com.rentmate.app.data.attachments.loadLinks
+import kotlinx.coroutines.CancellationException
 
 data class BillsUiState(
     val bills: List<BillWithSharesRow> = emptyList(),
@@ -28,7 +35,9 @@ data class BillsUiState(
     val settleUp: List<SettleUpRow>? = null,
     val settleUpLoading: Boolean = false,
     /** The signed-in user; only the creditor sees Mark paid / Confirm received (RM-0010). */
-    val currentUserId: String? = null
+    val currentUserId: String? = null,
+    /** RM-0029: thumbnails per bill ID, with short-lived signed URLs. */
+    val photos: Map<String, List<PhotoLink>> = emptyMap()
 )
 
 @Serializable
@@ -45,7 +54,8 @@ private val BILL_WITH_SHARES_COLUMNS = Columns.raw("*, bill_shares(*, profiles(d
 @HiltViewModel
 class BillsViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val attachments: AttachmentRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
@@ -64,6 +74,21 @@ class BillsViewModel @Inject constructor(
                     .decodeList<BillWithSharesRow>()
             }.onSuccess { _state.value = _state.value.copy(loading = false, bills = it) }
                 .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
+            loadPhotos()
+        }
+    }
+
+    /** Photos are extra: if they fail to load, bills still show without thumbnails. */
+    private suspend fun loadPhotos() {
+        try {
+            val links = attachments.loadLinks(THUMBNAIL_URL_EXPIRY)
+            _state.value = _state.value.copy(
+                photos = links.entries.filter { it.key is AttachmentParent.Bill }.associate { it.key.id to it.value }
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("BillsViewModel", "Could not load bill photos", e)
         }
     }
 

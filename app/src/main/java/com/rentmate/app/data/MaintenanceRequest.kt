@@ -1,6 +1,5 @@
 ﻿package com.rentmate.app.data
 
-import android.graphics.Bitmap
 import androidx.annotation.StringRes
 import com.rentmate.app.R
 import java.util.UUID
@@ -55,7 +54,6 @@ data class MaintenanceRequest(
     val category: MaintenanceCategory = MaintenanceCategory.OTHER,
     val urgency: Urgency = Urgency.MEDIUM,
     val status: RequestStatus = RequestStatus.OPEN,
-    val photo: Bitmap? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val sentAt: Long? = null,
     val acknowledgedAt: Long? = null,

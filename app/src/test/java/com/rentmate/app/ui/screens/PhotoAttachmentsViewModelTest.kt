@@ -1,7 +1,9 @@
 package com.rentmate.app.ui.screens
 
 import com.rentmate.app.R
+import com.rentmate.app.data.attachments.Attachment
 import com.rentmate.app.data.attachments.AttachmentKind
+import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
 import com.rentmate.app.data.attachments.PhotoCompressor
 import com.rentmate.app.data.attachments.PhotoTooLargeException
@@ -20,6 +22,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
+import kotlin.time.Duration
 
 /** RM-0028: upload progress is shown, failures offer Retry, and Retry does not compress again. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -50,6 +53,10 @@ class PhotoAttachmentsViewModelTest {
         override suspend fun delete(path: String) {
             deleted += path
         }
+
+        override suspend fun link(parent: AttachmentParent, paths: List<String>) = Unit
+        override suspend fun list(): List<Attachment> = emptyList()
+        override suspend fun signedUrls(paths: List<String>, expiresIn: Duration) = emptyMap<String, String>()
     }
 
     @Before
@@ -74,13 +81,12 @@ class PhotoAttachmentsViewModelTest {
     @Test
     fun `progress is shown while the upload is running`() {
         val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        val repo = object : AttachmentRepository {
+        val repo = object : AttachmentRepository by FakeAttachments() {
             override fun upload(kind: AttachmentKind, jpeg: ByteArray): Flow<UploadProgress> = flow {
                 emit(UploadProgress.Sending(0.4f))
                 gate.await()
                 emit(UploadProgress.Done("h1/bill/x.jpg"))
             }
-            override suspend fun delete(path: String) = Unit
         }
         val vm = PhotoAttachmentsViewModel(repo, FakeCompressor())
 

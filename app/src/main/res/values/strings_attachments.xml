@@ -11,4 +11,10 @@
     <string name="photo_error_upload">Upload failed. Check your connection and try again.</string>
     <string name="photo_error_unreadable">That photo couldn\'t be opened. Try another one.</string>
     <string name="photo_error_too_large">That photo couldn\'t be made small enough to upload.</string>
+    <string name="photo_wait_for_upload">Wait for the photos to finish uploading.</string>
+    <string name="photo_error_link">Saved, but the photos couldn\'t be attached. Tap Retry to try again.</string>
+    <string name="photo_thumbnail_description">Photo %1$d of %2$d</string>
+    <string name="photo_full_description">Attached photo, full size</string>
+    <string name="landlord_email_photos">Photos:</string>
+    <string name="photo_section_bill">Photo of the bill or slip (optional)</string>
 </resources>
