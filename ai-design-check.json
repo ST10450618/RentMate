@@ -1,0 +1,24 @@
+{
+    "include": ["app/src/main"],
+    "spacing": { "base": 4 },
+    "designSystem": {
+        "sizes": [12, 14, 16, 18, 24, 32],
+        "radii": [6, 10, 14, 18]
+    },
+    "allow": {
+        "radius-scale": [
+            "app/src/main/**:RoundedCornerShape(6.dp",
+            "app/src/main/**:RoundedCornerShape(10.dp",
+            "app/src/main/**:RoundedCornerShape(14.dp",
+            "app/src/main/**:RoundedCornerShape(18.dp"
+        ],
+        "type-scale": [
+            "app/src/main/**:fontSize = 12.sp",
+            "app/src/main/**:fontSize = 14.sp",
+            "app/src/main/**:fontSize = 16.sp",
+            "app/src/main/**:fontSize = 18.sp",
+            "app/src/main/**:fontSize = 24.sp",
+            "app/src/main/**:fontSize = 32.sp"
+        ]
+    }
+}
