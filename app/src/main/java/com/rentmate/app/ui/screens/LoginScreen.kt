@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,9 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.ReceiptLong
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,11 +42,11 @@ import com.rentmate.app.R
 import com.rentmate.app.auth.AuthUiState
 import com.rentmate.app.auth.AuthViewModel
 import com.rentmate.app.ui.components.BrandMark
+import com.rentmate.app.ui.components.OnBrandButton
 import com.rentmate.app.ui.theme.Aloe
 import com.rentmate.app.ui.theme.AloeDark
 import com.rentmate.app.ui.theme.AloeLight
 import com.rentmate.app.ui.theme.Amber
-import com.rentmate.app.ui.theme.Ink
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "LoginScreen"
@@ -147,35 +143,16 @@ fun LoginScreen(
                 Spacer(Modifier.height(Spacing.md))
             }
 
-            Button(
-                onClick = { viewModel.signIn() },
-                enabled = !loading,
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Ink,
-                    disabledContainerColor = Color.White.copy(alpha = 0.7f),
-                    disabledContentColor = Ink
+            OnBrandButton(
+                text = stringResource(
+                    if (state is AuthUiState.Error) R.string.login_try_again else R.string.login_continue_google
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-            ) {
-                if (loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Aloe)
-                    Spacer(Modifier.size(Spacing.md))
-                    Text(stringResource(R.string.login_signing_in), style = MaterialTheme.typography.titleSmall)
-                } else {
-                    GoogleBadge()
-                    Spacer(Modifier.size(Spacing.md))
-                    Text(
-                        stringResource(
-                            if (state is AuthUiState.Error) R.string.login_try_again else R.string.login_continue_google
-                        ),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-            }
+                onClick = { viewModel.signIn() },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { GoogleBadge() },
+                loading = loading,
+                loadingText = stringResource(R.string.login_signing_in)
+            )
 
             Spacer(Modifier.height(Spacing.lg))
             Text(
