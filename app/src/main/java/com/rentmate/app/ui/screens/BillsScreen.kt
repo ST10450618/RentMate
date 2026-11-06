@@ -41,6 +41,8 @@ import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.data.attachments.PhotoLink
 import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.MemberAvatar
+import androidx.compose.material3.SnackbarHost
+import com.rentmate.app.ui.feedback.LocalSnackbarHostState
 import com.rentmate.app.ui.components.PillTone
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.RentMateCard
@@ -104,6 +106,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
             onDismissRequest = { viewModel.dismissSettleUp() },
             title = { Text(stringResource(R.string.settle_up)) },
             text = {
+              Column {
                 if (state.settleUpLoading) {
                     CircularProgressIndicator()
                 } else {
@@ -139,6 +142,10 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         }
                     }
                 }
+                // RM-0052: the dialog is its own window, so the app's snackbar would be
+                // hidden behind it. Show the same snackbar state here, in front.
+                SnackbarHost(LocalSnackbarHostState.current)
+              }
             },
             confirmButton = {
                 PrimaryButton(stringResource(R.string.close), onClick = { viewModel.dismissSettleUp() })
@@ -192,7 +199,7 @@ private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPai
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
-                MemberAvatar(name, size = 28.dp)
+                MemberAvatar(name, size = 28.dp, userId = share.user_id)
                 Text(
                     stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
                     style = MaterialTheme.typography.bodyMedium,

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
@@ -44,7 +43,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -53,6 +51,7 @@ import androidx.core.content.FileProvider
 import com.rentmate.app.R
 import com.rentmate.app.ui.screens.PendingPhoto
 import com.rentmate.app.ui.screens.PhotoStatus
+import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.theme.Spacing
 import java.io.File
 import java.util.UUID
@@ -136,8 +135,8 @@ fun PhotoUploadRow(photo: PendingPhoto, onRetry: () -> Unit, onRemove: () -> Uni
     ) {
         Box(
             modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .size(Sizes.thumbnail)
+                .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             if (preview != null) {
@@ -145,11 +144,11 @@ fun PhotoUploadRow(photo: PendingPhoto, onRetry: () -> Unit, onRemove: () -> Uni
                     bitmap = preview,
                     contentDescription = stringResource(R.string.photo_preview_description),
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(Sizes.thumbnail)
                 )
             }
         }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             when (val status = photo.status) {
                 PhotoStatus.Compressing -> {
                     Text(stringResource(R.string.photo_status_preparing), style = MaterialTheme.typography.bodySmall)
@@ -198,8 +197,8 @@ fun AttachmentThumbnails(photos: List<PhotoLink>, modifier: Modifier = Modifier)
                 contentDescription = stringResource(R.string.photo_thumbnail_description, index + 1, photos.size),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .size(Sizes.thumbnailLarge)
+                    .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable { open = photo }
             )
@@ -211,7 +210,7 @@ fun AttachmentThumbnails(photos: List<PhotoLink>, modifier: Modifier = Modifier)
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colorScheme.surface)
             ) {
                 TextButton(onClick = { open = null }) { Text(stringResource(R.string.close)) }
@@ -219,7 +218,7 @@ fun AttachmentThumbnails(photos: List<PhotoLink>, modifier: Modifier = Modifier)
                     model = photo.imageRequest(),
                     contentDescription = stringResource(R.string.photo_full_description),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 560.dp)
+                    modifier = Modifier.fillMaxWidth().heightIn(max = Sizes.photoPreviewMax)
                 )
             }
         }
@@ -245,4 +244,4 @@ private fun newCameraUri(context: Context): Uri {
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }
 
-private fun Modifier.padStart() = this.then(Modifier.padding(start = 8.dp))
+private fun Modifier.padStart() = this.then(Modifier.padding(start = Spacing.sm))

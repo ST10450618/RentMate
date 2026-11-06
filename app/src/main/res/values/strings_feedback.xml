@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RM-0052: snackbar messages for failed actions. Each says what failed and what to do next. -->
+<resources>
+    <string name="feedback_retry">Retry</string>
+    <string name="feedback_setting_failed">Couldn\'t save this setting. Try again.</string>
+    <string name="feedback_language_failed">Couldn\'t save the language. Try again.</string>
+    <string name="feedback_sign_out_partial">Signed out on this device. We couldn\'t reach the server to end the session everywhere.</string>
+    <string name="feedback_save_bill_failed">Couldn\'t save the bill. Check your connection and tap Retry.</string>
+    <string name="feedback_add_chore_failed">Couldn\'t add the chore. Check your connection and tap Retry.</string>
+    <string name="feedback_add_item_failed">Couldn\'t add the item. Check your connection and tap Retry.</string>
+    <string name="feedback_mark_bought_failed">Couldn\'t mark the item as bought. Check your connection and tap Retry.</string>
+    <string name="feedback_mark_paid_failed">Couldn\'t mark this share as paid. Check your connection and tap Retry.</string>
+    <string name="feedback_mark_paid_not_allowed">Only the person who added this bill can mark it paid.</string>
+    <string name="feedback_stop_repeat_failed">Couldn\'t stop this bill repeating. Check your connection and tap Retry.</string>
+    <string name="feedback_settle_up_failed">Couldn\'t work out who owes whom. Check your connection and tap Retry.</string>
+    <string name="feedback_confirm_settlement_failed">Couldn\'t confirm the payment. Check your connection and tap Retry.</string>
+    <string name="feedback_complete_chore_failed">Couldn\'t mark the chore as done. Check your connection and tap Retry.</string>
+    <string name="feedback_create_household_failed">Couldn\'t create the household. Check your connection and tap Retry.</string>
+    <string name="feedback_join_household_failed">Couldn\'t join the household. Check your connection and tap Retry.</string>
+</resources>
