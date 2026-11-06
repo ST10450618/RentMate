@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RM-0028 / RM-0029: foto-aanhegsels. -->
+<resources>
+    <string name="photo_choose">Kies foto</string>
+    <string name="photo_take">Neem foto</string>
+    <string name="photo_preview_description">Foto om aan te heg</string>
+    <string name="photo_remove">Verwyder foto</string>
+    <string name="photo_status_preparing">Berei foto voor…</string>
+    <string name="photo_status_uploading">Laai op… %1$d%%</string>
+    <string name="photo_status_uploaded">Opgelaai (%1$d KB)</string>
+    <string name="photo_error_upload">Oplaai het misluk. Kontroleer jou verbinding en probeer weer.</string>
+    <string name="photo_error_unreadable">Daardie foto kon nie oopgemaak word nie. Probeer \'n ander een.</string>
+    <string name="photo_error_too_large">Daardie foto kon nie klein genoeg gemaak word om op te laai nie.</string>
+</resources>

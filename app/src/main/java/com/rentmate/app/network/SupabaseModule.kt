@@ -9,6 +9,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
 import javax.inject.Singleton
 
 @Module
@@ -22,6 +23,8 @@ object SupabaseModule {
         supabaseKey = BuildConfig.SUPABASE_ANON_KEY
     ) {
         install(Postgrest)
+        // RM-0028: photo attachments; uploads carry the signed-in user's JWT.
+        install(Storage)
         install(Auth) {
             // RM-0002: keep the session on the device and refresh it, so a
             // relaunch skips Login.

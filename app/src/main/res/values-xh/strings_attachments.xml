@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RM-0028 / RM-0029: iifoto eziqhotyoshelweyo. -->
+<resources>
+    <string name="photo_choose">Khetha ifoto</string>
+    <string name="photo_take">Thatha ifoto</string>
+    <string name="photo_preview_description">Ifoto eza kuqhotyoshelwa</string>
+    <string name="photo_remove">Susa ifoto</string>
+    <string name="photo_status_preparing">Ilungiselela ifoto…</string>
+    <string name="photo_status_uploading">Iyalayisha… %1$d%%</string>
+    <string name="photo_status_uploaded">Ilayishiwe (%1$d KB)</string>
+    <string name="photo_error_upload">Ukulayisha akuphumelelanga. Jonga uqhagamshelo lwakho uze uzame kwakhona.</string>
+    <string name="photo_error_unreadable">Loo foto ayikwazanga ukuvulwa. Zama enye.</string>
+    <string name="photo_error_too_large">Loo foto ayikwazanga ukwenziwa ibe ncinci ngokwaneleyo ukuba ilayishwe.</string>
+</resources>
