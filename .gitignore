@@ -29,10 +29,9 @@ app/build/
 keystore.properties
 
 #  Firebase 
-# google-services.json contains project identifiers. The marker needs the app
-# to build, so if the team decides to commit it, delete the line below and note
-# the decision in the README.
-app/google-services.json
+# app/google-services.json IS committed (see README, Getting started). The
+# service-account key used by the Edge Function is a secret and never is.
+*firebase-adminsdk*.json
 
 #  Secrets and local config 
 secrets.properties

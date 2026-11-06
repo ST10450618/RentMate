@@ -353,6 +353,8 @@ Build and install a debug build on a connected device:
 
 Debug builds are signed with the shared `keystore/debug.keystore`, so the SHA-1 registered for Google Sign-In works on every machine.
 
+`app/google-services.json` (Firebase project `rentmate-b120f`) is committed on purpose so every machine and CI can build. It holds only the project ID and an API key that ships inside every APK anyway. The Firebase service-account key used to send pushes is a secret: it lives only in Supabase Edge Function secrets and is never committed.
+
 ## 10. Backend (Supabase)
 
 Schema, Row Level Security and functions are numbered SQL migrations in `supabase/migrations/`:
