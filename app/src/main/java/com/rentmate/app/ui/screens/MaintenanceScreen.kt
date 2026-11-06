@@ -14,15 +14,10 @@ import androidx.compose.material3.AlertDialog
 import android.net.Uri
 import android.content.Intent
 import android.content.ActivityNotFoundException
-import android.graphics.Bitmap
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,8 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -59,6 +52,8 @@ import com.rentmate.app.data.RequestStatus
 import com.rentmate.app.data.TitleError
 import com.rentmate.app.data.Urgency
 import androidx.compose.ui.text.input.ImeAction
+import com.rentmate.app.data.attachments.AttachmentKind
+import com.rentmate.app.ui.components.PhotoAttachmentPicker
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ValidatedTextField
 import com.rentmate.app.ui.validation.Limits
@@ -73,7 +68,10 @@ import java.util.Locale
  * the landlord as one itemised message, and track each through to resolved.
  */
 @Composable
-fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
+fun MaintenanceScreen(
+    viewModel: MaintenanceViewModel = hiltViewModel(),
+    photosViewModel: PhotoAttachmentsViewModel = hiltViewModel()
+) {
     val requests by viewModel.requests.collectAsStateWithLifecycle()
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { viewModel.refresh() }
@@ -82,14 +80,9 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
     var description by remember { mutableStateOf("") }
     var category by remember { mutableStateOf(MaintenanceCategory.OTHER) }
     var urgency by remember { mutableStateOf(Urgency.MEDIUM) }
-    var photo by remember { mutableStateOf<Bitmap?>(null) }
     var error by remember { mutableStateOf<TitleError?>(null) }
-
-    // TakePicturePreview returns a thumbnail and needs no CAMERA permission or
-    // FileProvider. Full-resolution photos go to blob storage at the final POE.
-    val takePhoto = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicturePreview()
-    ) { bitmap -> if (bitmap != null) photo = bitmap }
+    // RM-0028: picked photos are compressed below 1 MB and uploaded straight away.
+    val photos by photosViewModel.photos.collectAsStateWithLifecycle()
 
     val openRequests = requests.filter { it.status == RequestStatus.OPEN }
     val openCount = openRequests.size
@@ -215,36 +208,23 @@ fun MaintenanceScreen(viewModel: MaintenanceViewModel = hiltViewModel()) {
                         }
                     }
 
-                    val bitmap = photo
-                    if (bitmap != null) {
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = stringResource(R.string.maintenance_photo),
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxWidth().height(160.dp)
-                        )
-                    }
-                    OutlinedButton(
-                        onClick = { takePhoto.launch(null) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            stringResource(
-                                if (bitmap == null) R.string.maintenance_add_photo
-                                else R.string.maintenance_retake_photo
-                            )
-                        )
-                    }
+                    PhotoAttachmentPicker(
+                        photos = photos,
+                        onPicked = { photosViewModel.add(it, AttachmentKind.MAINTENANCE) },
+                        onRetry = photosViewModel::retry,
+                        onRemove = photosViewModel::remove,
+                        maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
+                    )
 
                     Button(
                         onClick = {
-                            error = viewModel.log(title, description, category, urgency, photo)
+                            error = viewModel.log(title, description, category, urgency, null)
                             if (error == null) {
                                 title = ""
                                 description = ""
                                 category = MaintenanceCategory.OTHER
                                 urgency = Urgency.MEDIUM
-                                photo = null
+                                photosViewModel.clear()
                             }
                         },
                         modifier = Modifier.fillMaxWidth()

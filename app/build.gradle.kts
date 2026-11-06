@@ -182,5 +182,9 @@ dependencies {
     // API and Azure SQL now that Azure hosting isn't available.
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
+    // RM-0028: photo attachments in the private "attachments" bucket.
+    implementation(libs.supabase.storage)
+    // Reads the camera's rotation tag so compressed photos stay upright.
+    implementation(libs.androidx.exifinterface)
     implementation(libs.ktor.client.okhttp)
 }

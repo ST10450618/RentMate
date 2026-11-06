@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RM-0028 / RM-0029: photo attachments. -->
+<resources>
+    <string name="photo_choose">Choose photo</string>
+    <string name="photo_take">Take photo</string>
+    <string name="photo_preview_description">Photo to attach</string>
+    <string name="photo_remove">Remove photo</string>
+    <string name="photo_status_preparing">Preparing photo…</string>
+    <string name="photo_status_uploading">Uploading… %1$d%%</string>
+    <string name="photo_status_uploaded">Uploaded (%1$d KB)</string>
+    <string name="photo_error_upload">Upload failed. Check your connection and try again.</string>
+    <string name="photo_error_unreadable">That photo couldn\'t be opened. Try another one.</string>
+    <string name="photo_error_too_large">That photo couldn\'t be made small enough to upload.</string>
+</resources>
