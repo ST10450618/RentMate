@@ -318,6 +318,38 @@
     <string name="money_tap_received">Tap when you have received it</string>
     <string name="undo_marked_received">Marked %1$s as received</string>
     <string name="save_bill">Save bill</string>
+    <string name="chores_marked_done">%1$s marked done</string>
+    <string name="chores_your_next">Your next chore</string>
+    <string name="chores_none_for_you">Nothing is due from you right now.</string>
+    <string name="chores_this_week">This week</string>
+    <string name="chores_next_week">Next week</string>
+    <string name="chores_this_month">This month</string>
+    <string name="chores_next_month">Next month</string>
+    <string name="chores_turn">Turn %1$d</string>
+    <string name="chores_next_four_weeks">Next 4 weeks</string>
+    <string name="chores_points_this_month">Points this month</string>
+    <string name="chores_show">Show</string>
+    <string name="chores_hide">Hide</string>
+    <string name="chores_meta">%1$s · %2$s</string>
+    <string name="chores_any_time">Any time</string>
+    <string name="chores_you">You</string>
+    <plurals name="chores_points_long">
+        <item quantity="one">%d point</item>
+        <item quantity="other">%d points</item>
+    </plurals>
+    <plurals name="chores_in_weeks">
+        <item quantity="one">In %d week</item>
+        <item quantity="other">In %d weeks</item>
+    </plurals>
+    <plurals name="chores_in_months">
+        <item quantity="one">In %d month</item>
+        <item quantity="other">In %d months</item>
+    </plurals>
+    <string name="chores_new_title">New chore</string>
+    <string name="chores_points_label">Points</string>
+    <string name="chores_points_help">Bigger jobs earn more. 1 to 100.</string>
+    <string name="chores_takes_turns">Takes turns</string>
+    <string name="chores_you_first">You first</string>
     <string name="setup_title">Set up your home</string>
     <string name="setup_welcome">Welcome, %1$s</string>
     <string name="setup_join_title">Join a household</string>

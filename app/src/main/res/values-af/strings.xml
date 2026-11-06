@@ -311,6 +311,38 @@
     <string name="money_tap_received">Tik sodra jy dit ontvang het</string>
     <string name="undo_marked_received">%1$s as ontvang gemerk</string>
     <string name="save_bill">Stoor rekening</string>
+    <string name="chores_marked_done">%1$s as klaar gemerk</string>
+    <string name="chores_your_next">Jou volgende taak</string>
+    <string name="chores_none_for_you">Niks is nou van jou af nodig nie.</string>
+    <string name="chores_this_week">Hierdie week</string>
+    <string name="chores_next_week">Volgende week</string>
+    <string name="chores_this_month">Hierdie maand</string>
+    <string name="chores_next_month">Volgende maand</string>
+    <string name="chores_turn">Beurt %1$d</string>
+    <string name="chores_next_four_weeks">Volgende 4 weke</string>
+    <string name="chores_points_this_month">Punte hierdie maand</string>
+    <string name="chores_show">Wys</string>
+    <string name="chores_hide">Versteek</string>
+    <string name="chores_meta">%1$s · %2$s</string>
+    <string name="chores_any_time">Enige tyd</string>
+    <string name="chores_you">Jy</string>
+    <plurals name="chores_points_long">
+        <item quantity="one">%d punt</item>
+        <item quantity="other">%d punte</item>
+    </plurals>
+    <plurals name="chores_in_weeks">
+        <item quantity="one">Oor %d week</item>
+        <item quantity="other">Oor %d weke</item>
+    </plurals>
+    <plurals name="chores_in_months">
+        <item quantity="one">Oor %d maand</item>
+        <item quantity="other">Oor %d maande</item>
+    </plurals>
+    <string name="chores_new_title">Nuwe taak</string>
+    <string name="chores_points_label">Punte</string>
+    <string name="chores_points_help">Groter take verdien meer. 1 tot 100.</string>
+    <string name="chores_takes_turns">Neem beurte</string>
+    <string name="chores_you_first">Jy eerste</string>
     <string name="setup_title">Stel jou huis op</string>
     <string name="setup_welcome">Welkom, %1$s</string>
     <string name="setup_join_title">Sluit by \'n huishouding aan</string>
