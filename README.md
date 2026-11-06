@@ -19,7 +19,7 @@
 </p>
 
 > **Technical report: Final Portfolio of Evidence**
-> PROG7314 (Programming 3D), The IIE Varsity College, 2026, Group 1: James, Seth, Michael and Ali.
+> PROG7314 (Programming 3D), Emeris, 2026, Group 1: James, Seth, Michael and Ali.
 
 ---
 
@@ -104,27 +104,27 @@ Status key: ✅ done · 🔄 in progress · 📋 planned. This table is updated 
 | Settings menu | US-3 | ✅ |
 | REST API connected to a cloud database | US-5, US-6, US-9 | ✅ |
 | REST API integrated into the app | — | ✅ |
-| Biometric authentication | US-2 | 📋 |
-| Offline mode with synchronisation (Room + WorkManager) | US-7 | 📋 |
-| Real-time push notifications (Firebase Cloud Messaging) | US-8 | 📋 |
-| Multi-language: English, Afrikaans, isiXhosa | US-4 | 🔄 |
+| Biometric authentication | US-2 | ✅ |
+| Offline mode with synchronisation (Room + WorkManager) | US-7 | ✅ |
+| Real-time push notifications (Firebase Cloud Messaging) | US-8 | ✅ |
+| Multi-language: English, Afrikaans, isiXhosa | US-4 | ✅ |
 | Production assets: custom icon, splash, illustrations | — | ✅ |
 
 ### User-defined features
 
 | # | Feature | Story | What it does | Status |
 |---|---|---|---|---|
-| 1 | **Maintenance request log** | US-10 | Log a fault with a category and urgency, send all open faults to the landlord as one itemised email, and track each request from open to sent, acknowledged and resolved. | ✅ (fixes 🔄) |
-| 2 | **Chore rotation and points** | US-9, US-12 | Shows the rotation four cycles ahead so everyone sees the same schedule. Points accrue quietly, and the leaderboard can be hidden for the whole household. | ✅ (fixes 🔄) |
-| 3 | **Settle-up** | US-11 | Debt simplification finds the smallest set of payments that clears the household. | ✅ (fixes 🔄) |
-| 4 | **Photo attachments** | US-10, US-6 | Photos of faults and receipts stored in Supabase Storage (blob storage) and shared with the household and landlord. | 📋 |
-| 5 | **Offline settle-up preview** | US-11 | Runs the same debt simplification on the device's cached ledger, so housemates can see who owes whom without signal. | 📋 |
+| 1 | **Maintenance request log** | US-10 | Log a fault with a category and urgency, send all open faults to the landlord as one itemised email, and track each request from open to sent, acknowledged and resolved. | ✅ (fixes ✅) |
+| 2 | **Chore rotation and points** | US-9, US-12 | Shows the rotation four cycles ahead so everyone sees the same schedule. Points accrue quietly, and the leaderboard can be hidden for the whole household. | ✅ (fixes ✅) |
+| 3 | **Settle-up** | US-11 | Debt simplification finds the smallest set of payments that clears the household. | ✅ |
+| 4 | **Photo attachments** | US-10, US-6 | Photos of faults and receipts stored in Supabase Storage (blob storage) and shared with the household and landlord. | ✅ |
+| 5 | **Offline settle-up preview** | US-11 | Runs the same debt simplification on the device's cached ledger, so housemates can see who owes whom without signal. | ✅ |
 
 ### Supporting features
 
 | Feature | Status |
 |---|---|
-| Household activity feed stored in and read from Cloud Firestore (NoSQL) | 📋 |
+| Household activity feed stored in and read from Cloud Firestore (NoSQL) | ✅ |
 | Inline validation on every form; invalid input can't crash the app | ✅ |
 | Shared shopping list (US-13) | ✅ |
 
@@ -196,9 +196,9 @@ flowchart LR
         Rest["PostgREST<br/>REST API + RPC"]
         PG[("Postgres<br/>+ Row Level Security")]
         Store[("Storage<br/>photo blobs")]
-        Edge["Edge Function<br/>notify"]
+        Edge["Edge Function<br/>send-push"]
         Rest --> PG
-        PG -- "database webhook" --> Edge
+        PG -- "trigger + pg_net" --> Edge
     end
 
     subgraph Firebase["Google Firebase"]
@@ -478,20 +478,20 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 
 | Lecturer feedback (Part 2) | Fix | Ticket | Status |
 |---|---|---|---|
-| Network failure on Maintenance crashes the app | Errors caught in every ViewModel; friendly error states | RM-0001 | 📋 |
-| Back on Dashboard loops between Login and Dashboard | Login removed from the back stack after sign-in | RM-0003 | 📋 |
-| Users must sign in on every launch | Session restored from storage on launch | RM-0002 | 📋 |
-| Raw error messages shown | Exceptions mapped to translatable messages; Login already fixed | RM-0004, RM-0034 | 🔄 |
-| Settings saved but never read back | Settings loaded from the server on sign-in | RM-0005 | 📋 |
-| Access rules too loose (join without code, edit any bill) | Joining only through the invite-code RPC; bill edits restricted to the creator | RM-0006 | 📋 |
-| Chore forecast function never used | App uses the server forecast | RM-0007 | 📋 |
-| Leaderboard can be farmed; hide only saved on device | Only the assignee completes, once per cycle; hide stored for the whole household | RM-0008 | 📋 |
-| "Send to landlord" sends nothing; anyone can change status | Itemised email to the landlord; only the sender records replies | RM-0009 | 📋 |
-| Debtor confirms own payment; only equal splits | Creditor confirms; equal, percentage and exact splits | RM-0010 | 📋 |
+| Network failure on Maintenance crashes the app | Errors caught in every ViewModel; friendly error states | RM-0001 | ✅ |
+| Back on Dashboard loops between Login and Dashboard | Login removed from the back stack after sign-in | RM-0003 | ✅ |
+| Users must sign in on every launch | Session restored from storage on launch | RM-0002 | ✅ |
+| Raw error messages shown | Exceptions mapped to translatable messages; Login already fixed | RM-0004, RM-0034 | ✅ |
+| Settings saved but never read back | Settings loaded from the server on sign-in | RM-0005 | ✅ |
+| Access rules too loose (join without code, edit any bill) | Joining only through the invite-code RPC; bill edits restricted to the creator | RM-0006 | ✅ |
+| Chore forecast function never used | App uses the server forecast | RM-0007 | ✅ |
+| Leaderboard can be farmed; hide only saved on device | Only the assignee completes, once per cycle; hide stored for the whole household | RM-0008 | ✅ |
+| "Send to landlord" sends nothing; anyone can change status | Itemised email to the landlord; only the sender records replies | RM-0009 | ✅ |
+| Debtor confirms own payment; only equal splits | Creditor confirms; equal, percentage and exact splits | RM-0010 | ✅ |
 | Amounts don't open a number keypad | Decimal keypad on amount fields, number keypad on points | RM-0036 | ✅ |
-| Raw user IDs on screen | Display names everywhere, with "Housemate" as the fallback | RM-0011, RM-0034 | 🔄 |
+| Raw user IDs on screen | Display names everywhere, with "Housemate" as the fallback | RM-0011, RM-0034 | ✅ |
 | Login is one line of text; screens bare | Branded Login, design system, shared components | RM-0034 | ✅ |
-| Automated tests not working | CI fixed and shown passing | RM-0012 | 📋 |
+| Automated tests not working | CI fixed and shown passing | RM-0012 | ✅ |
 
 ## 15. Release notes
 
@@ -511,15 +511,18 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 - **Split options.** Bills split equally, by percentage or by exact amounts. The server rejects splits that do not add up (RM-0010).
 - **Recurring bills.** A bill can repeat weekly or monthly. A daily `pg_cron` job creates the next copy once per cycle, and only the person who added it can stop it (RM-0049).
 - **Send to landlord.** Builds an itemised email of open faults with photo links. Only the housemate who sent it can record the landlord's reply (RM-0009).
+- **Offline banner.** One banner above every signed-in screen says when you are offline, how many changes are waiting, and when they have synced. A change the server refuses is explained once (RM-0019).
+- **Offline settle-up preview (user-defined feature 5).** Offline, Money works out who owes whom from the cached ledger, including bills added offline, and labels it as a preview. Confirming a payment waits for the server (RM-0031).
 - **Snackbar feedback.** Every failed action shows a clear message, with Retry when trying again can help. A Settings toggle that fails to save flips back (RM-0052).
 - **Design system and redesign.** Shared colour, type, spacing and size tokens; shared buttons, cards, pills, headers and avatar colours; one 16 dp screen gutter; empty, loading and error states on every list; a branded Login, adaptive icon and splash screen (RM-0034 to RM-0037, RM-0050 to RM-0054).
+- **UI redesign.** Every screen follows `docs/ui-redesign-plan.html`: four tabs (Home, Money, Chores, House) with outline and filled icons, Settings on your avatar, titles on the page instead of a green banner, Public Sans, amounts as R 1 245,00, rows instead of cards, one main button per screen, Undo for 5 seconds instead of confirm dialogs, two columns on tablets, and support for the largest font size and TalkBack. Home leads with what you owe; Money puts bills and settle-up on one screen with a bill detail view; household setup asks one thing at a time (RM-0056 to RM-0061).
 - **Release build.** Signed with secrets from CI, R8 enabled, and CI builds the signed APK when a tag is pushed (RM-0039, RM-0040).
 - **Play Store pack.** Hi-res icon, feature graphic, listing text, data safety answers and the privacy policy (RM-0041, screenshots still to come).
 - Supabase CLI configuration for the hosted project, with the SQL migrations and tests in `supabase/`.
 
 **Changed**
 - Settings now load from the server on sign-in, so they follow you to another phone (RM-0005).
-- The chore forecast comes from the server (`get_chore_forecast`) instead of being worked out on the phone (RM-0007).
+- The chore forecast comes from the server (`forecast_chore`) instead of being worked out on the phone (RM-0007).
 - Settle-up uses one debt-simplification algorithm, written in Kotlin and tested against the server's `settle_up` results (RM-0030).
 - Amount fields open a number keypad, raw user IDs never show, and every amount limit reads from one place: R999,999.99 (RM-0011, RM-0053).
 - All forms validate inline with translated messages (RM-0036).
@@ -539,9 +542,8 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 - Members cannot edit chore rotation, points or the invite code directly. These change only through server functions (RM-0048).
 - Only the creditor can confirm a settle-up payment (RM-0010).
 
-**Still open before submission**
-- The offline banner (RM-0019) and the offline settle-up preview (RM-0031).
-- The full device check on the test tablet (RM-0047), the store screenshots (RM-0041) and the demo video (RM-0044).
+**Tested on a device**
+- Every device check in RM-0047 passed on a Samsung Galaxy Tab (SM-X230) with the signed release build on 6 November 2026.
 
 ### 0.x: Part 2 prototype
 
