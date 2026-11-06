@@ -125,7 +125,8 @@ class BillsSettleUpViewModelTest {
         feedback.drain()
         vm.confirmSettlement("b", 100.0)
         assertEquals(listOf(R.string.settle_up_confirm_needs_sync), feedback.drain().map { it.messageRes })
-        assertTrue("dialog stays open", vm.state.value.settleUp != null)
+        assertTrue("the preview rows stay on screen", vm.state.value.settleUp != null)
+        assertTrue("a blocked confirm starts no Undo window", vm.state.value.pendingReceived.isEmpty())
 
         repository.offline = false
         source.offline = false

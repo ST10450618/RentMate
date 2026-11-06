@@ -57,6 +57,12 @@ class AddShoppingItemViewModel @Inject constructor(
         }
     }
 
+    /** RM-0059: back to Idle after the quick-add field on Shopping has cleared itself. */
+    fun reset() {
+        Log.d(TAG, "reset")
+        _state.value = AddShoppingItemUiState.Idle
+    }
+
     // US-13: any member can add an item; the list records who added it.
     // RM-0017: offline, the item is saved locally and queued for upload.
     fun add(name: String) {
