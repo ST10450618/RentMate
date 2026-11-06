@@ -94,7 +94,7 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                         modifier = Modifier.padding(top = Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
-                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId && !bill.pending, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat) }
+                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId && !bill.pending, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat, isPaid = state::isShownPaid) }
                     }
                 }
             }
@@ -159,8 +159,15 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
  * One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010).
  * RM-0017: a bill saved offline shows "Waiting to sync" and no server actions until it is uploaded.
  */
-private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPaid: Boolean, onPay: (String) -> Unit, onStopRepeat: (String) -> Unit) {
-    val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { it.is_paid }
+private fun BillRow(
+    bill: BillWithSharesRow,
+    photos: List<PhotoLink>,
+    canMarkPaid: Boolean,
+    onPay: (String) -> Unit,
+    onStopRepeat: (String) -> Unit,
+    isPaid: (shareId: String, isPaid: Boolean) -> Boolean = { _, paid -> paid }
+) {
+    val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { isPaid(it.id, it.is_paid) }
     RentMateCard {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(bill.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
@@ -205,7 +212,7 @@ private fun BillRow(bill: BillWithSharesRow, photos: List<PhotoLink>, canMarkPai
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f).padding(start = Spacing.sm)
                 )
-                if (share.is_paid) {
+                if (isPaid(share.id, share.is_paid)) {
                     StatusPill(stringResource(R.string.bills_paid), PillTone.Positive)
                 } else if (canMarkPaid) {
                     SecondaryButton(stringResource(R.string.bills_mark_paid), onClick = { onPay(share.id) })

@@ -257,4 +257,12 @@
     <string name="form_error_members">Kon nie jou huismaats laai nie. Kontroleer jou verbinding en tik Probeer weer.</string>
     <string name="settings_error_load">Kon nie jou gestoorde instellings lees nie. Tik Probeer weer.</string>
     <string name="settings_error_sync">Kon nie instellings van jou ander toestelle laai nie. Wys dié wat op hierdie foon gestoor is.</string>
+    <string name="feedback_undo">Ontdoen</string>
+    <string name="undo_marked_paid">As betaal gemerk</string>
+    <string name="undo_item_deleted">Item uitgevee</string>
+    <string name="undo_chore_done">Taak as klaar gemerk</string>
+    <string name="feedback_delete_item_failed">Kon nie die item uitvee nie. Kontroleer jou verbinding en tik Probeer weer.</string>
+    <string name="feedback_delete_item_pending">Hierdie item wag nog om te sinkroniseer. Vee dit uit sodra dit opgelaai is.</string>
+    <string name="shopping_delete">Vee %1$s uit</string>
+    <string name="chores_done">Klaar</string>
 </resources>

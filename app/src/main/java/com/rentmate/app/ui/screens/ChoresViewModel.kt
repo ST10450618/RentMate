@@ -35,6 +35,9 @@ import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
 import com.rentmate.app.ui.feedback.FeedbackCenter
+import com.rentmate.app.ui.feedback.UndoQueue
+import com.rentmate.app.ui.feedback.UndoableAction
+import com.rentmate.app.ui.feedback.UserMessage
 
 data class ChoresUiState(
     val chores: List<ChoreRow> = emptyList(),
@@ -44,7 +47,12 @@ data class ChoresUiState(
     val leaderboard: List<LeaderboardRow>? = null,
     val showLeaderboard: Boolean = true,
     val loading: Boolean = false,
-    @StringRes val error: Int? = null
+    @StringRes val error: Int? = null,
+    /**
+     * RM-0056: chores marked done that are still inside their Undo window. The
+     * screen shows them as done; complete_chore runs when the window closes.
+     */
+    val pendingDone: Set<String> = emptySet()
 )
 
 fun ChoreRow.currentAssignee(): String? =
@@ -82,7 +90,8 @@ class ChoresViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val activity: ActivityLogger,
     private val choresRepository: ChoresRepository,
-    private val feedback: FeedbackCenter
+    private val feedback: FeedbackCenter,
+    private val undoQueue: UndoQueue
 ) : ViewModel() {
     private val settingsRepository = SettingsRepository(context)
     private val _state = MutableStateFlow(ChoresUiState())
@@ -157,16 +166,28 @@ class ChoresViewModel @Inject constructor(
         }
     }
 
-    /** US-9: records who completed the chore; the server advances the rotation. */
+    /**
+     * US-9: records who completed the chore; the server advances the rotation.
+     * RM-0056: the chore shows as done at once and a snackbar offers Undo for
+     * 5 s. complete_chore runs only after that, because the rotation it
+     * advances cannot be put back safely. See [UndoQueue].
+     */
     fun complete(choreId: String) {
         val title = _state.value.chores.firstOrNull { it.id == choreId }?.title
-        viewModelScope.launch {
-            runCatching { supabase.postgrest.rpc("complete_chore", CompleteChoreParams(choreId).toRpcParams()) }
-                .onSuccess {
+        Log.d(TAG, "complete $choreId, waiting for Undo")
+        undoQueue.submit(
+            UserMessage(R.string.undo_chore_done),
+            UndoableAction(
+                key = "complete:$choreId",
+                hide = { _state.update { it.copy(pendingDone = it.pendingDone + choreId) } },
+                restore = { _state.update { it.copy(pendingDone = it.pendingDone - choreId) } },
+                commit = {
+                    supabase.postgrest.rpc("complete_chore", CompleteChoreParams(choreId).toRpcParams())
+                    _state.update { it.copy(pendingDone = it.pendingDone - choreId) }
                     if (title != null) activity.choreCompleted(title, choreId)
                     refresh()
-                }
-                .onFailure {
+                },
+                onCommitFailed = {
                     // Seth's specific chore rules first (RM-0008), then the app-wide mapper (RM-0004).
                     val res = (it as? PostgrestRestException)
                         ?.let { e -> completeChoreErrorRes(e.code, e.message) }
@@ -177,6 +198,7 @@ class ChoresViewModel @Inject constructor(
                         feedback.failure(it, R.string.feedback_complete_chore_failed, retry = { complete(choreId) })
                     }
                 }
-        }
+            )
+        )
     }
 }

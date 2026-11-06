@@ -82,7 +82,7 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
                     if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         items(state.chores, key = { it.id }) { chore ->
-                            ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), onComplete = { viewModel.complete(chore.id) })
+                            ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), done = chore.id in state.pendingDone, onComplete = { viewModel.complete(chore.id) })
                         }
                         if (state.showLeaderboard) {
                             state.leaderboard?.let { item { LeaderboardCard(it) } }
@@ -99,6 +99,7 @@ private fun ChoreRow(
     chore: ChoreRow,
     memberNames: Map<String, String>,
     forecast: List<ChoreForecastRow>,
+    done: Boolean = false,
     onComplete: () -> Unit
 ) {
     RentMateCard {
@@ -128,7 +129,12 @@ private fun ChoreRow(
                 Text(stringResource(R.string.chores_forecast_row, row.cycle_number, memberNames[row.assignee_user_id] ?: housemate), style = MaterialTheme.typography.bodySmall)
             }
         }
-        SecondaryButton(stringResource(R.string.chores_mark_done), onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+        // RM-0056: while the Undo snackbar shows, the chore reads as done and cannot be tapped again.
+        if (done) {
+            StatusPill(stringResource(R.string.chores_done), PillTone.Positive, modifier = Modifier.padding(top = Spacing.sm))
+        } else {
+            SecondaryButton(stringResource(R.string.chores_mark_done), onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+        }
     }
 }
 

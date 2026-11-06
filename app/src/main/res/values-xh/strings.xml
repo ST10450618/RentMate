@@ -259,4 +259,12 @@
     <string name="form_error_members">Asikwazanga ukulayisha abahlali bakho. Jonga uqhagamshelo lwakho uze ucofe Zama kwakhona.</string>
     <string name="settings_error_load">Asikwazanga ukufunda iisetingi zakho ezigciniweyo. Cofa Zama kwakhona.</string>
     <string name="settings_error_sync">Asikwazanga ukulayisha iisetingi kwezinye izixhobo zakho. Kuboniswa ezigcinwe kule fowuni.</string>
+    <string name="feedback_undo">Rhoxisa</string>
+    <string name="undo_marked_paid">Kuphawulwe njengokuhlawulwe</string>
+    <string name="undo_item_deleted">Into icinyiwe</string>
+    <string name="undo_chore_done">Umsebenzi uphawulwe njengogqityiweyo</string>
+    <string name="feedback_delete_item_failed">Asikwazanga ukucima into. Jonga uqhagamshelo lwakho uze ucofe Zama kwakhona.</string>
+    <string name="feedback_delete_item_pending">Le nto isalindele ukuvumelanisa. Yicime xa sele ilayishiwe.</string>
+    <string name="shopping_delete">Cima %1$s</string>
+    <string name="chores_done">Kugqityiwe</string>
 </resources>

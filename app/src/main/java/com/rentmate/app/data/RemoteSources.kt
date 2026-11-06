@@ -56,6 +56,12 @@ interface ShoppingRemoteSource {
      * tell a lost target apart from a success.
      */
     suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int
+
+    /**
+     * RM-0056: deletes the item [id]. RLS lets any household member delete.
+     * The default throws so test fakes that never delete need no change.
+     */
+    suspend fun deleteItem(id: String): Unit = throw UnsupportedOperationException("deleteItem")
 }
 
 private val MEMBER_COLUMNS = Columns.raw("user_id, profiles(display_name)")
@@ -147,4 +153,8 @@ class SupabaseShoppingRemoteSource @Inject constructor(
             }
             .decodeList<IdRow>()
             .size
+
+    override suspend fun deleteItem(id: String) {
+        supabase.from("shopping_items").delete { filter { eq("id", id) } }
+    }
 }

@@ -25,6 +25,9 @@ import android.util.Log
 import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.R
 import com.rentmate.app.ui.feedback.FeedbackCenter
+import com.rentmate.app.ui.feedback.UndoQueue
+import com.rentmate.app.ui.feedback.UndoableAction
+import com.rentmate.app.ui.feedback.UserMessage
 import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
 import com.rentmate.app.data.attachments.PhotoLink
@@ -41,8 +44,16 @@ data class BillsUiState(
     /** The signed-in user; only the creditor sees Mark paid / Confirm received (RM-0010). */
     val currentUserId: String? = null,
     /** RM-0029: thumbnails per bill ID, with short-lived signed URLs. */
-    val photos: Map<String, List<PhotoLink>> = emptyMap()
-)
+    val photos: Map<String, List<PhotoLink>> = emptyMap(),
+    /**
+     * RM-0056: shares marked paid that are still inside their Undo window. The
+     * screen shows them as paid; the server call runs when the window closes.
+     */
+    val pendingPaidShares: Set<String> = emptySet()
+) {
+    /** True when [shareId] is paid on the server or waiting to be marked paid. */
+    fun isShownPaid(shareId: String, isPaid: Boolean): Boolean = isPaid || shareId in pendingPaidShares
+}
 
 @Serializable
 private data class SettleUpParams(val household_id_in: String)
@@ -65,7 +76,8 @@ class BillsViewModel @Inject constructor(
     private val attachments: AttachmentRepository,
     private val activity: ActivityLogger,
     private val billsRepository: BillsRepository,
-    private val feedback: FeedbackCenter
+    private val feedback: FeedbackCenter,
+    private val undoQueue: UndoQueue
 ) : ViewModel() {
     private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
@@ -106,27 +118,39 @@ class BillsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Marks a share paid. RM-0056: the share shows as paid at once and a
+     * snackbar offers Undo for 5 s. The mark_share_paid call runs only after
+     * that, so Undo needs no server call. See [UndoQueue].
+     */
     fun payShare(shareId: String) {
         val bill = _state.value.bills.firstOrNull { b -> b.bill_shares.any { it.id == shareId } }
         val share = bill?.bill_shares?.firstOrNull { it.id == shareId }
-        viewModelScope.launch {
-            runCatching {
-                // RM-0006: shares can't be updated directly any more (RLS has no
-                // update policy); the RPC only lets the bill's issuer (the creditor) mark a share paid.
-                supabase.postgrest.rpc("mark_share_paid", MarkSharePaidParams(shareId).toRpcParams())
-            }.onSuccess {
-                if (bill != null && share != null) {
-                    activity.sharePaid(bill.title, share.amount_owed, share.profiles?.display_name, bill.id)
+        Log.d(TAG, "payShare $shareId, waiting for Undo")
+        undoQueue.submit(
+            UserMessage(R.string.undo_marked_paid),
+            UndoableAction(
+                key = "pay:$shareId",
+                hide = { _state.update { it.copy(pendingPaidShares = it.pendingPaidShares + shareId) } },
+                restore = { _state.update { it.copy(pendingPaidShares = it.pendingPaidShares - shareId) } },
+                commit = {
+                    // RM-0006: shares can't be updated directly any more (RLS has no
+                    // update policy); the RPC only lets the bill's issuer (the creditor) mark a share paid.
+                    supabase.postgrest.rpc("mark_share_paid", MarkSharePaidParams(shareId).toRpcParams())
+                    if (bill != null && share != null) {
+                        activity.sharePaid(bill.title, share.amount_owed, share.profiles?.display_name, bill.id)
+                    }
+                    refresh()
+                },
+                onCommitFailed = {
+                    feedback.failure(
+                        it, R.string.feedback_mark_paid_failed,
+                        retry = { payShare(shareId) },
+                        notAllowedRes = R.string.feedback_mark_paid_not_allowed
+                    )
                 }
-                refresh()
-            }.onFailure {
-                feedback.failure(
-                    it, R.string.feedback_mark_paid_failed,
-                    retry = { payShare(shareId) },
-                    notAllowedRes = R.string.feedback_mark_paid_not_allowed
-                )
-            }
-        }
+            )
+        )
     }
 
     /** RM-0049: only the issuer can stop a bill repeating; the server checks it too. */

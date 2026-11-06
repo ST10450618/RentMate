@@ -150,6 +150,15 @@ interface ShoppingRepository {
      * still has a change waiting in the outbox, the change is queued instead.
      */
     suspend fun markPurchased(id: String, userId: String): WriteResult
+
+    /**
+     * RM-0056: deletes item [id] on the server, then from the cache. Online
+     * only: offline it throws, and nothing is queued. An item with a change
+     * still in the outbox is refused with [IllegalStateException], so a delete
+     * never races a queued insert or purchase.
+     * The default throws so test fakes that never delete need no change.
+     */
+    suspend fun deleteItem(id: String): Unit = throw UnsupportedOperationException("deleteItem")
 }
 
 /** [BillsRepository] backed by Room and a [BillsRemoteSource]. */
@@ -386,5 +395,13 @@ class CachedShoppingRepository @Inject constructor(
         )
         outbox.enqueue(entry) { updated?.let { dao.upsert(listOf(it)) } }
         return id
+    }
+
+    override suspend fun deleteItem(id: String) {
+        val local = dao.getById(id)
+        check(local == null || local.syncState == SyncState.SYNCED) { "item $id has a change waiting to sync" }
+        remote.deleteItem(id)
+        dao.delete(id)
+        Log.d(TAG, "shopping item deleted: $id")
     }
 }

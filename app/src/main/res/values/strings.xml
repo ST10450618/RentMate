@@ -264,4 +264,12 @@
     <string name="form_error_members">Couldn\'t load your housemates. Check your connection and tap Try again.</string>
     <string name="settings_error_load">Couldn\'t read your saved settings. Tap Try again.</string>
     <string name="settings_error_sync">Couldn\'t load settings from your other devices. Showing the ones saved on this phone.</string>
+    <string name="feedback_undo">Undo</string>
+    <string name="undo_marked_paid">Marked as paid</string>
+    <string name="undo_item_deleted">Item deleted</string>
+    <string name="undo_chore_done">Chore marked done</string>
+    <string name="feedback_delete_item_failed">Couldn\'t delete the item. Check your connection and tap Retry.</string>
+    <string name="feedback_delete_item_pending">This item is still waiting to sync. Delete it once it has uploaded.</string>
+    <string name="shopping_delete">Delete %1$s</string>
+    <string name="chores_done">Done</string>
 </resources>
