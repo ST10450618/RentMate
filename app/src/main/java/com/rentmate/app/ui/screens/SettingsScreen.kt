@@ -26,6 +26,9 @@ import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.SettingGroup
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.UserSettings
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SecondaryButton
@@ -39,6 +42,8 @@ import com.rentmate.app.ui.theme.Spacing
 @Composable
 fun SettingsScreen(onSignedOut: () -> Unit = {}, viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.state.collectAsStateWithLifecycle()
+    val load by viewModel.load.collectAsStateWithLifecycle()
+    val syncFailed by viewModel.syncFailed.collectAsStateWithLifecycle()
 
     val biometric = rememberBiometricToggleState { viewModel.setToggle(SettingToggle.BIOMETRIC_UNLOCK, it) }
 
@@ -49,7 +54,11 @@ fun SettingsScreen(onSignedOut: () -> Unit = {}, viewModel: SettingsViewModel = 
             if (toggle == SettingToggle.BIOMETRIC_UNLOCK) biometric.onToggle(on) else viewModel.setToggle(toggle, on)
         },
         onLanguage = viewModel::setLanguage,
-        onSignOut = { viewModel.signOut(onSignedOut) }
+        onSignOut = { viewModel.signOut(onSignedOut) },
+        load = load,
+        syncFailed = syncFailed,
+        onReload = viewModel::reload,
+        onRetrySync = viewModel::pullFromProfile
     )
 }
 
@@ -61,17 +70,28 @@ fun SettingsContent(
     onLanguage: (AppLanguage) -> Unit,
     onSignOut: () -> Unit = {},
     modifier: Modifier = Modifier,
-    biometricAvailability: BiometricAvailability = BiometricAvailability.AVAILABLE
+    biometricAvailability: BiometricAvailability = BiometricAvailability.AVAILABLE,
+    load: SettingsLoad = SettingsLoad.Ready,
+    syncFailed: Boolean = false,
+    onReload: () -> Unit = {},
+    onRetrySync: () -> Unit = {}
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
     ScreenHeader(title = stringResource(R.string.settings_title))
-    Column(
+    // RM-0056: the shared state views, like the list screens.
+    when (load) {
+        SettingsLoad.Loading -> LoadingState()
+        SettingsLoad.Failed -> ErrorState(message = stringResource(R.string.settings_error_load), onRetry = onReload)
+        SettingsLoad.Ready -> Unit
+    }
+    if (load == SettingsLoad.Ready) Column(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(Spacing.screen),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
+        if (syncFailed) InlineError(message = stringResource(R.string.settings_error_sync), onRetry = onRetrySync)
         SettingGroup.entries.forEach { group ->
             SettingsSection(title = stringResource(group.titleRes)) {
                 SettingToggle.inGroup(group).forEachIndexed { index, toggle ->

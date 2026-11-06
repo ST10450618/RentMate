@@ -253,4 +253,8 @@
     <string name="bills_repeats_weekly">Herhaal weekliks</string>
     <string name="bills_repeats_monthly">Herhaal maandeliks</string>
     <string name="bills_stop_repeat">Stop herhaling</string>
+    <!-- RM-0056: UI redesign -->
+    <string name="form_error_members">Kon nie jou huismaats laai nie. Kontroleer jou verbinding en tik Probeer weer.</string>
+    <string name="settings_error_load">Kon nie jou gestoorde instellings lees nie. Tik Probeer weer.</string>
+    <string name="settings_error_sync">Kon nie instellings van jou ander toestelle laai nie. Wys dié wat op hierdie foon gestoor is.</string>
 </resources>

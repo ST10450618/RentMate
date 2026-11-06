@@ -260,4 +260,8 @@
     <string name="bills_repeats_weekly">Repeats weekly</string>
     <string name="bills_repeats_monthly">Repeats monthly</string>
     <string name="bills_stop_repeat">Stop repeating</string>
+    <!-- RM-0056: UI redesign -->
+    <string name="form_error_members">Couldn\'t load your housemates. Check your connection and tap Try again.</string>
+    <string name="settings_error_load">Couldn\'t read your saved settings. Tap Try again.</string>
+    <string name="settings_error_sync">Couldn\'t load settings from your other devices. Showing the ones saved on this phone.</string>
 </resources>

@@ -9,6 +9,9 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import android.util.Log
@@ -52,14 +55,45 @@ class AddChoreViewModel @Inject constructor(
     private val _state = MutableStateFlow<AddChoreUiState>(AddChoreUiState.Idle)
     val state: StateFlow<AddChoreUiState> = _state
 
+    private val household = MutableStateFlow(HouseholdStatus.Unknown)
+    private val rosterRefresh = MutableStateFlow(RosterRefresh.Running)
+
+    /** RM-0056: LoadingState, EmptyState or ErrorState until the form can be filled in. */
+    val loadState: StateFlow<FormLoadState> = combine(household, _members, rosterRefresh) { h, m, r ->
+        formLoadState(h, needsRoster = true, rosterSize = m.size, refresh = r)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, FormLoadState.Loading)
+
     init {
         viewModelScope.launch {
-            val householdId = currentHousehold.id.first() ?: return@launch
+            currentHousehold.awaitRestored()
+            currentHousehold.id.collect { household.value = if (it == null) HouseholdStatus.None else HouseholdStatus.Present }
+        }
+        loadMembers()
+    }
+
+    /** Loads the rotation order. The ErrorState's Retry button calls it again. */
+    fun loadMembers() {
+        Log.d(TAG, "loadMembers")
+        rosterRefresh.value = RosterRefresh.Running
+        viewModelScope.launch {
+            currentHousehold.awaitRestored()
+            val householdId = currentHousehold.id.first()
+            if (householdId == null) {
+                rosterRefresh.value = RosterRefresh.Done
+                return@launch
+            }
             runCatching {
                 supabase.from("household_members")
                     .select { filter { eq("household_id", householdId) } }
                     .decodeList<MemberIdRow>()
-            }.onSuccess { _members.value = it.map { m -> m.user_id } }
+            }.onSuccess {
+                _members.value = it.map { m -> m.user_id }
+                rosterRefresh.value = RosterRefresh.Done
+            }.onFailure {
+                if (it is kotlinx.coroutines.CancellationException) throw it
+                Log.w(TAG, "could not load members", it)
+                rosterRefresh.value = RosterRefresh.Failed
+            }
         }
     }
 

@@ -255,4 +255,8 @@
     <string name="bills_repeats_weekly">Iyaphinda evekini</string>
     <string name="bills_repeats_monthly">Iyaphinda inyanga nenyanga</string>
     <string name="bills_stop_repeat">Yekela ukuphinda</string>
+    <!-- RM-0056: UI redesign -->
+    <string name="form_error_members">Asikwazanga ukulayisha abahlali bakho. Jonga uqhagamshelo lwakho uze ucofe Zama kwakhona.</string>
+    <string name="settings_error_load">Asikwazanga ukufunda iisetingi zakho ezigciniweyo. Cofa Zama kwakhona.</string>
+    <string name="settings_error_sync">Asikwazanga ukulayisha iisetingi kwezinye izixhobo zakho. Kuboniswa ezigcinwe kule fowuni.</string>
 </resources>

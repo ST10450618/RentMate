@@ -13,6 +13,9 @@ import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.rentmate.app.ui.validation.Limits
 import com.rentmate.app.ui.validation.validateRequiredText
@@ -39,6 +42,20 @@ class AddShoppingItemViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow<AddShoppingItemUiState>(AddShoppingItemUiState.Idle)
     val state: StateFlow<AddShoppingItemUiState> = _state
+
+    private val household = MutableStateFlow(HouseholdStatus.Unknown)
+
+    /** RM-0056: LoadingState or EmptyState until a household is known. The form needs no roster. */
+    val loadState: StateFlow<FormLoadState> = household
+        .map { formLoadState(it, needsRoster = false, rosterSize = 0, refresh = RosterRefresh.Done) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, FormLoadState.Loading)
+
+    init {
+        viewModelScope.launch {
+            currentHousehold.awaitRestored()
+            currentHousehold.id.collect { household.value = if (it == null) HouseholdStatus.None else HouseholdStatus.Present }
+        }
+    }
 
     // US-13: any member can add an item; the list records who added it.
     // RM-0017: offline, the item is saved locally and queued for upload.

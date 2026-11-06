@@ -3,9 +3,7 @@ package com.rentmate.app.ui.screens
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.components.PillTone
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.filled.ShoppingBasket
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,15 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.activity.ActivityEvent
 import com.rentmate.app.data.activity.ActivityType
+import com.rentmate.app.ui.components.EmptyState
 import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.MemberAvatar
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
@@ -69,7 +66,7 @@ private fun ActivityContent(state: ActivityUiState, now: Instant = Instant.now()
             subtitle = stringResource(R.string.activity_subtitle)
         )
         when (state) {
-            ActivityUiState.Loading -> CenteredBox { CircularProgressIndicator() }
+            ActivityUiState.Loading -> LoadingState()
             // RM-0035: same retry error state as the other list screens.
             is ActivityUiState.Error -> ErrorState(
                 message = stringResource(R.string.activity_error),
@@ -106,27 +103,14 @@ private fun SampleDataBanner() {
     }
 }
 
-@Composable
-private fun CenteredBox(content: @Composable () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize().padding(Spacing.screen), contentAlignment = Alignment.Center) {
-        content()
-    }
-}
-
+/** RM-0056: the shared EmptyState, with the activity illustration and no action. */
 @Composable
 private fun ActivityEmpty() {
-    CenteredBox {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            Image(painterResource(R.drawable.illus_empty_activity), contentDescription = null)
-            Text(stringResource(R.string.activity_empty_title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(R.string.activity_empty_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+    EmptyState(
+        illustration = R.drawable.illus_empty_activity,
+        title = stringResource(R.string.activity_empty_title),
+        body = stringResource(R.string.activity_empty_body)
+    )
 }
 
 @Composable
