@@ -18,8 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -52,6 +51,7 @@ import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.tabular
 import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.components.ChipRow
+import com.rentmate.app.ui.components.AdaptiveList
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "BillsScreen"
@@ -92,10 +92,8 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                 else -> {
                     if (state.loading) RefreshingIndicator()
                     if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
-                    LazyColumn(
-                        modifier = Modifier.padding(top = Spacing.md),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-                    ) {
+                    // RM-0056: two columns of bills at 600 dp and wider.
+                    AdaptiveList(modifier = Modifier.padding(top = Spacing.md)) {
                         items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId && !bill.pending, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat, isPaid = state::isShownPaid) }
                     }
                 }

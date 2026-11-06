@@ -26,7 +26,8 @@ import com.rentmate.app.ui.theme.Spacing
  * RM-0056: the title sits on the ground in ink, not on a solid green banner.
  * The banner pushed content down and made every screen open with the same
  * block of colour (docs/ui-redesign-plan.html, "Header pattern differs").
- * Padding follows the plan: 16 dp sides, 16 dp top, 8 dp bottom.
+ * Padding follows the plan: the screen gutter at the sides (16 dp on a phone,
+ * 24 dp on a tablet), 16 dp at the top and 8 dp at the bottom.
  * The title is a heading for TalkBack, so users can jump between screens' titles.
  *
  * @param onBack when set, a back arrow sits before the title. Forms (Add Bill,
@@ -39,8 +40,9 @@ fun ScreenHeader(title: String, subtitle: String? = null, onBack: (() -> Unit)? 
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
             .padding(
-                start = if (onBack != null) Spacing.xs else Spacing.lg,
-                end = Spacing.lg,
+                // The IconButton has 12 dp around its icon, so the arrow lines up with the gutter.
+                start = if (onBack != null) Spacing.screen - Spacing.md else Spacing.screen,
+                end = Spacing.screen,
                 top = Spacing.lg,
                 bottom = Spacing.sm
             ),

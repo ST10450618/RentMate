@@ -16,8 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +43,8 @@ import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.theme.Sizes
+import com.rentmate.app.ui.components.AdaptiveList
+import com.rentmate.app.ui.components.fullWidthItem
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "ChoresScreen"
@@ -80,12 +81,13 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
                 else -> {
                     if (state.loading) RefreshingIndicator()
                     if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    // RM-0056: two columns of chores at 600 dp and wider; the leaderboard spans both.
+                    AdaptiveList {
                         items(state.chores, key = { it.id }) { chore ->
                             ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), done = chore.id in state.pendingDone, onComplete = { viewModel.complete(chore.id) })
                         }
                         if (state.showLeaderboard) {
-                            state.leaderboard?.let { item { LeaderboardCard(it) } }
+                            state.leaderboard?.let { fullWidthItem(key = "leaderboard") { LeaderboardCard(it) } }
                         }
                     }
                 }

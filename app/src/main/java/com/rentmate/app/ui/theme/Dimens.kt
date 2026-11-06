@@ -2,6 +2,9 @@ package com.rentmate.app.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -18,8 +21,14 @@ object Spacing {
     val xl = 24.dp
     val xxl = 32.dp
 
-    /** Horizontal gutter for screen content. */
-    val screen = 16.dp
+    /**
+     * Horizontal gutter for screen content: 16 dp on a phone, 24 dp at 600 dp
+     * and wider (RM-0056). It reads [LocalScreenLayout], so it is only
+     * available inside a composable.
+     */
+    val screen: Dp
+        @Composable @ReadOnlyComposable
+        get() = LocalScreenLayout.current.gutter
 
     /** Inner padding of a [com.rentmate.app.ui.components.RentMateCard]. */
     val card = 16.dp

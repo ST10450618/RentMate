@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
@@ -36,7 +35,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.activity.ActivityEvent
 import com.rentmate.app.data.activity.ActivityType
+import com.rentmate.app.ui.components.AdaptiveList
 import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.ui.components.fullWidthItem
 import com.rentmate.app.ui.components.ErrorState
 import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.MemberAvatar
@@ -117,13 +118,13 @@ private fun ActivityEmpty() {
 private fun ActivityList(events: List<ActivityEvent>, now: Instant) {
     val zone = remember { ZoneId.systemDefault() }
     val groups = remember(events, now) { groupByDay(events, LocalDate.now(zone), zone) }
-    LazyColumn(
+    // RM-0056: two columns of events at 600 dp and wider; day headers span both.
+    AdaptiveList(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.screen)
     ) {
         groups.forEach { group ->
-            item(key = "header-${group.bucket}") { SectionLabel(dayLabel(group.bucket)) }
+            fullWidthItem(key = "header-${group.bucket}") { SectionLabel(dayLabel(group.bucket)) }
             items(group.events, key = { it.id }) { ActivityRow(it, now) }
         }
     }

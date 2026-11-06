@@ -4,6 +4,7 @@ import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.rentmate.app.R
+import com.rentmate.app.ui.components.AdaptiveList
 import com.rentmate.app.ui.components.EmptyState
 import com.rentmate.app.ui.components.ErrorState
 import com.rentmate.app.ui.components.InlineError
@@ -15,8 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -79,7 +79,8 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
                 else -> {
                     if (state.loading) RefreshingIndicator()
                     if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    // RM-0056: two columns of items at 600 dp and wider.
+                    AdaptiveList {
                         items(state.visibleItems, key = { it.id }) { item ->
                             ShoppingItemRow(item, onToggle = { viewModel.purchase(item.id) }, onDelete = { viewModel.delete(item.id) })
                         }
