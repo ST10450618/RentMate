@@ -1,7 +1,12 @@
 package com.rentmate.app.notifications
 
 import com.rentmate.app.navigation.Screen
+import com.rentmate.app.navigation.deepLinkPath
+import com.rentmate.app.navigation.tabFor
+import com.rentmate.app.navigation.tabRootRoutes
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -80,5 +85,35 @@ class PushDeepLinkTest {
         assertEquals("chores", inbox.pending.value)
         inbox.consume("chores")
         assertNull(inbox.pending.value)
+    }
+
+    // RM-0056: tabs are Home, Money, Chores and House. The routes did not change,
+    // so a push still names the same screen; deepLinkPath decides how it opens.
+
+    @Test fun `a bill push opens Money and a chore push opens Chores`() {
+        assertEquals(listOf(Screen.Bills), deepLinkPath(PushDeepLink.screenFor(null, "bills", null)!!))
+        assertEquals(listOf(Screen.Chores), deepLinkPath(PushDeepLink.screenFor(null, "chores", null)!!))
+        assertEquals(Screen.Bills, tabFor(Screen.Bills.route))
+    }
+
+    @Test fun `a maintenance or shopping push opens under House`() {
+        assertEquals(listOf(Screen.House, Screen.Maintenance), deepLinkPath(PushDeepLink.screenFor(null, "maintenance", null)!!))
+        assertEquals(listOf(Screen.House, Screen.ShoppingList), deepLinkPath(PushDeepLink.screenFor(null, "shopping", null)!!))
+        assertEquals(Screen.House, tabFor(Screen.Maintenance.route))
+        assertEquals(Screen.House, tabFor(Screen.ShoppingList.route))
+    }
+
+    @Test fun `every push path starts on a tab anchored on Home, never Login`() {
+        PushDeepLink.targets.values.forEach { target ->
+            val path = deepLinkPath(target)
+            assertTrue(path.first().route in tabRootRoutes)
+            assertEquals(target, path.last())
+            assertFalse(path.any { it == Screen.Login || it == Screen.HouseholdSetup })
+        }
+    }
+
+    @Test fun `a maintenance tap from the House tab still opens Maintenance`() {
+        assertEquals(DeepLinkStep.Open(Screen.Maintenance), PushDeepLink.nextStep("maintenance", Screen.House.route))
+        assertEquals(DeepLinkStep.AlreadyThere, PushDeepLink.nextStep("maintenance", Screen.Maintenance.route))
     }
 }

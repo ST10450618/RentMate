@@ -296,4 +296,8 @@
         <item quantity="one">%d other housemate also owes you</item>
         <item quantity="other">%d other housemates also owe you</item>
     </plurals>
+    <string name="nav_home">Home</string>
+    <string name="nav_money">Money</string>
+    <string name="nav_house">House</string>
+    <string name="house_subtitle">Shopping and repairs</string>
 </resources>

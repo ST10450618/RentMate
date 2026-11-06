@@ -1,70 +1,76 @@
 package com.rentmate.app.ui.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarData
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.rentmate.app.ui.theme.Sizes
-import com.rentmate.app.ui.theme.Spacing
-
-/** One tab of a [TextTabBar]: its label and whether it is the current tab. */
-data class TabItem(val label: String, val selected: Boolean, val onClick: () -> Unit)
 
 /**
- * RM-0056: the bottom tabs from the mockups. Text only, no icons: the four
- * labels (Home, Money, Chores, House) are short and say what each tab is for.
- * The current tab is aloe and SemiBold, the others muted. A hairline Line
- * border separates the bar from the content.
+ * One bottom tab.
  *
- * Each tab is at least 48 dp tall and fills an equal share of the width.
- * TalkBack reads the bar as one group of tabs with the selected state. Labels
- * wrap rather than clip at the largest font size.
+ * @property icon the outlined icon shown while the tab is not selected.
+ * @property selectedIcon the filled version of the same icon, shown while it is.
+ */
+data class TabItem(
+    val label: String,
+    val icon: ImageVector,
+    val selectedIcon: ImageVector,
+    val selected: Boolean,
+    val onClick: () -> Unit
+)
+
+/**
+ * RM-0056: the bottom tabs. Each tab has a 24 dp icon above its label.
+ *
+ * An inactive tab shows the outlined icon with the label, both muted. The
+ * active tab swaps to the filled icon, and the icon and the SemiBold label
+ * turn aloe. There is no pill or indicator behind the active tab. A hairline
+ * Line border separates the bar from the content.
+ *
+ * Each tab is a 48 dp+ target. TalkBack reads the label as the tab's name, so
+ * the icons have no description of their own and the name is not read twice.
  */
 @Composable
-fun TextTabBar(tabs: List<TabItem>, modifier: Modifier = Modifier) {
-    Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
-        Column {
-            ListDivider()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .selectableGroup()
-            ) {
-                tabs.forEach { tab ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = Sizes.tabBar)
-                            .selectable(selected = tab.selected, role = Role.Tab, onClick = tab.onClick)
-                            .padding(horizontal = Spacing.xs, vertical = Spacing.sm),
-                        contentAlignment = Alignment.Center
-                    ) {
+fun RentMateTabBar(tabs: List<TabItem>, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    val colors = NavigationBarItemDefaults.colors(
+        indicatorColor = Color.Transparent,
+        selectedIconColor = scheme.primary,
+        selectedTextColor = scheme.primary,
+        unselectedIconColor = scheme.onSurfaceVariant,
+        unselectedTextColor = scheme.onSurfaceVariant
+    )
+    Column(modifier = modifier.fillMaxWidth()) {
+        ListDivider()
+        NavigationBar(containerColor = scheme.surface, tonalElevation = Sizes.none) {
+            tabs.forEach { tab ->
+                NavigationBarItem(
+                    selected = tab.selected,
+                    onClick = tab.onClick,
+                    icon = { Icon(if (tab.selected) tab.selectedIcon else tab.icon, contentDescription = null) },
+                    label = {
                         Text(
                             tab.label,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = if (tab.selected) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (tab.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
-                    }
-                }
+                    },
+                    colors = colors
+                )
             }
         }
     }

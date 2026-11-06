@@ -291,4 +291,8 @@
         <item quantity="one">Umhlali o-%d omnye ukwakunetyala</item>
         <item quantity="other">Abahlali abanye abangama-%d bakwanetyala kuwe</item>
     </plurals>
+    <string name="nav_home">Ikhaya</string>
+    <string name="nav_money">Imali</string>
+    <string name="nav_house">Indlu</string>
+    <string name="house_subtitle">Ukuthenga nokulungisa</string>
 </resources>

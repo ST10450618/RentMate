@@ -39,8 +39,8 @@ object Sizes {
     /** Minimum touch target (WCAG 2.5.8, Android accessibility). */
     val minTouch = 48.dp
 
-    /** Minimum height of one tab in [com.rentmate.app.ui.components.TextTabBar]. */
-    val tabBar = 56.dp
+    /** No size, for example no tonal elevation. */
+    val none = 0.dp
 
     /** Height of [com.rentmate.app.ui.components.PrimaryButton], the one main action on a screen. */
     val primaryButton = 52.dp

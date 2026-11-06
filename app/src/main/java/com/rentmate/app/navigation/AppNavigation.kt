@@ -48,12 +48,38 @@ fun NavHostController.onSignedOut() {
  * the Dashboard, keeps each tab's own state, and avoids launching a second copy
  * of a tab that is already showing. Back from any tab returns to the Dashboard;
  * Back on the Dashboard closes the app.
+ *
+ * @param restore false opens the tab at its root instead of where the user
+ *   left it. Deep links pass false so the stack is predictable.
  */
-fun NavHostController.navigateTopLevel(screen: Screen) {
+fun NavHostController.navigateTopLevel(screen: Screen, restore: Boolean = true) {
     Log.d(TAG, "navigateTopLevel -> ${screen.id} ${screen.route}")
     navigate(screen.route) {
         popUpTo(Screen.Dashboard.route) { saveState = true }
         launchSingleTop = true
-        restoreState = true
+        restoreState = restore
     }
+}
+
+/**
+ * RM-0056: the screens to open, in order, for a notification about [target].
+ * Shopping and Maintenance sit under the House tab, so their path goes
+ * through House. Back then returns to House, then Home. Every other target is
+ * a tab of its own. This is a pure function, so PushDeepLinkTest covers it.
+ */
+fun deepLinkPath(target: Screen): List<Screen> = when (target) {
+    Screen.ShoppingList, Screen.Maintenance -> listOf(Screen.House, target)
+    else -> listOf(target)
+}
+
+/**
+ * Opens a notification's screen (RM-0023) along [deepLinkPath]. The first step
+ * is anchored on Home, like a tab tap, so Back never reaches Login. Saved tab
+ * state is not restored, so the stack is always Home followed by the path.
+ */
+fun NavHostController.openDeepLink(target: Screen) {
+    val path = deepLinkPath(target)
+    Log.d(TAG, "openDeepLink -> ${path.joinToString(" > ") { it.route }}")
+    navigateTopLevel(path.first(), restore = false)
+    path.drop(1).forEach { navigate(it.route) { launchSingleTop = true } }
 }
