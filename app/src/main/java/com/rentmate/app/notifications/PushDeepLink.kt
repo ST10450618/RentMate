@@ -90,6 +90,7 @@ object PushDeepLink {
         return DeepLinkStep.Open(target)
     }
 
+    /** Trims and lower-cases an extra so "Bills " and "bills" match the same route. */
     private fun String.normalised(): String = trim().lowercase()
 }
 

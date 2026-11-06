@@ -45,6 +45,7 @@ class CurrentHousehold internal constructor(
     /** The active household id, or null when none is selected (yet). */
     val id: StateFlow<String?> = _id
 
+    /** Loads the saved id once, as soon as the object is built. */
     private val restored: Deferred<Unit> = scope.async {
         val saved = try {
             store.read()
@@ -71,6 +72,7 @@ class CurrentHousehold internal constructor(
             changed = true
             _id.value = householdId
         }
+        Log.d(TAG, "household selected")
         scope.launch { persist() }
     }
 
@@ -80,6 +82,7 @@ class CurrentHousehold internal constructor(
             changed = true
             _id.value = null
         }
+        Log.d(TAG, "household cleared")
         scope.launch { persist() }
     }
 
@@ -90,6 +93,7 @@ class CurrentHousehold internal constructor(
             _id.value = null
         }
         persist()
+        Log.d(TAG, "household forgotten on sign-out")
     }
 
     /** Writes the latest value, so writes that finish out of order still end correct. */

@@ -1,5 +1,6 @@
 package com.rentmate.app.network
 
+import android.util.Log
 import com.rentmate.app.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -12,10 +13,20 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import javax.inject.Singleton
 
+private const val TAG = "SupabaseModule"
+
+/**
+ * Hilt module that builds the app's single [SupabaseClient], with Postgrest,
+ * Storage and Auth installed. The URL and anon key come from BuildConfig.
+ *
+ * Based on: Supabase Kotlin reference, Initializing,
+ * https://supabase.com/docs/reference/kotlin/initializing (accessed 2026-11-06)
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object SupabaseModule {
 
+    /** Creates the client once per process. Auth saves the session on the device and refreshes it. */
     @Provides
     @Singleton
     fun provideSupabaseClient(): SupabaseClient = createSupabaseClient(
@@ -32,5 +43,5 @@ object SupabaseModule {
             autoLoadFromStorage = true
             alwaysAutoRefresh = true
         }
-    }
+    }.also { Log.d(TAG, "Supabase client created") }
 }

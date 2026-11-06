@@ -91,6 +91,7 @@ fun BiometricLockHost(content: @Composable () -> Unit) {
     }
 }
 
+/** Walks the [ContextWrapper] chain to find the activity that can host a BiometricPrompt. */
 private tailrec fun Context.findFragmentActivity(): FragmentActivity? = when (this) {
     is FragmentActivity -> this
     is ContextWrapper -> baseContext.findFragmentActivity()

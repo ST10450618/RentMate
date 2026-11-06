@@ -53,6 +53,7 @@ class SyncStatusTracker @Inject constructor(
     outbox: OutboxQueue,
     rejectionDao: SyncRejectionDao
 ) : SyncStatusSource {
+    /** The in-memory part of [SyncStatus]. It holds what the worker last reported. */
     private data class RunState(val phase: SyncPhase = SyncPhase.Idle, val lastSyncedAt: Long? = null)
 
     private val run = MutableStateFlow(RunState())
@@ -68,10 +69,16 @@ class SyncStatusTracker @Inject constructor(
     val lastSyncedAt: Long? get() = run.value.lastSyncedAt
 
     /** Called when a run starts. */
-    fun started() = run.update { it.copy(phase = SyncPhase.Syncing) }
+    fun started() {
+        Log.d(TAG, "sync started")
+        run.update { it.copy(phase = SyncPhase.Syncing) }
+    }
 
     /** Called when a run emptied the queue at [at], epoch millis. */
-    fun succeeded(at: Long) = run.update { it.copy(phase = SyncPhase.Idle, lastSyncedAt = at) }
+    fun succeeded(at: Long) {
+        Log.d(TAG, "sync finished: queue empty")
+        run.update { it.copy(phase = SyncPhase.Idle, lastSyncedAt = at) }
+    }
 
     /** Called when a run stopped early and will retry. */
     fun failed(error: String?) {

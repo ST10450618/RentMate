@@ -15,6 +15,7 @@ import javax.inject.Singleton
 
 private const val TAG = "ProfileSettingsSync"
 
+/** The one `households` column the leaderboard toggle reads. */
 @Serializable
 private data class HouseholdHideRow(val hide_leaderboard: Boolean = false)
 
