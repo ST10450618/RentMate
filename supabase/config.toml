@@ -383,3 +383,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.firebase-token]
 verify_jwt = true
+
+[functions.send-push]
+# The database calls this function with x-push-secret, not a user session.
+verify_jwt = false
