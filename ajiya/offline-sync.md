@@ -9,7 +9,7 @@ Room: entities mirror SupabaseRows plus syncState (SYNCED | PENDING_CREATE | PEN
 
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
-| RM-0015 | android | Room database and DAOs for bills, shares, chores, shopping items | Room migration/DAO instrumented or Robolectric tests pass | RM-0001 | - | 🟨 In progress |
+| RM-0015 | android | Room database and DAOs for bills, shares, chores, shopping items | Room migration/DAO instrumented or Robolectric tests pass | RM-0001 | - | 🟩 Done · b4bb962 · 2026-11-06 · Note: Room v1 (bills, bill_shares, chores, shopping_items, outbox) with exported schema; 17 Robolectric DAO tests pass. Sign-out clears every table. Code commits a592576 and 7e2d7c3. |
 | RM-0016 | android | Repositories read from Room as source of truth and refresh from Supabase | Screens render cached data in airplane mode after one online load | RM-0015 | - | 🟥 Pending |
 | RM-0017 | android | Outbox queue: offline creates/edits stored as pending operations | Adding a shopping item and a bill offline shows them with a pending badge | RM-0016 | - | 🟥 Pending |
 | RM-0018 | android | WorkManager sync worker with network constraint and conflict handling | Reconnecting syncs pending items to Supabase within a minute; unit tests for conflict rules pass | RM-0017 | - | 🟥 Pending |
