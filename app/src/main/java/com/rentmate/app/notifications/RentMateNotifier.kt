@@ -15,7 +15,7 @@ import com.rentmate.app.R
 
 private const val TAG = "RentMateNotifier"
 
-/** Intent extra carrying the screen route a notification tap should open (read by RM-0023). */
+/** Intent extra carrying the screen route a notification tap should open (read by [PushDeepLink]). */
 const val EXTRA_OPEN_SCREEN = "com.rentmate.app.extra.OPEN_SCREEN"
 
 /** Intent extra carrying the id of the bill, chore or request the notification is about. */
@@ -60,7 +60,10 @@ object RentMateNotifier {
         }
 
         val tapIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            // RM-0023: SINGLE_TOP hands the tap to a running MainActivity through
+            // onNewIntent, so the activity is not rebuilt and the lock state is kept.
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(EXTRA_OPEN_SCREEN, channel.screen)
             refId?.let { putExtra(EXTRA_REF_ID, it) }
         }

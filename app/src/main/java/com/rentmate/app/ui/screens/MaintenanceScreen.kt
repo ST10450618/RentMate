@@ -22,13 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rentmate.app.R
@@ -56,7 +53,10 @@ import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.data.attachments.PhotoLink
 import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
+import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.components.ScreenHeader
+import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.ValidatedTextField
 import com.rentmate.app.ui.validation.Limits
 import com.rentmate.app.ui.validation.validateOptionalText
@@ -124,171 +124,165 @@ fun MaintenanceScreen(
         )
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth().padding(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-    ) {
-        item {
-            Text(
-                stringResource(R.string.maintenance_title),
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-
-        if (uiState.loading) {
-            item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
-        }
-
-        uiState.error?.let { messageRes ->
-            item {
-                ErrorCard(
-                    message = stringResource(messageRes),
-                    onRetry = viewModel::refresh,
-                    onDismiss = viewModel::dismissError
-                )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ScreenHeader(title = stringResource(R.string.maintenance_title))
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().padding(Spacing.screen),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+        ) {
+            if (uiState.loading) {
+                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             }
-        }
 
-        item {
-            RentMateCard {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    Text(
-                        stringResource(R.string.maintenance_new),
-                        style = MaterialTheme.typography.titleMedium
+            uiState.error?.let { messageRes ->
+                item {
+                    ErrorCard(
+                        message = stringResource(messageRes),
+                        onRetry = viewModel::refresh,
+                        onDismiss = viewModel::dismissError
                     )
+                }
+            }
 
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it.take(Limits.TITLE_MAX + 10); error = null },
-                        label = { Text(stringResource(R.string.maintenance_whats_wrong)) },
-                        isError = error != null,
-                        supportingText = {
-                            when (error) {
-                                TitleError.BLANK -> Text(stringResource(R.string.error_title_blank))
-                                TitleError.TOO_LONG -> Text(stringResource(R.string.error_title_long))
-                                null -> {}
-                            }
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    ValidatedTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = stringResource(R.string.maintenance_detail),
-                        error = validateOptionalText(description, Limits.DESCRIPTION_MAX),
-                        showErrors = true,
-                        maxLength = Limits.DESCRIPTION_MAX + 20,
-                        singleLine = false,
-                        minLines = 2,
-                        imeAction = ImeAction.Default,
-                        supportingText = "${description.length} / ${Limits.DESCRIPTION_MAX}"
-                    )
-
-                    Text(
-                        stringResource(R.string.maintenance_category),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    ChipRow {
-                        MaintenanceCategory.entries.forEach { option ->
-                            FilterChip(
-                                selected = category == option,
-                                onClick = { category = option },
-                                label = { Text(stringResource(option.labelRes)) }
-                            )
-                        }
-                    }
-
-                    Text(
-                        stringResource(R.string.maintenance_urgency),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    ChipRow {
-                        Urgency.entries.forEach { option ->
-                            FilterChip(
-                                selected = urgency == option,
-                                onClick = { urgency = option },
-                                label = { Text(stringResource(option.labelRes)) }
-                            )
-                        }
-                    }
-
-                    PhotoAttachmentPicker(
-                        photos = photos,
-                        onPicked = { photosViewModel.add(it, AttachmentKind.MAINTENANCE) },
-                        onRetry = photosViewModel::retry,
-                        onRemove = photosViewModel::remove,
-                        maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
-                    )
-
-                    val photosBusy = photos.any { it.status is PhotoStatus.Compressing || it.status is PhotoStatus.Uploading }
-                    if (photosBusy) {
+            item {
+                RentMateCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         Text(
-                            stringResource(R.string.photo_wait_for_upload),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            stringResource(R.string.maintenance_new),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        OutlinedTextField(
+                            value = title,
+                            onValueChange = { title = it.take(Limits.TITLE_MAX + 10); error = null },
+                            label = { Text(stringResource(R.string.maintenance_whats_wrong)) },
+                            isError = error != null,
+                            supportingText = {
+                                when (error) {
+                                    TitleError.BLANK -> Text(stringResource(R.string.error_title_blank))
+                                    TitleError.TOO_LONG -> Text(stringResource(R.string.error_title_long))
+                                    null -> {}
+                                }
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        ValidatedTextField(
+                            value = description,
+                            onValueChange = { description = it },
+                            label = stringResource(R.string.maintenance_detail),
+                            error = validateOptionalText(description, Limits.DESCRIPTION_MAX),
+                            showErrors = true,
+                            maxLength = Limits.DESCRIPTION_MAX + 20,
+                            singleLine = false,
+                            minLines = 2,
+                            imeAction = ImeAction.Default,
+                            supportingText = "${description.length} / ${Limits.DESCRIPTION_MAX}"
+                        )
+
+                        Text(
+                            stringResource(R.string.maintenance_category),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        ChipRow {
+                            MaintenanceCategory.entries.forEach { option ->
+                                FilterChip(
+                                    selected = category == option,
+                                    onClick = { category = option },
+                                    label = { Text(stringResource(option.labelRes)) }
+                                )
+                            }
+                        }
+
+                        Text(
+                            stringResource(R.string.maintenance_urgency),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        ChipRow {
+                            Urgency.entries.forEach { option ->
+                                FilterChip(
+                                    selected = urgency == option,
+                                    onClick = { urgency = option },
+                                    label = { Text(stringResource(option.labelRes)) }
+                                )
+                            }
+                        }
+
+                        PhotoAttachmentPicker(
+                            photos = photos,
+                            onPicked = { photosViewModel.add(it, AttachmentKind.MAINTENANCE) },
+                            onRetry = photosViewModel::retry,
+                            onRemove = photosViewModel::remove,
+                            maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
+                        )
+
+                        val photosBusy = photos.any { it.status is PhotoStatus.Compressing || it.status is PhotoStatus.Uploading }
+                        if (photosBusy) {
+                            Text(
+                                stringResource(R.string.photo_wait_for_upload),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        PrimaryButton(
+                            text = stringResource(R.string.maintenance_log_request),
+                            enabled = !photosBusy,
+                            onClick = {
+                                error = viewModel.log(title, description, category, urgency, photosViewModel.uploadedPaths)
+                                if (error == null) {
+                                    title = ""
+                                    description = ""
+                                    category = MaintenanceCategory.OTHER
+                                    urgency = Urgency.MEDIUM
+                                    photosViewModel.clear()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    Button(
-                        enabled = !photosBusy,
+                }
+            }
+
+            if (openCount > 0) {
+                item {
+                    PrimaryButton(
+                        text = pluralStringResource(R.plurals.maintenance_send_to_landlord, openCount, openCount),
                         onClick = {
-                            error = viewModel.log(title, description, category, urgency, photosViewModel.uploadedPaths)
-                            if (error == null) {
-                                title = ""
-                                description = ""
-                                category = MaintenanceCategory.OTHER
-                                urgency = Urgency.MEDIUM
-                                photosViewModel.clear()
-                            }
+                            val landlord = uiState.landlord
+                            if (landlord != null && landlord.hasEmail) openEmail(landlord) else askForEmail = true
                         },
                         modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.maintenance_log_request))
-                    }
+                    )
                 }
             }
-        }
 
-        if (openCount > 0) {
-            item {
-                Button(
-                    onClick = {
-                        val landlord = uiState.landlord
-                        if (landlord != null && landlord.hasEmail) openEmail(landlord) else askForEmail = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(pluralStringResource(R.plurals.maintenance_send_to_landlord, openCount, openCount))
-                }
-            }
-        }
-
-        item {
-            Text(
-                stringResource(R.string.maintenance_logged),
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        if (requests.isEmpty()) {
             item {
                 Text(
-                    stringResource(R.string.maintenance_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(24.dp)
+                    stringResource(R.string.maintenance_logged),
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
-        }
 
-        items(requests, key = { it.id }) { request ->
-            RequestCard(
-                request = request,
-                photos = uiState.photos[request.id].orEmpty(),
-                canChangeStatus = request.canChangeStatus(uiState.currentUserId),
-                onAdvance = { viewModel.advance(request.id) }
-            )
+            if (requests.isEmpty()) {
+                item {
+                    Text(
+                        stringResource(R.string.maintenance_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(Spacing.xl)
+                    )
+                }
+            }
+
+            items(requests, key = { it.id }) { request ->
+                RequestCard(
+                    request = request,
+                    photos = uiState.photos[request.id].orEmpty(),
+                    canChangeStatus = request.canChangeStatus(uiState.currentUserId),
+                    onAdvance = { viewModel.advance(request.id) }
+                )
+            }
         }
     }
 }
@@ -300,13 +294,13 @@ private fun ErrorCard(message: String, onRetry: () -> Unit, onDismiss: () -> Uni
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.padding(Spacing.card), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Text(
                 message,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 TextButton(onClick = onRetry) { Text(stringResource(R.string.action_retry)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_dismiss)) }
             }
@@ -344,14 +338,14 @@ private fun RequestCard(
                 )
             }
             if (request.status.canAdvance && canChangeStatus) {
-                OutlinedButton(onClick = onAdvance, modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        stringResource(
-                            R.string.maintenance_mark_as,
-                            stringResource(request.status.next()!!.labelRes)
-                        )
-                    )
-                }
+                SecondaryButton(
+                    text = stringResource(
+                        R.string.maintenance_mark_as,
+                        stringResource(request.status.next()!!.labelRes)
+                    ),
+                    onClick = onAdvance,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -361,7 +355,7 @@ private fun RequestCard(
 @Composable
 private fun StatusTimeline(request: MaintenanceRequest) {
     val formatter = remember { SimpleDateFormat("d MMM yyyy", Locale.getDefault()) }
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         RequestStatus.entries.forEach { status ->
             val stamp = request.timestampFor(status)
             val reached = stamp != null
@@ -387,7 +381,7 @@ private fun StatusTimeline(request: MaintenanceRequest) {
 @Composable
 private fun ChipRow(content: @Composable () -> Unit) {
     androidx.compose.foundation.layout.FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         modifier = Modifier.fillMaxWidth()
     ) { content() }
 }
@@ -446,9 +440,10 @@ private fun LandlordEmailDialog(initial: String, onDismiss: () -> Unit, onConfir
             }
         },
         confirmButton = {
-            Button(onClick = { if (isValidEmail(address)) onConfirm(address.trim()) else showError = true }) {
-                Text(stringResource(R.string.landlord_email_open))
-            }
+            PrimaryButton(
+                text = stringResource(R.string.landlord_email_open),
+                onClick = { if (isValidEmail(address)) onConfirm(address.trim()) else showError = true }
+            )
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.lock_prompt_cancel)) }

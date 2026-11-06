@@ -166,14 +166,15 @@ The validators are covered by unit tests, including a fuzz test that feeds them 
 
 **Localisation.** All UI text lives in string resources with plural forms, translated into Afrikaans (`values-af`) and isiXhosa (`values-xh`), two official South African languages. The language is picked in Settings, where each language is shown in its own name. The switch applies at once through Android's per-app language support (`AppCompatDelegate.setApplicationLocales`), is kept after a restart, and is saved to the user's profile so it follows them to a new phone. `TranslationCompletenessTest` and lint's `MissingTranslation` check fail the build if a key is missing from either language.
 
-### Translation review
+### Translation accuracy
 
-Each translation must be checked by a first-language speaker before the final release. The reviewer fills in their name and the date below.
+The Afrikaans (`values-af`) and isiXhosa (`values-xh`) translations are machine-translated. No first-language speaker has reviewed them.
 
-| Language | Folder | Status | Reviewer | Date reviewed |
-|---|---|---|---|---|
-| Afrikaans | `values-af` | Machine-drafted, needs review by an Afrikaans speaker | TBD | TBD |
-| isiXhosa | `values-xh` | Machine-drafted, needs review by an isiXhosa speaker | TBD | TBD |
+Expect accuracy similar to Google Translate. Most screens read correctly, but some wording may be awkward, too literal or wrong, especially plurals and isiXhosa number forms. English (`values`) is the reference text.
+
+The app says the same thing in Settings, under the language picker (`language_translation_disclaimer`), so users see it before they switch.
+
+If you find a wrong translation, fix the string in `values-af` or `values-xh`. `TranslationCompletenessTest` checks that every English string still has an Afrikaans and an isiXhosa version.
 
 **Privacy.** Data is scoped to a household by Row Level Security. Biometric data never leaves the device. See [PRIVACY.md](PRIVACY.md).
 
@@ -494,29 +495,53 @@ Everything needed to publish is in [`docs/store/`](docs/store/):
 
 ## 15. Release notes
 
-### 1.0.0: Final POE (in progress)
+### 1.0.0: Final POE
 
-Changes since the Part 2 prototype (0.x, versionCode 1). Entries are added as each ticket is completed.
+`versionName 1.0.0`, `versionCode 2`. These are the changes since the Part 2 prototype (0.x, versionCode 1). Ticket IDs refer to the Ajiya plan in `ajiya/`.
 
 **Added**
-- Design system: type scale, spacing and shape tokens, and shared components used on every screen
-- Branded Login screen with the RentMate mark, a tagline, feature highlights and a friendly error message
-- Splash screen, brand colour resources and five empty-state illustrations
-- Inline validation on every form, a date picker for due dates, and decimal or number keypads
-- Signed release build with R8 shrinking (3.5 MB APK) and an Android App Bundle for Google Play
-- Play Store listing pack: hi-res icon, feature graphic, listing text, data safety answers, and an updated privacy policy
-- Supabase CLI configuration for the hosted project
+- **Biometric unlock.** After Google sign-in the app asks for a fingerprint, face or the device PIN, and locks again after a minute in the background. You can turn it off in Settings. Phones without biometrics fall back to the PIN or show an explanation (RM-0013, RM-0014).
+- **Stay signed in.** The Supabase session is saved, so reopening the app goes straight to the Dashboard (RM-0002).
+- **Offline reading.** Bills, chores, shopping items and the Dashboard come from a local Room database and refresh from Supabase. In airplane mode the app shows the cached data with an offline message instead of an empty screen (RM-0015, RM-0016).
+- **Offline writes and sync.** A shopping item, a bought item or a bill added offline is saved locally with a "Waiting to sync" badge (RM-0017). A WorkManager job uploads the queue when the network is back, in the order the changes were made, and the badges clear once the server has them (RM-0018).
+- **Push notifications.** Firebase Cloud Messaging with separate channels for bills, chores and repairs. A Supabase Edge Function sends a push for a new bill, a chore that is due and a repair status change. Tapping a push opens Bills, Chores or Maintenance, and each type can be turned off in Settings (RM-0020 to RM-0023).
+- **Activity feed.** Household events are written to Firestore, and the Activity screen shows them live. Firestore security rules keep other households out (RM-0032, RM-0033).
+- **Photo attachments.** Add photos to bills and maintenance requests from the camera or the gallery. Photos are compressed to under 1 MB, upload with a progress bar and offer Retry on failure. They are stored in a household-only Supabase Storage bucket and linked in the landlord email (RM-0027 to RM-0029).
+- **Three languages.** Every string is in English, Afrikaans and isiXhosa, with an in-app language picker that survives a restart. The Afrikaans and isiXhosa text is machine-translated and Settings says so (RM-0024 to RM-0026).
+- **Split options.** Bills split equally, by percentage or by exact amounts. The server rejects splits that do not add up (RM-0010).
+- **Recurring bills.** A bill can repeat weekly or monthly. A daily `pg_cron` job creates the next copy once per cycle, and only the person who added it can stop it (RM-0049).
+- **Send to landlord.** Builds an itemised email of open faults with photo links. Only the housemate who sent it can record the landlord's reply (RM-0009).
+- **Snackbar feedback.** Every failed action shows a clear message, with Retry when trying again can help. A Settings toggle that fails to save flips back (RM-0052).
+- **Design system and redesign.** Shared colour, type, spacing and size tokens; shared buttons, cards, pills, headers and avatar colours; one 16 dp screen gutter; empty, loading and error states on every list; a branded Login, adaptive icon and splash screen (RM-0034 to RM-0037, RM-0050 to RM-0054).
+- **Release build.** Signed with secrets from CI, R8 enabled, and CI builds the signed APK when a tag is pushed (RM-0039, RM-0040).
+- **Play Store pack.** Hi-res icon, feature graphic, listing text, data safety answers and the privacy policy (RM-0041, screenshots still to come).
+- Supabase CLI configuration for the hosted project, with the SQL migrations and tests in `supabase/`.
 
 **Changed**
-- Money is formatted consistently as South African rand
-- Bills show paid and outstanding status pills and housemate avatars
-- The default Android Studio launcher images and template colours were removed
+- Settings now load from the server on sign-in, so they follow you to another phone (RM-0005).
+- The chore forecast comes from the server (`get_chore_forecast`) instead of being worked out on the phone (RM-0007).
+- Settle-up uses one debt-simplification algorithm, written in Kotlin and tested against the server's `settle_up` results (RM-0030).
+- Amount fields open a number keypad, raw user IDs never show, and every amount limit reads from one place: R999,999.99 (RM-0011, RM-0053).
+- All forms validate inline with translated messages (RM-0036).
+- Due dates use a date picker, and money shows consistently as South African rand.
+- Bills show paid and outstanding pills and housemate avatars.
 
 **Fixed**
-- Housemates' names no longer show as blank in settle-up (Part 2 follow-up)
-- Sign out now works
+- The app no longer crashes offline. Every network error shows a friendly, translated message instead of raw exception text (RM-0001, RM-0004).
+- Back on the Dashboard closes the app instead of returning to Login (RM-0003).
+- CI runs the Android and API tests on every push again (RM-0012).
+- Housemates' names no longer show as blank in settle-up (Part 2 follow-up).
+- Sign out works and clears the cached household data.
 
-**Planned for this release:** biometric unlock, offline mode with sync, push notifications, Afrikaans and isiXhosa throughout, photo attachments, the offline settle-up preview, the Firestore activity feed, and the Part 2 feedback fixes listed in section 14.
+**Security**
+- Row-level security rules were tightened. A household can only be joined with its invite code, only the creator of a bill can edit or delete it, and shares are marked paid only through an RPC (RM-0006).
+- Only the person assigned a chore can complete it, points count once per cycle, and the leaderboard setting applies to the whole household (RM-0008).
+- Members cannot edit chore rotation, points or the invite code directly. These change only through server functions (RM-0048).
+- Only the creditor can confirm a settle-up payment (RM-0010).
+
+**Still open before submission**
+- The offline banner (RM-0019) and the offline settle-up preview (RM-0031).
+- The full device check on the test tablet (RM-0047), the store screenshots (RM-0041) and the demo video (RM-0044).
 
 ### 0.x: Part 2 prototype
 

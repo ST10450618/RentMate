@@ -11,6 +11,7 @@
     <string name="notif_maintenance">Uhlaziyo malunga nolungiso</string>
 
     <string name="section_language">Ulwimi</string>
+    <string name="language_translation_disclaimer">IsiBhulu nesiXhosa ziguqulelwe ngomatshini, njengeGoogle Translate, kwaye zinokuba neempazamo.</string>
 
     <string name="section_security">Ukhuseleko nomboniso</string>
     <string name="biometric_title">Vula ngebhayometriki</string>
