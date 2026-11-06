@@ -49,7 +49,7 @@ The app never uses a toast or snackbar. When an action fails, the user often get
   - Chores: the forecast failing to load (`ChoresViewModel` line 123).
 - **Hidden errors.** On Bills, a failed "Confirm received" writes its error behind the open dialog, so the user can't see it.
 - **Vague errors.** "Something went wrong. Please try again." does not say what failed or what to do. A failed bill save and a failed photo upload show the same text.
-- **Wrong numbers.** `error_amount_too_large` says "Amount can't be more than R999,999.99", but `FormValidation` allows exactly R1,000,000.
+- **Vague limits.** The split error said only "That amount is too large" without the limit. Fixed in RM-0053: it now says R999,999.99, the same limit as the Amount field.
 
 ### Requirement
 
