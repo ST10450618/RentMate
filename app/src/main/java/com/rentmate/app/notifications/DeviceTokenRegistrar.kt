@@ -13,7 +13,7 @@ interface PushTokenSource {
     suspend fun currentToken(): String?
 }
 
-/** Where the token is saved. The app uses the device_tokens table (migration 0014). */
+/** Where the token is saved. The app uses the device_tokens table (migration 0015). */
 interface DeviceTokenStore {
     /** Saves the token for the signed-in user. Returns false when nobody is signed in. May throw. */
     suspend fun register(token: String): Boolean

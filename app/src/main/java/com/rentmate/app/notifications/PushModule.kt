@@ -33,7 +33,7 @@ class FirebasePushTokenSource(private val context: Context) : PushTokenSource {
     }
 }
 
-/** Saves tokens through the RPCs in migration 0014_device_tokens.sql. */
+/** Saves tokens through the RPCs in migration 0015_device_tokens.sql. */
 class SupabaseDeviceTokenStore(private val supabase: SupabaseClient) : DeviceTokenStore {
     override suspend fun register(token: String): Boolean {
         if (supabase.auth.currentSessionOrNull() == null) return false

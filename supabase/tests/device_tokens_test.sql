@@ -1,4 +1,4 @@
--- RM-0021: proves the device token rules from migration 0014.
+-- RM-0021: proves the device token rules from migration 0015.
 --
 -- Run as the postgres user against a database with every migration applied:
 --   supabase db reset

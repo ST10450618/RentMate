@@ -6,7 +6,7 @@ package com.rentmate.app.notifications
  * The server sends data-only messages so that [RentMateMessagingService] always
  * receives them, also when the app is in the background. The service then picks
  * the channel, the tap target and the user's toggle. The keys are documented in
- * supabase/migrations/0014_device_tokens.sql.
+ * supabase/migrations/0015_device_tokens.sql.
  */
 data class PushMessage(
     val channel: RentMateChannel,
