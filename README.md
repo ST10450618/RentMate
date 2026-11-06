@@ -352,6 +352,8 @@ Build and install a debug build on a connected device:
 
 Debug builds are signed with the shared `keystore/debug.keystore`, so the SHA-1 registered for Google Sign-In works on every machine.
 
+`app/google-services.json` (Firebase project `rentmate-b120f`) is committed on purpose so every machine and CI can build. It holds only the project ID and an API key that ships inside every APK anyway. The Firebase service-account key used to send pushes is a secret: it lives only in Supabase Edge Function secrets and is never committed.
+
 ## 10. Backend (Supabase)
 
 Schema, Row Level Security and functions are numbered SQL migrations in `supabase/migrations/`:
@@ -362,6 +364,9 @@ Schema, Row Level Security and functions are numbered SQL migrations in `supabas
 | `0002_functions.sql` | `create_household`, `join_household`, `complete_chore`, `forecast_chore`, `settle_up`, `confirm_settlement`, `leaderboard` |
 | `0003_send_to_landlord.sql` | Groups open maintenance requests into one request to the landlord |
 | `0004`–`0006` | Members can read the household roster and each other's display names |
+| `0012_deterministic_settle_up.sql` | `settle_up` gives the same payments every time it runs |
+| `0013_lock_chores_households.sql` | Members can edit only the chore and household fields the app uses |
+| `0014_recurring_bills.sql` | Weekly or monthly repeat on bills, `stop_bill_repeat`, and a daily `pg_cron` job that copies due bills once |
 
 The repo is linked to the hosted project with the Supabase CLI:
 
@@ -371,6 +376,13 @@ supabase link --project-ref crmomoazxwrdsicfphav
 supabase migration list        # compare local and remote history
 supabase db push               # apply new migrations
 ```
+
+Edge Function secrets (set with `supabase secrets set`, never committed):
+
+| Secret | Used for |
+|---|---|
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase service-account JSON, so the push Edge Function can call FCM HTTP v1 |
+| `FIREBASE_PROJECT_ID` | `rentmate-b120f` |
 
 ## 11. Testing
 
@@ -411,6 +423,28 @@ Every feature is also checked on a physical device against its ticket's "Done wh
 | Shrinking | R8 minification and resource shrinking are on. Keep rules in `app/proguard-rules.pro` cover kotlinx.serialization, Supabase, Ktor and Credential Manager. The release APK is 3.5 MB, down from 23.7 MB for debug. |
 | Versioning | `versionCode 2`, `versionName 1.0.0` (`1` was the Part 2 prototype) |
 | Artefacts | `./gradlew assembleRelease` builds the signed APK; `./gradlew bundleRelease` builds the AAB for Google Play |
+
+#### Releasing from CI
+
+`.github/workflows/android-release.yml` runs when a tag matching `v*` or `final-poe` is pushed (or by hand from the Actions tab). It builds the signed APK and AAB, checks the APK signature with `apksigner`, and uploads the APK, the AAB and the R8 `mapping.txt` as artefacts named after the tag. It fails at once, with a clear message, if a signing secret is empty.
+
+Add these repository secrets under Settings, Secrets and variables, Actions:
+
+| Secret | Value |
+|---|---|
+| `RENTMATE_KEYSTORE_BASE64` | The upload keystore, base64 encoded |
+| `RENTMATE_KEYSTORE_PASSWORD` | Keystore password |
+| `RENTMATE_KEY_ALIAS` | Key alias |
+| `RENTMATE_KEY_PASSWORD` | Key password |
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` and `WEB_CLIENT_ID` are optional secrets. The workflow writes them to `local.properties` when set, so the release build can reach the backend.
+
+Encode the keystore on macOS with `base64 -i upload.jks | pbcopy`, then paste it into the secret. To cut a release:
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ### Version control workflow
 

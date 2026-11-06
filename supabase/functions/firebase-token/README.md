@@ -1,0 +1,3 @@
+# firebase-token
+
+Gives the app a Firebase custom token so it can read and write the household activity feed in Firestore. The function checks the caller's Supabase session, reads the caller's households from `household_members` with the caller's own JWT, and signs a token whose uid is the Supabase user id and whose `households` claim lists those household ids. To deploy it, make sure the `FIREBASE_SERVICE_ACCOUNT` and `FIREBASE_PROJECT_ID` secrets exist on the project, then run `supabase functions deploy firebase-token --project-ref <ref>`. Deploying changes the hosted project, so do it only when the team has agreed.

@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RentMate UI Redesign Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column for the plan, with wider bands for mockups and tables.
+   The page uses the proposed app tokens, so it previews the new look. */
+:root {
+  --bg: #f7fbfa;          /* cool ground, replaces cream Sand #F5F1E6 */
+  --surface: #ffffff;
+  --surface-2: #f1f4f3;
+  --line: #dce3e1;
+  --ink: #141a18;
+  --muted: #494f4d;
+  --aloe: #14564b;        /* brand, unchanged */
+  --aloe-soft: #daf6ef;
+  --amber: #8a6410;       /* text on light */
+  --amber-fill: #fbefd0;
+  --clay: #c35047;        /* error */
+  --clay-soft: #f8e3e1;
+  --old-cream: #f5f1e6;
+  --old-line: #dcd5c2;
+  --font: "Public Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c110f; --surface: #131817; --surface-2: #1a1f1e; --line: #2a2f2e;
+    --ink: #ecf4f2; --muted: #b9bfbe; --aloe: #6fb3a5; --aloe-soft: #172e29;
+    --amber: #e8b23a; --amber-fill: #2e2412; --clay: #e66f64; --clay-soft: #2e1715;
+    --old-cream: #2a2620; --old-line: #4a4436; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c110f; --surface: #131817; --surface-2: #1a1f1e; --line: #2a2f2e;
+  --ink: #ecf4f2; --muted: #b9bfbe; --aloe: #6fb3a5; --aloe-soft: #172e29;
+  --amber: #e8b23a; --amber-fill: #2e2412; --clay: #e66f64; --clay-soft: #2e1715;
+  --old-cream: #2a2620; --old-line: #4a4436; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.6 var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 48px 96px; display: grid; gap: 64px; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+h1 { font-size: 2.5rem; line-height: 1.15; }
+h2 { font-size: 1.75rem; line-height: 1.25; }
+h3 { font-size: 1.125rem; line-height: 1.4; }
+p { margin: 0; }
+section { display: grid; gap: 20px; }
+.meta { color: var(--muted); font-size: 0.9375rem; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.lede { font-size: 1.1875rem; line-height: 1.55; max-width: 62ch; }
+code, .mono { font-family: var(--mono); font-size: 0.875em; }
+code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; }
+a { color: var(--aloe); }
+ul, ol { margin: 0; padding-left: 1.25em; display: grid; gap: 6px; }
+.tag { display: inline-block; font-size: 0.8125rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--aloe-soft); color: var(--aloe); }
+.tag.p0 { background: var(--clay-soft); color: var(--clay); }
+.tag.p1 { background: var(--amber-fill); color: var(--amber); }
+.tag.p2 { background: var(--surface-2); color: var(--muted); }
+
+/* Summary strip */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 4px; }
+.stat b { font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { color: var(--muted); font-size: 0.9375rem; line-height: 1.4; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; color: var(--muted); font-size: 0.875rem; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Tokens */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sw { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
+.sw i { display: block; height: 56px; border-bottom: 1px solid var(--line); }
+.sw div { padding: 8px 12px; font-size: 0.875rem; line-height: 1.4; }
+.sw div b { display: block; font-weight: 600; }
+.scale { display: grid; gap: 10px; }
+.bar { display: flex; align-items: center; gap: 12px; font-size: 0.9375rem; }
+.bar i { display: block; height: 16px; background: var(--aloe); border-radius: 4px; flex: none; }
+.bar span { min-width: 0; }
+
+/* Mockups */
+.mock-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: start; }
+.mock { display: grid; gap: 10px; }
+.mock figcaption { font-size: 0.9375rem; color: var(--muted); }
+.mock figcaption b { color: var(--ink); font-weight: 600; }
+figure { margin: 0; }
+.phone {
+  width: 100%; max-width: 320px; aspect-ratio: 9 / 18.5; border: 1px solid var(--line);
+  border-radius: 28px; overflow: hidden; background: var(--bg); display: flex; flex-direction: column;
+  font-size: 13px; line-height: 1.45; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.phone .body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.phone .nav { display: flex; justify-content: space-around; border-top: 1px solid var(--line); background: var(--surface); padding: 8px 0 10px; font-size: 10.5px; color: var(--muted); }
+.phone .nav span { display: grid; justify-items: center; gap: 2px; }
+.phone .nav span.on { color: var(--aloe); font-weight: 600; }
+.phone .nav svg { width: 18px; height: 18px; }
+.p-title { font-size: 20px; font-weight: 600; line-height: 1.25; }
+.p-sub { color: var(--muted); font-size: 12px; }
+.p-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 8px; }
+.p-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.p-row .grow { flex: 1; min-width: 0; }
+.p-amt { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.p-big { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.p-btn { height: 40px; border-radius: 999px; background: var(--aloe); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+.p-btn.ghost { background: transparent; color: var(--aloe); border: 1px solid var(--aloe); }
+.av { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; flex: none; color: #fff; }
+.av.a { background: #2f7a6c; } .av.b { background: #8a6410; } .av.c { background: #6b5aa6; } .av.d { background: #b4533f; }
+.p-pill { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--amber-fill); color: var(--amber); white-space: nowrap; }
+.p-pill.ok { background: var(--aloe-soft); color: var(--aloe); }
+.p-list { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.p-list .p-row { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.p-list .p-row:last-child { border-bottom: 0; }
+.p-h { font-size: 13px; font-weight: 600; }
+.p-snack { margin-top: auto; background: var(--ink); color: var(--bg); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; font-size: 12px; }
+.p-snack b { color: var(--aloe-soft); margin-left: auto; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px; background: var(--surface); }
+.chip.on { background: var(--aloe-soft); border-color: var(--aloe); color: var(--aloe); font-weight: 600; }
+.field { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 8px 10px; display: grid; gap: 1px; }
+.field small { color: var(--muted); font-size: 11px; }
+.field.err { border-color: var(--clay); }
+.err-text { color: var(--clay); font-size: 11.5px; }
+
+/* Before mock: cream, banner header, uppercase labels */
+.phone.old { background: var(--old-cream); border-color: var(--old-line); }
+.old .banner { background: #15574b; color: #fff; padding: 18px 16px 14px; }
+.old .banner b { display: block; font-size: 19px; font-weight: 600; }
+.old .banner small { opacity: 0.8; font-size: 11.5px; }
+.old .o-card { background: var(--surface); border: 1px solid var(--old-line); border-radius: 14px; padding: 12px; display: grid; gap: 6px; }
+.old .o-lab { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.old .o-btn { justify-self: start; border: 1px solid #15574b; color: #15574b; border-radius: 999px; padding: 5px 12px; font-size: 12px; }
+.old .av { background: #d9e8e3; color: #15574b; }
+.note { border-left: 3px solid var(--aloe); padding: 4px 0 4px 16px; color: var(--muted); max-width: 68ch; }
+
+/* Principles */
+.principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.pr { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.pr h3 { font-size: 1.0625rem; }
+.pr .src { font-size: 0.8125rem; color: var(--muted); }
+.pr p { font-size: 0.9375rem; line-height: 1.55; }
+.pr .fix { font-size: 0.9375rem; }
+.pr .fix b { font-weight: 600; }
+
+/* Steps */
+.steps { display: grid; gap: 12px; counter-reset: s; }
+.step { display: grid; grid-template-columns: 40px 1fr; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.step::before { counter-increment: s; content: counter(s); width: 32px; height: 32px; border-radius: 50%; background: var(--aloe-soft); color: var(--aloe); display: grid; place-items: center; font-weight: 600; }
+.step > div { display: grid; gap: 6px; min-width: 0; }
+.step .time { color: var(--muted); font-size: 0.875rem; }
+pre { margin: 0; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font: 400 0.8125rem/1.6 var(--mono); }
+:focus-visible { outline: 2px solid var(--aloe); outline-offset: 2px; }
+@media (max-width: 520px) { h1 { font-size: 2rem; } h2 { font-size: 1.5rem; } .wrap { gap: 48px; padding-block: 32px 64px; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<header style="display:grid;gap:16px">
+  <div class="meta"><span>RentMate · PROG7314 Final POE</span><span>Draft by Seth, 6 Nov 2026</span><span>Owner of the design system: Ali</span></div>
+  <h1>RentMate UI redesign plan</h1>
+  <p class="lede">The app works, but each screen sets its own spacing, buttons and messages, and the look matches what design tools now flag as generated. This plan sets one standard for spacing, type, colour and components, lists the UX principles behind it, and orders the fixes so the most visible ones land before the demo.</p>
+  <div class="stats">
+    <div class="stat"><b>21</b><span>different hard-coded dp values in screens and components</span></div>
+    <div class="stat"><b>2</b><span>screen gutters in use: 16 dp on lists, 24 dp on forms</span></div>
+    <div class="stat"><b>6 of 14</b><span>screens use the shared <code>ScreenHeader</code></span></div>
+    <div class="stat"><b>0</b><span>snackbars or toasts. Failed actions often show nothing</span></div>
+    <div class="stat"><b>18</b><span>findings from <code>ai-design-check</code>, 0 of them accessibility</span></div>
+  </div>
+</header>
+
+<section>
+  <h2>What we measured</h2>
+  <p class="prose">Two sources: the <a href="https://github.com/enmerasoftware/ai-design-check" target="_blank" rel="noopener">ai-design-check</a> checker (141 rules, reads Jetpack Compose) run on <code>app/src/main</code>, and a manual audit of every screen file. The checker needs no API key: <code>npx @enmera/ai-design-check app/src/main</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Finding</th><th>Where</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td>Cream page ground (<code>Sand #F5F1E6</code>)</td><td><code>ui/theme/Color.kt</code>, every screen</td><td>The checker's benchmark found a cream ground on 40% of AI-built pages and 3% of human-designed sites. It is the strongest single tell.</td></tr>
+      <tr><td>Tracked uppercase labels ("YOUR BALANCE", "HOUSEHOLD")</td><td><code>SectionLabel</code> calls <code>text.uppercase()</code>, 14 uses</td><td>Rule <i>No tracked uppercase labels</i>. Uppercase also ignores the locale, which breaks isiXhosa and Afrikaans casing.</td></tr>
+      <tr><td>Type sizes outside a declared scale</td><td><code>Type.kt</code> lines 21 to 33 (13 sizes)</td><td>13 text styles from 11 to 36 sp. Screens can pick any of them, so headings drift between screens.</td></tr>
+      <tr><td>Radii 6, 10, 14 dp undeclared</td><td><code>Dimens.kt</code> lines 31 to 33</td><td>The values are fine. The checker flags them only because no <code>ai-design-check.json</code> declares the scale.</td></tr>
+      <tr><td>Error text that gives no next step</td><td><code>AddBillViewModel</code> 113, <code>AddChoreViewModel</code> 73</td><td>Rule <i>Errors say what happened and what to do</i>. Matches UX-02 in <code>docs/ux-requirements.md</code>.</td></tr>
+      <tr><td>Two screen gutters</td><td>Lists use <code>Spacing.screen</code> (16), forms use <code>Spacing.xl</code> (24)</td><td>Content jumps sideways when you open Add Bill from Bills.</td></tr>
+      <tr><td>Literal paddings</td><td>Settings (8 literals), Maintenance (6), Login (7), <code>ScreenHeader</code> (20 dp)</td><td>20 dp is not a spacing token, so the header never lines up with the cards under it.</td></tr>
+      <tr><td>Off-grid pill padding</td><td><code>StatusPill</code>: <code>Spacing.sm + 2.dp</code> = 10 dp</td><td>Breaks the 4 dp grid.</td></tr>
+      <tr><td>Secondary button 40 dp tall</td><td><code>SecondaryButton</code> in <code>RentMateComponents.kt</code></td><td>Below the 48 dp touch target Android requires. "Settle up" and "View chores" are small to hit.</td></tr>
+      <tr><td>Raw buttons beside shared ones</td><td>8 raw <code>Button</code>/<code>OutlinedButton</code> (Maintenance 4, Login, Lock, Settings, Household Setup)</td><td>Rule <i>Interactive elements come from shared components</i>. Five button looks exist today.</td></tr>
+      <tr><td>Header pattern differs</td><td>Banner <code>ScreenHeader</code> on 6 screens; Settings, Maintenance and the Add screens draw their own</td><td>Rule <i>One card header pattern</i> and <i>A screen header does one job</i>.</td></tr>
+      <tr><td>Avatars all the same colour</td><td><code>MemberAvatar</code>: pale aloe circle with one letter</td><td>Two housemates whose names start with the same letter look identical in Bills and Chores.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>The standard</h2>
+  <p class="prose">One set of tokens, written once in <code>ui/theme</code>, and no literal values in screens. The brand colour stays. The ground, type scale and spacing rules change.</p>
+
+  <h3>Colour</h3>
+  <div class="swatches">
+    <div class="sw"><i style="background:#f7fbfa"></i><div><b>Ground</b><span class="mono">#F7FBFA</span> · replaces Sand</div></div>
+    <div class="sw"><i style="background:#ffffff"></i><div><b>Surface</b><span class="mono">#FFFFFF</span> · cards, sheets</div></div>
+    <div class="sw"><i style="background:#f1f4f3"></i><div><b>Surface 2</b><span class="mono">#F1F4F3</span> · grouped rows</div></div>
+    <div class="sw"><i style="background:#dce3e1"></i><div><b>Line</b><span class="mono">#DCE3E1</span> · dividers, borders</div></div>
+    <div class="sw"><i style="background:#14564b"></i><div><b>Aloe</b><span class="mono">#14564B</span> · brand, primary</div></div>
+    <div class="sw"><i style="background:#daf6ef"></i><div><b>Aloe soft</b><span class="mono">#DAF6EF</span> · selected, paid</div></div>
+    <div class="sw"><i style="background:#e8b23a"></i><div><b>Amber</b><span class="mono">#E8B23A</span> · due soon (text <span class="mono">#8A6410</span>)</div></div>
+    <div class="sw"><i style="background:#c35047"></i><div><b>Clay</b><span class="mono">#C35047</span> · errors, overdue</div></div>
+  </div>
+  <p class="note">Contrast: lowest text pair is 4.56:1 in light and 4.61:1 in dark (WCAG 2.2 AA asks 4.5:1). Dark values come from the same generator: ground <span class="mono">#0C110F</span>, primary <span class="mono">#579487</span>.</p>
+
+  <h3>Type</h3>
+  <p class="prose">Seven styles instead of thirteen. Body text moves up to 16 sp, the Android default, because rent and bill amounts are read on small phones. Bundle <b>Public Sans</b> (SIL Open Font License) in <code>res/font</code>, so the app stops using whatever <code>SansSerif</code> each phone ships.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Role</th><th>Material 3 token</th><th>Size / line</th><th>Weight</th><th>Use it for</th></tr></thead>
+    <tbody>
+      <tr><td>Figure</td><td><code>displaySmall</code></td><td class="num">32 / 40 sp</td><td>600</td><td>The one big number on a screen: your balance. Once per screen.</td></tr>
+      <tr><td>Screen title</td><td><code>headlineSmall</code></td><td class="num">24 / 32 sp</td><td>600</td><td>Dashboard, Bills, Chores</td></tr>
+      <tr><td>Card title</td><td><code>titleMedium</code></td><td class="num">18 / 24 sp</td><td>600</td><td>"Your balance", "Next chore"</td></tr>
+      <tr><td>Body</td><td><code>bodyLarge</code></td><td class="num">16 / 24 sp</td><td>400</td><td>Running text, list rows</td></tr>
+      <tr><td>Body small</td><td><code>bodyMedium</code></td><td class="num">14 / 20 sp</td><td>400</td><td>Second line of a row, helper text</td></tr>
+      <tr><td>Label</td><td><code>labelLarge</code></td><td class="num">14 / 20 sp</td><td>500</td><td>Buttons, chips, tabs</td></tr>
+      <tr><td>Caption</td><td><code>bodySmall</code></td><td class="num">12 / 16 sp</td><td>400</td><td>Dates, "Added by". Nothing smaller than 12 sp.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">All sizes in <code>sp</code>, so they follow the phone's font size setting. Amounts use tabular figures (<code>fontFeatureSettings = "tnum"</code>) so columns of rands line up. Labels use sentence case and normal tracking.</p>
+
+  <h3>Spacing and margins</h3>
+  <div class="scale">
+    <div class="bar"><i style="width:4px"></i><span><code>xs 4</code> icon to its label, inside chips</span></div>
+    <div class="bar"><i style="width:8px"></i><span><code>sm 8</code> between rows inside a card, between chips</span></div>
+    <div class="bar"><i style="width:12px"></i><span><code>md 12</code> between cards in a list</span></div>
+    <div class="bar"><i style="width:16px"></i><span><code>lg 16</code> screen gutter on phones, card padding, between form fields</span></div>
+    <div class="bar"><i style="width:24px"></i><span><code>xl 24</code> between sections, screen gutter on tablets (600 dp and wider)</span></div>
+    <div class="bar"><i style="width:32px"></i><span><code>xxl 32</code> top of an empty state, above the primary form button</span></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Rule</th><th>Value</th><th>Replaces</th></tr></thead>
+    <tbody>
+      <tr><td>Screen gutter, every screen including forms</td><td class="num">16 dp phone, 24 dp tablet</td><td>16 on lists, 24 on forms, literal 16 in Settings</td></tr>
+      <tr><td>Header padding</td><td class="num">16 dp sides, 16 top, 8 bottom</td><td>20 dp in <code>ScreenHeader</code></td></tr>
+      <tr><td>Card padding</td><td class="num">16 dp</td><td>Mixed 12, 16, literal 16</td></tr>
+      <tr><td>Gap between cards</td><td class="num">12 dp</td><td>Mixed <code>sm</code>, <code>md</code></td></tr>
+      <tr><td>Gap between sections</td><td class="num">24 dp</td><td>Mixed</td></tr>
+      <tr><td>Pill padding</td><td class="num">8 dp × 4 dp</td><td>10 × 2 dp</td></tr>
+      <tr><td>Minimum touch target</td><td class="num">48 × 48 dp</td><td>40 dp <code>SecondaryButton</code></td></tr>
+      <tr><td>Avatar sizes</td><td class="num">24 dp in rows, 40 dp in headers</td><td>28 and 32 dp</td></tr>
+      <tr><td>Corner radius</td><td class="num">6 chips · 10 inputs · 14 cards · 18 sheets · full for buttons</td><td>Same values, now declared</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>Before and after</h2>
+  <p class="prose">Mockups at phone size. Names and amounts are example data from the app's own sample set, not real households.</p>
+  <div class="mock-row">
+
+    <figure class="mock">
+      <div class="phone old" aria-label="Current dashboard">
+        <div class="banner"><b>Dashboard</b><small>1 household</small></div>
+        <div class="body">
+          <div class="o-card"><span class="o-lab">Your balance</span><b style="font-size:15px">You're all settled up</b><span class="o-btn">Settle up</span></div>
+          <div class="o-card"><span class="o-lab">Your next chore</span><b style="font-size:15px">Sweeping</b><span class="o-btn">View chores</span></div>
+          <div class="o-card"><span class="o-lab">Household</span><div class="p-row"><span class="av">T</span><span class="av">S</span><span>Thandi, Sipho</span></div></div>
+        </div>
+        <div class="nav"><span class="on">Dashboard</span><span>Bills</span><span>Chores</span><span>More</span></div>
+      </div>
+      <figcaption><b>Now.</b> Cream ground, a solid banner that pushes content down, uppercase labels, three cards that look equal, and two small outlined buttons.</figcaption>
+    </figure>
+
+    <figure class="mock">
+      <div class="phone" aria-label="Proposed home">
+        <div class="body">
+          <div class="p-row"><div class="grow"><div class="p-sub">12 Kloof Street</div><div class="p-title">Home</div></div><span class="av a" style="width:32px;height:32px">N</span></div>
+          <div class="p-card">
+            <div class="p-sub">You owe</div>
+            <div class="p-big">R 1 245,00</div>
+            <div class="p-row"><span class="av b">S</span><span class="grow">Sipho · Electricity, due 30 Nov</span><span class="p-pill">3 days</span></div>
+            <div class="p-btn">Pay Sipho</div>
+          </div>
+          <div class="p-h">This week</div>
+          <div class="p-list">
+            <div class="p-row"><span class="av a">N</span><span class="grow">Your turn: Bins</span><span class="p-pill">Thu</span></div>
+            <div class="p-row"><span class="av c">T</span><span class="grow">Thandi added Wi-Fi</span><span class="p-amt">R 899</span></div>
+            <div class="p-row"><span class="av b">S</span><span class="grow">Sipho fixed the tap</span><span class="p-pill ok">Done</span></div>
+          </div>
+        </div>
+        <div class="nav"><span class="on">Home</span><span>Money</span><span>Chores</span><span>House</span></div>
+      </div>
+      <figcaption><b>Proposed.</b> The answer first: what you owe, to whom, by when, and one button. Recent activity replaces two static cards. Each housemate keeps one colour on every screen.</figcaption>
+    </figure>
+
+    <figure class="mock">
+      <div class="phone" aria-label="Proposed money screen">
+        <div class="body">
+          <div class="p-title">Money</div>
+          <div class="chips"><span class="chip on">Open</span><span class="chip">Paid</span><span class="chip">Repeating</span></div>
+          <div class="p-list">
+            <div class="p-row"><div class="grow"><div style="font-weight:600">Rent</div><div class="p-sub">Monthly · split equally · 4</div></div><span class="p-amt">R 9 600</span></div>
+            <div class="p-row"><div class="grow"><div style="font-weight:600">Electricity</div><div class="p-sub">Due 30 Nov · Sipho</div></div><span class="p-amt">R 1 200</span></div>
+            <div class="p-row"><div class="grow"><div style="font-weight:600">Wi-Fi</div><div class="p-sub">Monthly · Thandi</div></div><span class="p-amt">R 899</span></div>
+          </div>
+          <div class="p-h">Settle up</div>
+          <div class="p-list">
+            <div class="p-row"><span class="av a">N</span><span class="grow">You pay Sipho</span><span class="p-amt">R 1 245</span></div>
+            <div class="p-row"><span class="av c">T</span><span class="grow">Thandi pays you</span><span class="p-amt">R 300</span></div>
+          </div>
+          <div class="p-snack">Marked R 300 as received<b>Undo</b></div>
+        </div>
+        <div class="nav"><span>Home</span><span class="on">Money</span><span>Chores</span><span>House</span></div>
+      </div>
+      <figcaption><b>Proposed.</b> Bills and settle-up on one screen, as rows instead of cards. Actions confirm with a snackbar and offer Undo instead of a dialog.</figcaption>
+    </figure>
+
+    <figure class="mock">
+      <div class="phone" aria-label="Proposed add bill form">
+        <div class="body">
+          <div class="p-row"><span style="font-size:18px;color:var(--muted)">‹</span><div class="p-title grow">New bill</div></div>
+          <div class="field"><small>What is it for?</small>Electricity</div>
+          <div class="field err"><small>Amount (R)</small>1 200,005</div>
+          <div class="err-text">Use at most 2 decimal places, for example 1 200,50.</div>
+          <div class="p-h">Split</div>
+          <div class="chips"><span class="chip on">Equally</span><span class="chip">By %</span><span class="chip">Exact amounts</span></div>
+          <div class="p-h">Repeats</div>
+          <div class="chips"><span class="chip">Never</span><span class="chip">Weekly</span><span class="chip on">Monthly</span></div>
+          <div class="p-btn" style="margin-top:auto;opacity:.45">Save bill</div>
+        </div>
+      </div>
+      <figcaption><b>Proposed.</b> Same 16 dp gutter as the lists. Errors sit under the field and say how to fix it. Save stays disabled until the form is valid.</figcaption>
+    </figure>
+  </div>
+  <p class="note">Navigation change, optional: four tabs named after jobs (Home, Money, Chores, House) instead of Dashboard, Bills, Chores, More. Shopping and Maintenance move to House, Activity moves into Home, and Settings opens from your avatar. This is the largest change; do it last or after the demo.</p>
+</section>
+
+<section>
+  <h2>UX principles to implement</h2>
+  <p class="prose">Each principle comes from an established source, and each card ends with the concrete fix for RentMate.</p>
+  <div class="principles">
+    <article class="pr"><h3>Show what the app is doing</h3><div class="src">Nielsen heuristic 1, visibility of system status</div><p>People should never wonder whether a tap worked.</p><p class="fix"><b>Fix:</b> spinner inside the button while saving, a snackbar on success or failure, an offline banner when there is no network.</p></article>
+    <article class="pr"><h3>Help people recover from errors</h3><div class="src">Nielsen heuristic 9; WCAG 2.2, 3.3.1 and 3.3.3</div><p>An error names the problem in plain words and suggests the fix.</p><p class="fix"><b>Fix:</b> UX-02. One message per failure type, each with a next step and a Retry action.</p></article>
+    <article class="pr"><h3>Prevent errors first</h3><div class="src">Nielsen heuristic 5</div><p>Stop the mistake before it reaches the server.</p><p class="fix"><b>Fix:</b> disable Save until the form is valid (RM-0036), number keypad for amounts, date picker with no past dates for due dates.</p></article>
+    <article class="pr"><h3>Undo beats "Are you sure?"</h3><div class="src">Material 3 snackbar guidance; Raskin, <i>The Humane Interface</i></div><p>Confirmation dialogs get dismissed without reading. Undo lets people act fast and fix mistakes.</p><p class="fix"><b>Fix:</b> mark paid, delete item and complete chore show a snackbar with Undo for 5 seconds.</p></article>
+    <article class="pr"><h3>Be consistent</h3><div class="src">Nielsen heuristic 4; Jakob's law</div><p>The same thing looks and behaves the same everywhere, and like other Android apps.</p><p class="fix"><b>Fix:</b> one header, one gutter, two button styles, one list row, one empty state. UX-01.</p></article>
+    <article class="pr"><h3>Recognise, don't recall</h3><div class="src">Nielsen heuristic 6</div><p>Show the information people need instead of making them remember it.</p><p class="fix"><b>Fix:</b> a colour and initial per housemate on every screen; show whose turn it is and the amount on the row itself.</p></article>
+    <article class="pr"><h3>Answer first, detail after</h3><div class="src">Inverted pyramid; Material 3 layout guidance</div><p>The top of a screen answers the question the person opened it for.</p><p class="fix"><b>Fix:</b> Home leads with "You owe R 1 245 to Sipho by 30 Nov" and one action.</p></article>
+    <article class="pr"><h3>One main action per screen</h3><div class="src">Hick's law; ai-design-check <i>One primary action per page</i></div><p>More equal choices take longer to decide between.</p><p class="fix"><b>Fix:</b> one filled button per screen; the rest are outlined or text buttons.</p></article>
+    <article class="pr"><h3>Big, reachable targets</h3><div class="src">Fitts's law; Android accessibility, 48 dp; WCAG 2.2, 2.5.8</div><p>Small or distant targets are slow and error-prone, especially one-handed.</p><p class="fix"><b>Fix:</b> every tappable thing at least 48 × 48 dp; main actions at the bottom of the screen where the thumb reaches.</p></article>
+    <article class="pr"><h3>Readable by everyone</h3><div class="src">WCAG 2.2, 1.4.3 contrast and 1.4.4 resize text</div><p>4.5:1 contrast for text, and layouts that survive a 200% font size.</p><p class="fix"><b>Fix:</b> new palette passes 4.5:1; no fixed heights on text containers; test at the largest font size in Android settings.</p></article>
+    <article class="pr"><h3>Empty states that teach</h3><div class="src">Material 3 empty state guidance</div><p>An empty list explains what goes there and offers the first step.</p><p class="fix"><b>Fix:</b> "No bills yet. Add rent or electricity to start splitting." with an Add bill button.</p></article>
+    <article class="pr"><h3>Speak the user's language</h3><div class="src">Nielsen heuristic 2; ai-design-check <i>Sentence case</i></div><p>Use the words housemates use, in sentence case, in their language.</p><p class="fix"><b>Fix:</b> "Pay Sipho", not "Settle up"; amounts as <code>R 1 245,00</code> through <code>NumberFormat</code> for <code>en-ZA</code>; no forced uppercase.</p></article>
+    <article class="pr"><h3>Show less at first</h3><div class="src">Progressive disclosure, Nielsen Norman Group</div><p>Keep advanced options out of the way until someone needs them.</p><p class="fix"><b>Fix:</b> Add Bill defaults to Equally; percentage and exact fields appear only when chosen.</p></article>
+    <article class="pr"><h3>Calm motion</h3><div class="src">Material 3 motion; WCAG 2.2, 2.3.3</div><p>Motion explains a change and finishes fast.</p><p class="fix"><b>Fix:</b> transitions under 300 ms, no looping animations, and respect the system "Remove animations" setting.</p></article>
+  </div>
+</section>
+
+<section>
+  <h2>Fix list</h2>
+  <p class="prose"><span class="tag p0">P0</span> before the demo, small and global. <span class="tag p1">P1</span> this week. <span class="tag p2">P2</span> after submission.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Priority</th><th>Fix</th><th>Files</th><th class="num">Effort</th><th>Owner</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag p0">P0</span></td><td>Cool ground and surface colours, dark theme from the same tokens</td><td><code>Color.kt</code>, <code>Theme.kt</code></td><td class="num">30 min</td><td>Ali</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>Seven-style type scale, sentence-case <code>SectionLabel</code></td><td><code>Type.kt</code>, <code>RentMateComponents.kt</code></td><td class="num">30 min</td><td>Ali</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td><code>SecondaryButton</code> to 48 dp; pill padding to 8 × 4</td><td><code>RentMateComponents.kt</code></td><td class="num">10 min</td><td>Ali</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>One 16 dp gutter on every screen; replace literal paddings with tokens</td><td>All <code>*Screen.kt</code>, <code>ScreenHeader.kt</code></td><td class="num">45 min</td><td>Ali</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>Shared snackbar host; failed actions and silent Settings failures show a message; failed toggles flip back</td><td><code>RentMateApp.kt</code>, <code>SettingsViewModel.kt</code>, view models</td><td class="num">1 h</td><td>Ali, Michael</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>Amount limit from one place, stated in the split error (done, RM-0053)</td><td><code>BillSplit.kt</code>, <code>strings.xml</code></td><td class="num">Done</td><td>Seth</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Replace 8 raw buttons with <code>PrimaryButton</code> and <code>SecondaryButton</code></td><td>Maintenance, Login, Lock, Settings, Household Setup</td><td class="num">45 min</td><td>Screen owners</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>One header on every top-level screen; forms get a back arrow header</td><td><code>ScreenHeader.kt</code>, Settings, Maintenance, Add screens</td><td class="num">1 h</td><td>Ali</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Per-housemate avatar colour from the user id</td><td><code>MemberAvatar</code></td><td class="num">20 min</td><td>Ali</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Shared state views on Activity, Settings and the forms</td><td><code>StateViews.kt</code> callers</td><td class="num">1 h</td><td>Ali</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Undo snackbar for mark paid, delete item, complete chore</td><td>Bills, Shopping, Chores view models</td><td class="num">1.5 h</td><td>Screen owners</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Home leads with "You owe" and one action; recent activity below</td><td><code>DashboardScreen.kt</code></td><td class="num">2 h</td><td>Ali</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Bundle Public Sans; tabular figures on amounts; <code>en-ZA</code> number format</td><td><code>res/font</code>, <code>Type.kt</code>, <code>formatRand</code></td><td class="num">45 min</td><td>Ali</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>Tabs by job: Home, Money, Chores, House</td><td><code>Screen.kt</code>, <code>RentMateApp.kt</code></td><td class="num">3 h</td><td>Team</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>Tablet layout: 24 dp gutter and two columns at 600 dp and wider</td><td>Screens with lists</td><td class="num">3 h</td><td>Team</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>Test at 200% font size and with TalkBack on every screen</td><td>All</td><td class="num">2 h</td><td>Team</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>How we roll it out</h2>
+  <div class="steps">
+    <div class="step"><div><h3>Tokens first</h3><p>Change <code>Color.kt</code>, <code>Type.kt</code> and <code>Dimens.kt</code>. Every screen picks up the new ground, type and radii without touching screen code.</p><span class="time">About 1 hour · one PR</span></div></div>
+    <div class="step"><div><h3>Shared components</h3><p>Fix <code>SectionLabel</code>, <code>SecondaryButton</code>, <code>StatusPill</code>, <code>MemberAvatar</code> and <code>ScreenHeader</code>, and add the snackbar host.</p><span class="time">About 1.5 hours · one PR</span></div></div>
+    <div class="step"><div><h3>Screen sweep, by owner</h3><p>Each owner removes literal values, swaps raw buttons and adds snackbar feedback on their screens, following the tables above.</p><span class="time">30 to 60 minutes per person, in parallel</span></div></div>
+    <div class="step"><div><h3>Keep it from coming back</h3><p>Declare the scales so the checker knows them, then run it in Android CI next to lint.</p>
+<pre>// ai-design-check.json
+{ "spacing": 4, "radius": [6, 10, 14, 18],
+  "type": [12, 14, 16, 18, 24, 32] }
+
+# .github/workflows/android-ci.yml, new step
+- run: npx --yes @enmera/ai-design-check app/src/main</pre>
+<span class="time">20 minutes</span></div></div>
+  </div>
+  <p class="note">Sources: Nielsen Norman Group, <a href="https://www.nngroup.com/articles/ten-usability-heuristics/" target="_blank" rel="noopener">10 usability heuristics</a>. W3C, <a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener">WCAG 2.2</a>. Google, <a href="https://m3.material.io/" target="_blank" rel="noopener">Material 3</a> and <a href="https://developer.android.com/guide/topics/ui/accessibility/apps" target="_blank" rel="noopener">Android accessibility</a>. Enmera, <a href="https://github.com/enmerasoftware/ai-design-check" target="_blank" rel="noopener">ai-design-check rules and benchmark</a>. Jon Yablonski, <a href="https://lawsofux.com/" target="_blank" rel="noopener">Laws of UX</a>.</p>
+</section>
+
+</main>
+</body>
+</html>

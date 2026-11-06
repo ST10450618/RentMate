@@ -10,12 +10,7 @@ import javax.inject.Singleton
 /**
  * Source of the household activity feed (RM-0033).
  *
- * TODO(RM-0032): add a `FirestoreActivityRepository` that wraps
- * `households/{householdId}/events` with `orderBy("createdAt", DESCENDING).limit(limit)`
- * and `addSnapshotListener` converted via `callbackFlow` (remove the listener in `awaitClose`),
- * then change the binding in [ActivityModule]. Map `type` with [ActivityType.fromWireName]
- * and skip documents whose type is unknown, and treat a null `createdAt` (pending server
- * timestamp) as "now". Nothing else in the UI needs to change.
+ * The app uses [FirestoreActivityRepository] (RM-0032).
  */
 interface ActivityRepository {
     /** Emits the newest [limit] events of [householdId], newest first, and again on every change. */
@@ -29,7 +24,7 @@ interface ActivityRepository {
 }
 
 /**
- * Stand-in used until the Firestore implementation (RM-0032) lands. Ignores the household
+ * Sample-data stand-in, kept for tests. Ignores the household
  * and emits one fixed sample list, with timestamps relative to when [observe] is called,
  * so the screen always shows today, yesterday and older groups. Never emits live updates.
  */

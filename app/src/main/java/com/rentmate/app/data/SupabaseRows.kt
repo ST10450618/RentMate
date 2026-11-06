@@ -54,7 +54,9 @@ data class BillRow(
     val split_method: String,
     val issued_by_user_id: String,
     val created_at: String,
-    val updated_at: String
+    val updated_at: String,
+    val repeat: String = "Never",
+    val repeat_stopped: Boolean = false
 )
 
 @Serializable
@@ -81,6 +83,8 @@ data class BillWithSharesRow(
     val issued_by_user_id: String,
     val created_at: String,
     val updated_at: String,
+    val repeat: String = "Never",
+    val repeat_stopped: Boolean = false,
     val bill_shares: List<BillShareWithProfileRow> = emptyList()
 )
 

@@ -13,6 +13,7 @@ import com.rentmate.app.data.attachments.PhotoUnreadableException
 import com.rentmate.app.data.attachments.UploadProgress
 import com.rentmate.app.ui.error.AppError
 import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.ui.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -58,7 +59,8 @@ class PendingPhoto(
 @HiltViewModel
 class PhotoAttachmentsViewModel @Inject constructor(
     private val repository: AttachmentRepository,
-    private val compressor: PhotoCompressor
+    private val compressor: PhotoCompressor,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
 
     private val _photos = MutableStateFlow<List<PendingPhoto>>(emptyList())
@@ -128,7 +130,11 @@ class PhotoAttachmentsViewModel @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Photo upload failed", e)
-                set(id) { it.copy(status = PhotoStatus.Failed(messageFor(e))) }
+                val message = messageFor(e)
+                set(id) { it.copy(status = PhotoStatus.Failed(message)) }
+                // RM-0052: the tile shows the failure too, but it may be scrolled out of view.
+                val canRetry = message == R.string.photo_error_upload
+                feedback.show(message, retry = if (canRetry) ({ retry(id) }) else null)
             }
         }
     }

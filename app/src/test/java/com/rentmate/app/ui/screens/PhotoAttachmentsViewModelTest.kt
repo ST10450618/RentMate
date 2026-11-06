@@ -8,6 +8,7 @@ import com.rentmate.app.data.attachments.AttachmentRepository
 import com.rentmate.app.data.attachments.PhotoCompressor
 import com.rentmate.app.data.attachments.PhotoTooLargeException
 import com.rentmate.app.data.attachments.UploadProgress
+import com.rentmate.app.ui.feedback.FeedbackCenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -68,7 +69,7 @@ class PhotoAttachmentsViewModelTest {
     @Test
     fun `a picked photo is compressed and uploaded`() {
         val repo = FakeAttachments()
-        val vm = PhotoAttachmentsViewModel(repo, FakeCompressor())
+        val vm = PhotoAttachmentsViewModel(repo, FakeCompressor(), FeedbackCenter())
 
         vm.add("content://photo/1", AttachmentKind.MAINTENANCE)
 
@@ -88,7 +89,7 @@ class PhotoAttachmentsViewModelTest {
                 emit(UploadProgress.Done("h1/bill/x.jpg"))
             }
         }
-        val vm = PhotoAttachmentsViewModel(repo, FakeCompressor())
+        val vm = PhotoAttachmentsViewModel(repo, FakeCompressor(), FeedbackCenter())
 
         vm.add("content://photo/1", AttachmentKind.BILL)
         assertEquals(PhotoStatus.Uploading(0.4f), vm.photos.value.single().status)
@@ -102,7 +103,7 @@ class PhotoAttachmentsViewModelTest {
     fun `an offline upload fails with retry, and retry reuses the compressed bytes`() {
         val repo = FakeAttachments().apply { offline = true }
         val compressor = FakeCompressor()
-        val vm = PhotoAttachmentsViewModel(repo, compressor)
+        val vm = PhotoAttachmentsViewModel(repo, compressor, FeedbackCenter())
 
         vm.add("content://photo/1", AttachmentKind.BILL)
         assertEquals(PhotoStatus.Failed(R.string.photo_error_upload), vm.photos.value.single().status)
@@ -118,7 +119,7 @@ class PhotoAttachmentsViewModelTest {
 
     @Test
     fun `a photo that cannot be shrunk says so`() {
-        val vm = PhotoAttachmentsViewModel(FakeAttachments(), FakeCompressor().apply { tooLarge = true })
+        val vm = PhotoAttachmentsViewModel(FakeAttachments(), FakeCompressor().apply { tooLarge = true }, FeedbackCenter())
 
         vm.add("content://photo/1", AttachmentKind.MAINTENANCE)
 
@@ -128,7 +129,7 @@ class PhotoAttachmentsViewModelTest {
     @Test
     fun `removing an uploaded photo deletes it from storage`() {
         val repo = FakeAttachments()
-        val vm = PhotoAttachmentsViewModel(repo, FakeCompressor())
+        val vm = PhotoAttachmentsViewModel(repo, FakeCompressor(), FeedbackCenter())
         vm.add("content://photo/1", AttachmentKind.MAINTENANCE)
 
         vm.remove(vm.photos.value.single().id)
@@ -139,7 +140,7 @@ class PhotoAttachmentsViewModelTest {
 
     @Test
     fun `no more than the maximum photos are accepted`() {
-        val vm = PhotoAttachmentsViewModel(FakeAttachments(), FakeCompressor())
+        val vm = PhotoAttachmentsViewModel(FakeAttachments(), FakeCompressor(), FeedbackCenter())
         repeat(PhotoAttachmentsViewModel.MAX_PHOTOS + 2) { vm.add("content://photo/$it", AttachmentKind.MAINTENANCE) }
 
         assertEquals(PhotoAttachmentsViewModel.MAX_PHOTOS, vm.photos.value.size)

@@ -5,13 +5,18 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** Local copy of a row in the Supabase `bills` table. */
+/**
+ * Local copy of a row in the Supabase `bills` table.
+ *
+ * Money is stored as whole cents ([amount_cents]) so sums never drift the way
+ * Double arithmetic can. Convert to Rand only when mapping to a UI row.
+ */
 @Entity(tableName = "bills", indices = [Index("household_id")])
 data class BillEntity(
     @PrimaryKey val id: String,
     val household_id: String,
     val title: String,
-    val amount: Double,
+    val amount_cents: Long,
     val due_date: String,
     val split_method: String,
     val issued_by_user_id: String,
@@ -20,7 +25,11 @@ data class BillEntity(
     val server_updated_at: String,
     val syncState: SyncState = SyncState.SYNCED,
     /** Local last-modified time, epoch millis. */
-    val updatedAt: Long = 0L
+    val updatedAt: Long = 0L,
+    /** RM-0049 repeat mode as sent by the server ("Never", "Weekly", "Monthly"). */
+    val repeat: String = "Never",
+    /** RM-0049: true once the issuer stopped the bill repeating. */
+    val repeat_stopped: Boolean = false
 )
 
 /**
@@ -44,7 +53,8 @@ data class BillShareEntity(
     val bill_id: String,
     val household_id: String,
     val user_id: String,
-    val amount_owed: Double,
+    /** This housemate's share in whole cents. */
+    val amount_owed_cents: Long,
     val is_paid: Boolean,
     val paid_at: String? = null,
     /** Joined `profiles.display_name` of the debtor, if known. */

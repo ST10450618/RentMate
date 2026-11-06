@@ -1,6 +1,6 @@
 RENTMATE DEVICE TEST CHECKLIST
 ==============================
-Tickets: RM-0047 (James's work), plus Michael's RM-0001 to RM-0004
+Tickets: RM-0047 (everyone's device checks, including Michael's)
 Tester: Ali (tablet)          Date: ____________
 
 SETUP
@@ -78,8 +78,8 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
 [ ] Open a photo link in a browser where you are NOT logged in: the photo opens.
 
 
-6. MICHAEL'S PART 2 FIXES (RM-0001 to RM-0004)
----------------------------------------------
+6. MICHAEL'S FIXES AND APP LOCK (RM-0001 to RM-0004, RM-0013, RM-0014)
+-----------------------------------------------------------------------
 [ ] RM-0001: with airplane mode on, open every screen (Dashboard, Bills,
     Chores, Shopping, Maintenance, Settings). Each shows a friendly error,
     and nothing crashes.
@@ -89,6 +89,24 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
     to Login or loops.
 [ ] RM-0004: no screen ever shows raw error text (e.g. "HttpRequestException",
     "PGRST", stack traces) - only plain messages.
+[ ] RM-0013: in Settings, turn ON the app lock. Swipe the app away and
+    reopen: it asks for fingerprint, face or PIN before showing anything.
+[ ] RM-0013: cancel the prompt: the app stays locked. Unlock with the PIN
+    instead of a fingerprint: it opens.
+[ ] RM-0013: leave the app for more than a minute, come back: it asks
+    again. Back within a few seconds: no prompt. Rotating the screen does
+    not ask twice.
+[ ] RM-0013: on an Android 8-10 phone with only a screen-lock PIN (no
+    fingerprint), the lock still works with the PIN.
+[ ] RM-0014: turn the app lock OFF, reopen: no prompt.
+[ ] RM-0014: on a device with no screen lock at all, the toggle explains
+    that a screen lock is needed instead of crashing.
+[ ] RM-0002: after a backup restore or transfer to another phone, the app
+    opens on Login, not the Dashboard (the saved sign-in is not copied).
+[ ] RM-0016: open Bills, Chores, Shopping and the Dashboard once while
+    online. Turn on airplane mode, swipe the app away and reopen: all four
+    still show the same bills, chores, items and cards, with an offline
+    message instead of an empty screen.
 
 
 7. TRANSLATIONS (RM-0025)
@@ -103,4 +121,3 @@ WHEN DONE
 ---------
 Send the failures to James and Michael. If everything passes:
   ajiya ticket done RM-0047 --test
-  ajiya ticket done RM-0001 --test   (and RM-0002, RM-0003, RM-0004; Michael's call)
