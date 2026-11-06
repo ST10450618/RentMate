@@ -163,7 +163,7 @@
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Member</string>
     <string name="split_error_percent">Percentages must add up to 100. They add up to %1$s.</string>
-    <string name="split_error_exact">Amounts must add up to R%2$s. They add up to R%1$s.</string>
+    <string name="split_error_exact">Amounts must add up to %2$s. They add up to %1$s.</string>
     <string name="split_error_number">Enter a number for every member (or leave it blank for 0).</string>
     <string name="split_error_negative">Split values cannot be negative.</string>
     <string name="split_error_too_large">Amount can\'t be more than R999,999.99.</string>

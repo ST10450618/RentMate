@@ -37,6 +37,7 @@ import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.ValidatedTextField
+import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.Spacing
 import com.rentmate.app.ui.validation.Limits
 import com.rentmate.app.ui.validation.parseAmount

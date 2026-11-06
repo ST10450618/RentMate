@@ -1,6 +1,8 @@
 package com.rentmate.app.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.Font
+import com.rentmate.app.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -19,9 +21,35 @@ import androidx.compose.ui.unit.sp
  *
  * Material slots the app does not use as their own style point at the nearest
  * of the seven, so a stray `labelSmall` can never be smaller than 12 sp.
- * The font is the platform sans-serif; bundling Public Sans was left out on purpose.
+ *
+ * RM-0056: every style uses Public Sans, bundled in res/font as three static
+ * TTFs (400, 500, 600) from Google Fonts, so the app no longer depends on the
+ * sans-serif each phone ships. Public Sans is under the SIL Open Font License
+ * 1.1; the licence ships in assets/licenses/PublicSans-OFL.txt.
  */
-private val Sans = FontFamily.SansSerif
+val PublicSans = FontFamily(
+    Font(R.font.public_sans_regular, FontWeight.Normal),
+    Font(R.font.public_sans_medium, FontWeight.Medium),
+    Font(R.font.public_sans_semibold, FontWeight.SemiBold)
+)
+
+private val Sans = PublicSans
+
+/**
+ * Tabular figures, so columns of rand amounts line up digit under digit.
+ * Use it on any text that shows an amount: `style = typography.bodyLarge.tabular()`.
+ */
+fun TextStyle.tabular(): TextStyle = copy(fontFeatureSettings = "tnum")
+
+/** Every style in [Typography], for the test that checks they all use Public Sans. */
+internal val allTextStyles: List<TextStyle>
+    get() = with(Typography) {
+        listOf(
+            displayLarge, displayMedium, displaySmall, headlineLarge, headlineMedium, headlineSmall,
+            titleLarge, titleMedium, titleSmall, bodyLarge, bodyMedium, bodySmall,
+            labelLarge, labelMedium, labelSmall
+        )
+    }
 
 private val Figure = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 32.sp, lineHeight = 40.sp, fontFeatureSettings = "tnum")
 private val ScreenTitle = TextStyle(fontFamily = Sans, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, lineHeight = 32.sp)

@@ -50,6 +50,7 @@ import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.components.formatRand
+import com.rentmate.app.ui.theme.tabular
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "BillsScreen"
@@ -171,7 +172,7 @@ private fun BillRow(
     RentMateCard {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(bill.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            Text(formatRand(bill.amount), style = MaterialTheme.typography.titleMedium)
+            Text(formatRand(bill.amount), style = MaterialTheme.typography.titleMedium.tabular())
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -209,7 +210,7 @@ private fun BillRow(
                 MemberAvatar(name, size = 28.dp, userId = share.user_id)
                 Text(
                     stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.tabular(),
                     modifier = Modifier.weight(1f).padding(start = Spacing.sm)
                 )
                 if (isPaid(share.id, share.is_paid)) {

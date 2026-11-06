@@ -35,8 +35,8 @@ import com.rentmate.app.ui.theme.Aloe
 import com.rentmate.app.ui.theme.Ink
 import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.theme.Spacing
-import java.text.NumberFormat
-import java.util.Locale
+import com.rentmate.app.ui.format.RandFormat
+import java.math.BigDecimal
 
 /*
  * Shared building blocks for every RentMate screen (RM-0034).
@@ -252,10 +252,12 @@ fun BrandMark(modifier: Modifier = Modifier, size: Dp = Sizes.brandMark) {
     }
 }
 
-private val zarFormat: NumberFormat = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
-
 /**
- * Formats an amount as South African rand, e.g. `R1 250,00`, so money looks the
+ * Formats an amount as South African rand, e.g. `R 1 250,00`, so money looks the
  * same on every screen instead of each one using its own `"R%.2f"` template.
+ * RM-0056: delegates to [RandFormat], the one shared en-ZA formatter.
  */
-fun formatRand(amount: Double): String = zarFormat.format(amount)
+fun formatRand(amount: Double): String = RandFormat.format(amount)
+
+/** [formatRand] for exact amounts, such as the split totals on Add Bill. */
+fun formatRand(amount: BigDecimal): String = RandFormat.format(amount)

@@ -160,7 +160,7 @@
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Ilungu</string>
     <string name="split_error_percent">Iipesenti kufuneka zidibane zibe yi-100. Ngoku zidibana zibe ngu-%1$s.</string>
-    <string name="split_error_exact">Izixa kufuneka zidibane zibe yi-R%2$s. Ngoku zidibana zibe yi-R%1$s.</string>
+    <string name="split_error_exact">Izixa kufuneka zidibane zibe yi-%2$s. Ngoku zidibana zibe yi-%1$s.</string>
     <string name="split_error_number">Faka inani lelungu ngalinye (okanye ushiye kungenanto ukuze kube ngu-0).</string>
     <string name="split_error_negative">Amaxabiso okwahlula akanakuba ngaphantsi ko-0.</string>
     <string name="split_error_too_large">Isixa asinakudlula i-R999,999.99.</string>

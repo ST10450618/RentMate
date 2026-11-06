@@ -158,7 +158,7 @@
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Lid</string>
     <string name="split_error_percent">Die persentasies moet saam 100 wees. Hulle is saam %1$s.</string>
-    <string name="split_error_exact">Die bedrae moet saam R%2$s wees. Hulle is saam R%1$s.</string>
+    <string name="split_error_exact">Die bedrae moet saam %2$s wees. Hulle is saam %1$s.</string>
     <string name="split_error_number">Voer \'n getal vir elke lid in (of laat dit leeg vir 0).</string>
     <string name="split_error_negative">Verdelingswaardes kan nie negatief wees nie.</string>
     <string name="split_error_too_large">Die bedrag kan nie meer as R999,999.99 wees nie.</string>
