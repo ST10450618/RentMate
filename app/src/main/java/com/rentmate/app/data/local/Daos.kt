@@ -16,7 +16,12 @@ data class BillWithShares(
     val shares: List<BillShareEntity>
 )
 
-/** Access to cached bills and their shares. Reads hide PENDING_DELETE rows. */
+/**
+ * Access to cached bills and their shares. Reads hide PENDING_DELETE rows.
+ *
+ * Based on: Android Developers, Accessing data using Room DAOs,
+ * https://developer.android.com/training/data-storage/room/accessing-data (accessed 2026-11-06)
+ */
 @Dao
 abstract class BillDao {
 

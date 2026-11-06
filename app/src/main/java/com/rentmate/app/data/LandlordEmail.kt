@@ -6,6 +6,7 @@ data class LandlordContact(
     val landlordName: String? = null,
     val landlordEmail: String? = null
 ) {
+    /** True when there is an address to send the email to. */
     val hasEmail: Boolean get() = !landlordEmail.isNullOrBlank()
 }
 
@@ -28,6 +29,7 @@ data class LandlordEmailText(
     val urgencyLabel: (Urgency) -> String
 )
 
+/** A finished email, ready to hand to an ACTION_SENDTO intent. */
 data class LandlordEmail(val to: String, val subject: String, val body: String)
 
 /**
@@ -78,9 +80,11 @@ fun buildLandlordEmail(
     )
 }
 
+/** Needs one @, a dot in the domain, a top-level domain of two or more characters and no whitespace. */
 private val EMAIL = Regex("""^[^\s@]+@[^\s@]+\.[^\s@]{2,}$""")
 
 /** Loose check before saving the landlord's address: something@domain.tld, no spaces. */
 fun isValidEmail(email: String): Boolean = EMAIL.matches(email.trim())
 
+/** Fills the single `%1$s` placeholder of a translated template. */
 private fun String.fill(value: String) = replace("%1\$s", value)

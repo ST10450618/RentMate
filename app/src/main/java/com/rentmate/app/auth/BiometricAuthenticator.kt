@@ -15,6 +15,9 @@ private const val TAG = "BiometricAuth"
 /**
  * Thin wrapper over androidx.biometric: capability check, enrolment intent and
  * showing the system prompt. Decision logic lives in [BiometricLockPolicy].
+ *
+ * Based on: Android Developers, Show a biometric authentication dialog,
+ * https://developer.android.com/identity/sign-in/biometric-auth (accessed 2026-11-06)
  */
 object BiometricAuthenticator {
 

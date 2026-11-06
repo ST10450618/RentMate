@@ -34,6 +34,9 @@ interface DeviceTokenStore {
  * None of these calls throw. Sign-in and sign-out must work offline and in a
  * build without google-services.json, so a failure is only logged. The next
  * sign-in or app start tries again.
+ *
+ * Based on: Firebase docs, Get started with Firebase Cloud Messaging in Android apps,
+ * https://firebase.google.com/docs/cloud-messaging/android/get-started (accessed 2026-11-06)
  */
 class DeviceTokenRegistrar(
     private val source: PushTokenSource,
@@ -42,6 +45,7 @@ class DeviceTokenRegistrar(
 ) {
     /** Saves the current token. Returns true when it was saved. */
     suspend fun syncCurrent(): Boolean {
+        Log.d(TAG, "syncCurrent: reading FCM token")
         val token = safely("read token") { source.currentToken() } ?: return false
         return register(token)
     }
@@ -51,6 +55,7 @@ class DeviceTokenRegistrar(
      * uses this because Android can stop the service before the save finishes.
      */
     fun registerInBackground(token: String) {
+        Log.d(TAG, "registerInBackground")
         scope.launch { register(token) }
     }
 
@@ -66,14 +71,16 @@ class DeviceTokenRegistrar(
     suspend fun unregisterCurrent() {
         val token = safely("read token") { source.currentToken() } ?: return
         safely("unregister token") { store.unregister(token) }
+        Log.d(TAG, "unregisterCurrent: done")
     }
 
+    /** Runs [block], logs any failure except cancellation, and returns null on failure. */
     private suspend fun <T> safely(action: String, block: suspend () -> T): T? = try {
         block()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Log.w(TAG, "could not $action: ${e.message}")
+        Log.w(TAG, "could not $action", e)
         null
     }
 }

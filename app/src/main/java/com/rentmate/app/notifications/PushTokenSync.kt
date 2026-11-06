@@ -37,6 +37,7 @@ class PushTokenSync @Inject constructor(
     fun start() {
         if (started) return
         started = true
+        Log.d(TAG, "start: following the Supabase session")
         scope.launch {
             try {
                 supabase.auth.sessionStatus
@@ -44,7 +45,10 @@ class PushTokenSync @Inject constructor(
                     // fetched, so "signed in" stands in for the id until then.
                     .map { (it as? SessionStatus.Authenticated)?.let { auth -> auth.session.user?.id ?: SIGNED_IN } }
                     .distinctUntilChanged()
-                    .collect { userId -> if (userId != null) registrar.syncCurrent() }
+                    .collect { userId ->
+                        Log.d(TAG, "session changed: signedIn=${userId != null}")
+                        if (userId != null) registrar.syncCurrent()
+                    }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

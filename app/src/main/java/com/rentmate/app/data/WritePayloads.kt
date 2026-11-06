@@ -18,6 +18,7 @@ val OutboxJson: Json = Json { encodeDefaults = true; ignoreUnknownKeys = true }
  */
 @Serializable
 data class ShoppingItemInsert(
+    /** Client-generated UUID of the new item. */
     val id: String,
     val household_id: String,
     val name: String,
