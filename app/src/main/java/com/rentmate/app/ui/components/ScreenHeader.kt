@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,7 +22,9 @@ import com.rentmate.app.R
 import com.rentmate.app.ui.theme.Spacing
 
 /**
- * The one screen header: title and optional subtitle on the page ground.
+ * The one screen header: an optional eyebrow line, the title and an optional
+ * subtitle on the page ground, with an optional avatar or action at the end.
+ * Use it at the top of every screen.
  *
  * RM-0056: the title sits on the ground in ink, not on a solid green banner.
  * The banner pushed content down and made every screen open with the same
@@ -30,11 +33,23 @@ import com.rentmate.app.ui.theme.Spacing
  * 24 dp on a tablet), 16 dp at the top and 8 dp at the bottom.
  * The title is a heading for TalkBack, so users can jump between screens' titles.
  *
+ * @param eyebrow a small muted line above the title, for example the household
+ *   name above "Home". Leave it null on most screens.
  * @param onBack when set, a back arrow sits before the title. Forms (Add Bill,
  *   Add Chore, Add Item) pass their close action so they share the list header.
+ * @param trailing content at the end of the row. When null, the header shows
+ *   [LocalHeaderAction] instead: the app scaffold sets it to the avatar that
+ *   opens Settings on the four tab screens (RM-0056).
  */
 @Composable
-fun ScreenHeader(title: String, subtitle: String? = null, onBack: (() -> Unit)? = null) {
+fun ScreenHeader(
+    title: String,
+    subtitle: String? = null,
+    eyebrow: String? = null,
+    onBack: (() -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null
+) {
+    val action = trailing ?: LocalHeaderAction.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -57,7 +72,14 @@ fun ScreenHeader(title: String, subtitle: String? = null, onBack: (() -> Unit)? 
                 )
             }
         }
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
+            if (eyebrow != null) {
+                Text(
+                    eyebrow,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Text(
                 title,
                 style = MaterialTheme.typography.headlineSmall,
@@ -72,5 +94,13 @@ fun ScreenHeader(title: String, subtitle: String? = null, onBack: (() -> Unit)? 
                 )
             }
         }
+        if (action != null) action()
     }
 }
+
+/**
+ * What the end of a [ScreenHeader] shows when the screen passes nothing. The
+ * app scaffold provides the Settings avatar on tab screens and null elsewhere,
+ * so screens do not need to know about Settings.
+ */
+val LocalHeaderAction = staticCompositionLocalOf<(@Composable () -> Unit)?> { null }

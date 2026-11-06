@@ -9,7 +9,17 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import com.rentmate.app.ui.theme.Sizes
+import com.rentmate.app.ui.theme.Spacing
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -60,28 +70,85 @@ fun ValidatedTextField(
     var touched by remember { mutableStateOf(false) }
     val visibleError = if (touched || showErrors) error else null
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-            touched = true
-            onValueChange(it.take(maxLength))
-        },
-        label = { Text(label) },
+    BoxedField(
+        message = visibleError?.let { stringResource(it.messageRes) } ?: supportingText,
         isError = visibleError != null,
-        supportingText = when {
-            visibleError != null -> { { Text(stringResource(visibleError.messageRes)) } }
-            supportingText != null -> { { Text(supportingText) } }
-            else -> null
-        },
-        singleLine = singleLine,
-        minLines = minLines,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType,
-            capitalization = capitalization,
-            imeAction = imeAction
-        ),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+    ) { fieldModifier, colors ->
+        TextField(
+            value = value,
+            onValueChange = {
+                touched = true
+                onValueChange(it.take(maxLength))
+            },
+            label = { Text(label) },
+            isError = visibleError != null,
+            singleLine = singleLine,
+            minLines = minLines,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                capitalization = capitalization,
+                imeAction = imeAction
+            ),
+            shape = MaterialTheme.shapes.small,
+            colors = colors,
+            modifier = fieldModifier
+        )
+    }
+}
+
+/**
+ * RM-0056: the field look from the mockups. The label sits inside a rounded
+ * box (radius 10) with a 1 dp Line border on the surface colour. The border
+ * turns aloe while the field has focus and clay on an error. The message sits
+ * under the box, in clay for an error, so it can say how to fix the value.
+ *
+ * Every text input in the app goes through here, so new fields get the same
+ * look by using [ValidatedTextField] or [DatePickerField].
+ */
+@Composable
+private fun BoxedField(
+    message: String?,
+    isError: Boolean,
+    modifier: Modifier,
+    field: @Composable (Modifier, TextFieldColors) -> Unit
+) {
+    val scheme = MaterialTheme.colorScheme
+    var focused by remember { mutableStateOf(false) }
+    val borderColor = when {
+        isError -> scheme.error
+        focused -> scheme.primary
+        else -> scheme.outline
+    }
+    val colors = TextFieldDefaults.colors(
+        focusedContainerColor = scheme.surface,
+        unfocusedContainerColor = scheme.surface,
+        disabledContainerColor = scheme.surface,
+        errorContainerColor = scheme.surface,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        errorIndicatorColor = Color.Transparent,
+        focusedLabelColor = scheme.onSurfaceVariant,
+        unfocusedLabelColor = scheme.onSurfaceVariant,
+        errorLabelColor = scheme.onSurfaceVariant
     )
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        field(
+            Modifier
+                .fillMaxWidth()
+                .border(Sizes.border, borderColor, MaterialTheme.shapes.small)
+                .onFocusChanged { focused = it.hasFocus },
+            colors
+        )
+        if (message != null) {
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isError) scheme.error else scheme.onSurfaceVariant
+            )
+        }
+    }
 }
 
 /**
@@ -107,17 +174,24 @@ fun DatePickerField(
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
     val visibleError = if (showErrors) error else null
 
-    OutlinedTextField(
-        value = date?.format(formatter).orEmpty(),
-        onValueChange = {},
-        readOnly = true,
-        label = { Text(label) },
-        trailingIcon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = stringResource(R.string.pick_date)) },
+    BoxedField(
+        message = visibleError?.let { stringResource(it.messageRes) },
         isError = visibleError != null,
-        supportingText = visibleError?.let { e -> { Text(stringResource(e.messageRes)) } },
-        interactionSource = interaction,
-        modifier = modifier.fillMaxWidth()
-    )
+        modifier = modifier
+    ) { fieldModifier, colors ->
+        TextField(
+            value = date?.format(formatter).orEmpty(),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = stringResource(R.string.pick_date)) },
+            isError = visibleError != null,
+            interactionSource = interaction,
+            shape = MaterialTheme.shapes.small,
+            colors = colors,
+            modifier = fieldModifier
+        )
+    }
 
     if (open) {
         val pickerState = rememberDatePickerState(

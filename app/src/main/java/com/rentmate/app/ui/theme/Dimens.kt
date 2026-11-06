@@ -39,6 +39,12 @@ object Sizes {
     /** Minimum touch target (WCAG 2.5.8, Android accessibility). */
     val minTouch = 48.dp
 
+    /** Minimum height of one tab in [com.rentmate.app.ui.components.TextTabBar]. */
+    val tabBar = 56.dp
+
+    /** Height of [com.rentmate.app.ui.components.PrimaryButton], the one main action on a screen. */
+    val primaryButton = 52.dp
+
     /** Height of [com.rentmate.app.ui.components.OnBrandButton], the main action on the aloe gradient. */
     val onBrandButton = 56.dp
     val border = 1.dp

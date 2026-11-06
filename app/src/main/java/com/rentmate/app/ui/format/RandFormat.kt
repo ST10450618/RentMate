@@ -54,4 +54,14 @@ object RandFormat {
 
     /** Formats [amount] as rand, rounding half up to cents. */
     fun format(amount: BigDecimal): String = format.get()!!.format(amount)
+
+    /**
+     * The short form for list rows: whole rand without cents, for example
+     * 1245.0 -> `R 1 245`. An amount with cents keeps them (`R 12,50`), so
+     * nothing is hidden. Use [format] for the one big figure on a screen.
+     */
+    fun formatShort(amount: Double): String {
+        val full = format(amount)
+        return if (full.endsWith(",00")) full.dropLast(3) else full
+    }
 }

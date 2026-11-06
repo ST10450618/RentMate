@@ -50,4 +50,12 @@ class RandFormatTest {
         assertEquals(RandFormat.format(1200.0), formatRand(1200.0))
         assertEquals(RandFormat.format(BigDecimal("1200")), formatRand(BigDecimal("1200")))
     }
+
+    @Test
+    fun shortFormDropsZeroCentsOnly() {
+        assertEquals(rand("R 1 245"), RandFormat.formatShort(1245.0))
+        assertEquals(rand("R 9 600"), RandFormat.formatShort(9600.0))
+        assertEquals(rand("R 12,50"), RandFormat.formatShort(12.5))
+        assertEquals(rand("R 0"), RandFormat.formatShort(0.0))
+    }
 }
