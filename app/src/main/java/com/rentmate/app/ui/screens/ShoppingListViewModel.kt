@@ -31,10 +31,18 @@ data class ShoppingListUiState(
     val loading: Boolean = false,
     @StringRes val error: Int? = null,
     /** RM-0056: items deleted but still inside their Undo window. They are hidden. */
-    val hiddenItems: Set<String> = emptySet()
+    val hiddenItems: Set<String> = emptySet(),
+    /** RM-0059: items tapped as bought but still inside their Undo window. They show as bought. */
+    val boughtPending: Set<String> = emptySet()
 ) {
     /** The items the screen lists: everything except those waiting to be deleted. */
     val visibleItems: List<ShoppingItemRow> get() = items.filterNot { it.id in hiddenItems }
+
+    /** RM-0059: items still to buy, shown first. */
+    val toBuy: List<ShoppingItemRow> get() = visibleItems.filterNot { it.is_purchased || it.id in boughtPending }
+
+    /** RM-0059: bought items, folded under "Bought (n)". */
+    val bought: List<ShoppingItemRow> get() = visibleItems.filter { it.is_purchased || it.id in boughtPending }
 }
 
 private const val TAG = "ShoppingListViewModel"
@@ -73,23 +81,33 @@ class ShoppingListViewModel @Inject constructor(
     }
 
     /**
-     * Marks an item bought. RM-0017: offline the change is queued and the row
-     * shows as pending; the repository refreshes the cache after an online save.
+     * Marks an item bought. RM-0059: the item moves to Bought at once and a
+     * snackbar offers Undo for 5 s; the server call runs only after that (see
+     * [UndoQueue]). RM-0017: offline the change is queued and the row shows as
+     * pending; the repository refreshes the cache after an online save.
      */
     fun purchase(id: String) {
-        val name = _state.value.items.firstOrNull { it.id == id }?.name
-        viewModelScope.launch {
-            val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
-            runCatching { shoppingRepository.markPurchased(id, userId) }
-                .onSuccess { result ->
-                    when (result) {
-                        is WriteResult.Sent -> if (name != null) activity.shoppingBought(name, id)
+        val name = _state.value.items.firstOrNull { it.id == id }?.name ?: return
+        Log.d(TAG, "purchase $id, waiting for Undo")
+        undoQueue.submit(
+            UserMessage(R.string.house_undo_bought, listOf(name)),
+            UndoableAction(
+                key = "buy:$id",
+                hide = { _state.update { it.copy(boughtPending = it.boughtPending + id) } },
+                restore = { _state.update { it.copy(boughtPending = it.boughtPending - id) } },
+                commit = {
+                    val userId = supabase.auth.currentUserOrNull()?.id
+                        ?: throw IllegalStateException("not signed in")
+                    when (shoppingRepository.markPurchased(id, userId)) {
+                        is WriteResult.Sent -> activity.shoppingBought(name, id)
                         // RM-0018: SyncWorker posts shoppingBought once the queued purchase uploads.
                         is WriteResult.Queued -> Log.d(TAG, "purchase of $id queued offline")
                     }
-                }
-                .onFailure { feedback.failure(it, R.string.feedback_mark_bought_failed, retry = { purchase(id) }) }
-        }
+                    _state.update { it.copy(boughtPending = it.boughtPending - id) }
+                },
+                onCommitFailed = { feedback.failure(it, R.string.feedback_mark_bought_failed, retry = { purchase(id) }) }
+            )
+        )
     }
 
     /**
