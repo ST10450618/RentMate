@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.LandlordContact
+import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.data.MaintenanceCategory
 import com.rentmate.app.data.MaintenanceRepository
 import com.rentmate.app.data.MaintenanceRequest
@@ -64,7 +65,8 @@ data class MaintenanceUiState(
 @HiltViewModel
 class MaintenanceViewModel @Inject constructor(
     private val repository: MaintenanceRepository,
-    private val attachments: AttachmentRepository
+    private val attachments: AttachmentRepository,
+    private val activity: ActivityLogger
 ) : ViewModel() {
 
     /** A saved request whose photos still need linking, retried by [refresh]. */
@@ -183,6 +185,7 @@ class MaintenanceViewModel @Inject constructor(
                     urgency = urgency
                 )
             )
+            if (created != null) activity.maintenanceLogged(created.title, created.id)
             if (created != null && photoPaths.isNotEmpty()) {
                 try {
                     linkPhotos(created.id, photoPaths)
@@ -199,7 +202,12 @@ class MaintenanceViewModel @Inject constructor(
 
     fun advance(id: String) {
         Log.d(TAG, "advance $id")
-        launchSafely(TAG, onError = { fail(it, MaintenanceError.UPDATE) }) { repository.advance(id) }
+        launchSafely(TAG, onError = { fail(it, MaintenanceError.UPDATE) }) {
+            repository.advance(id)
+            repository.requests.value.firstOrNull { it.id == id }?.let {
+                activity.maintenanceStatus(it.title, it.status.name.lowercase().replaceFirstChar { c -> c.uppercase() }, id)
+            }
+        }
     }
 
     fun sendOpenRequests() {

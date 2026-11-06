@@ -28,6 +28,7 @@ import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.R
 import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
 
@@ -63,7 +64,8 @@ private data class CreatedBillRow(val id: String)
 class AddBillViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
-    private val attachments: AttachmentRepository
+    private val attachments: AttachmentRepository,
+    private val activity: ActivityLogger
 ) : ViewModel() {
     /**
      * Set once create_bill succeeded. If linking the photos then fails, Save
@@ -132,6 +134,7 @@ class AddBillViewModel @Inject constructor(
                 supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<CreatedBillRow>()
             }.onSuccess { bill ->
                 createdBillId = bill.id
+                activity.billAdded(title, amount.toDouble(), bill.id)
                 runCatching { attachments.link(AttachmentParent.Bill(bill.id), photoPaths) }
                     .onSuccess { _state.value = AddBillUiState.Saved }
                     .onFailure { linkFailed(it) }

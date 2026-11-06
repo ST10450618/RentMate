@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.ShoppingItemRow
+import com.rentmate.app.data.activity.ActivityLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -35,7 +36,8 @@ private val SHOPPING_ITEM_COLUMNS = Columns.raw(
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val activity: ActivityLogger
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShoppingListUiState())
     val state: StateFlow<ShoppingListUiState> = _state
@@ -58,6 +60,7 @@ class ShoppingListViewModel @Inject constructor(
     }
 
     fun purchase(id: String) {
+        val name = _state.value.items.firstOrNull { it.id == id }?.name
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             runCatching {
@@ -68,8 +71,10 @@ class ShoppingListViewModel @Inject constructor(
                 }) {
                     filter { eq("id", id) }
                 }
-            }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+            }.onSuccess {
+                if (name != null) activity.shoppingBought(name, id)
+                refresh()
+            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 }

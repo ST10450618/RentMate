@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.HouseholdRow
+import com.rentmate.app.data.activity.FirebaseSession
 import com.rentmate.app.network.toRpcParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
@@ -38,7 +39,8 @@ private data class JoinHouseholdParams(val code: String)
 @HiltViewModel
 class HouseholdSetupViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val firebaseSession: FirebaseSession
 ) : ViewModel() {
     private val _state = MutableStateFlow<HouseholdSetupUiState>(HouseholdSetupUiState.Idle)
     val state: StateFlow<HouseholdSetupUiState> = _state
@@ -54,6 +56,8 @@ class HouseholdSetupViewModel @Inject constructor(
                     .decodeAs<HouseholdRow>()
             }.onSuccess {
                 currentHousehold.set(it.id)
+                // RM-0032: the Firebase token must list the new household.
+                firebaseSession.refreshClaims()
                 _state.value = HouseholdSetupUiState.Created(it.invite_code)
             }.onFailure {
                 _state.value = HouseholdSetupUiState.Error(ErrorMapper.toMessage(it))
@@ -71,6 +75,8 @@ class HouseholdSetupViewModel @Inject constructor(
                     .decodeAs<HouseholdRow>()
             }.onSuccess {
                 currentHousehold.set(it.id)
+                // RM-0032: the Firebase token must list the new household.
+                firebaseSession.refreshClaims()
                 _state.value = HouseholdSetupUiState.Joined
             }.onFailure {
                 _state.value = HouseholdSetupUiState.Error(ErrorMapper.toMessage(it, fallback = R.string.error_invalid_invite_code))

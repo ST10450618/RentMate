@@ -3,6 +3,7 @@ package com.rentmate.app.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.activity.ActivityLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -29,10 +30,14 @@ sealed interface AddShoppingItemUiState {
 @Serializable
 private data class ShoppingItemInsert(val household_id: String, val name: String, val added_by_user_id: String)
 
+@Serializable
+private data class InsertedItemRow(val id: String)
+
 @HiltViewModel
 class AddShoppingItemViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val activity: ActivityLogger
 ) : ViewModel() {
     private val _state = MutableStateFlow<AddShoppingItemUiState>(AddShoppingItemUiState.Idle)
     val state: StateFlow<AddShoppingItemUiState> = _state
@@ -46,8 +51,12 @@ class AddShoppingItemViewModel @Inject constructor(
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
             _state.value = AddShoppingItemUiState.Loading
             runCatching {
-                supabase.from("shopping_items").insert(ShoppingItemInsert(householdId, name.trim(), userId))
-            }.onSuccess { _state.value = AddShoppingItemUiState.Saved }
+                supabase.from("shopping_items").insert(ShoppingItemInsert(householdId, name.trim(), userId)) { select() }
+                    .decodeSingle<InsertedItemRow>()
+            }.onSuccess {
+                activity.shoppingAdded(name.trim(), it.id)
+                _state.value = AddShoppingItemUiState.Saved
+            }
                 .onFailure { _state.value = AddShoppingItemUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
