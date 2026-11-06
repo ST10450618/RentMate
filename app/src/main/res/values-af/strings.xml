@@ -265,4 +265,6 @@
     <string name="feedback_delete_item_pending">Hierdie item wag nog om te sinkroniseer. Vee dit uit sodra dit opgelaai is.</string>
     <string name="shopping_delete">Vee %1$s uit</string>
     <string name="chores_done">Klaar</string>
+    <string name="nav_back">Terug</string>
+    <string name="shopping_mark_bought">Merk %1$s as gekoop</string>
 </resources>

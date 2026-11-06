@@ -32,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
@@ -44,6 +43,7 @@ import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.StatusPill
+import com.rentmate.app.ui.theme.Sizes
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "ChoresScreen"
@@ -114,7 +114,7 @@ private fun ChoreRow(
         val housemate = stringResource(R.string.housemate_fallback)
         val current = chore.currentAssignee()?.let { memberNames[it] ?: housemate }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = Spacing.xs)) {
-            MemberAvatar(current ?: "?", size = 28.dp, userId = chore.currentAssignee())
+            MemberAvatar(current ?: "?", size = Sizes.avatarRow, userId = chore.currentAssignee())
             Text(
                 stringResource(R.string.chores_this_cycle, current ?: stringResource(R.string.chores_unassigned)),
                 style = MaterialTheme.typography.bodyMedium,
@@ -148,7 +148,7 @@ private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("${index + 1}", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(end = Spacing.sm))
-                MemberAvatar(entry.display_name, size = 28.dp, userId = entry.user_id)
+                MemberAvatar(entry.display_name, size = Sizes.avatarRow, userId = entry.user_id)
                 Text(entry.display_name, modifier = Modifier.weight(1f).padding(start = Spacing.sm))
                 Text(
                     pluralStringResource(R.plurals.leaderboard_points, entry.month_points.toInt(), entry.month_points, entry.total_points),

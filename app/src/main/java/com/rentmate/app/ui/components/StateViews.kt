@@ -3,6 +3,13 @@ package com.rentmate.app.ui.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +40,35 @@ import com.rentmate.app.ui.theme.Spacing
  */
 
 /**
+ * A column centred in the space it gets that scrolls when its content is taller.
+ *
+ * RM-0056: at the largest font size an empty or error state can be taller than
+ * the screen. A plain centred Column then clips the button at the bottom. This
+ * one keeps the content centred while it fits, and lets the user scroll once
+ * it does not.
+ */
+@Composable
+fun CenteredScrollColumn(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(Spacing.xl),
+    spacing: Dp = Spacing.md,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
+                .padding(contentPadding),
+            verticalArrangement = Arrangement.spacedBy(spacing, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = content
+        )
+    }
+}
+
+/**
  * Centred empty state: illustration, title, explanation and an optional action.
  *
  * @param illustration one of the `illus_empty_*` vector drawables.
@@ -48,11 +84,7 @@ fun EmptyState(
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {
-    Column(
-        modifier = modifier.fillMaxSize().padding(Spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    CenteredScrollColumn(modifier = modifier) {
         Image(painter = painterResource(illustration), contentDescription = null)
         Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         Text(
@@ -75,11 +107,7 @@ fun EmptyState(
  */
 @Composable
 fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxSize().padding(Spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    CenteredScrollColumn(modifier = modifier) {
         Text(
             message,
             style = MaterialTheme.typography.bodyMedium,

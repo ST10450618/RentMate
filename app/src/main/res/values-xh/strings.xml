@@ -267,4 +267,6 @@
     <string name="feedback_delete_item_pending">Le nto isalindele ukuvumelanisa. Yicime xa sele ilayishiwe.</string>
     <string name="shopping_delete">Cima %1$s</string>
     <string name="chores_done">Kugqityiwe</string>
+    <string name="nav_back">Buyela umva</string>
+    <string name="shopping_mark_bought">Phawula u-%1$s njengothengiweyo</string>
 </resources>

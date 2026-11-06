@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,7 +47,7 @@ fun AddShoppingItemScreen(onClose: () -> Unit, viewModel: AddShoppingItemViewMod
         ScreenHeader(title = stringResource(R.string.add_item_title), onBack = onClose)
         FormLoadGate(loadState, onRetry = {}) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(Spacing.screen),
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 ValidatedTextField(

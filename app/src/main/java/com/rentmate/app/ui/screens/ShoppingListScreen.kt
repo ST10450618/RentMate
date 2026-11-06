@@ -34,6 +34,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ShoppingItemRow
@@ -92,7 +94,13 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
 private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit, onDelete: () -> Unit) {
     RentMateCard {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = item.is_purchased, onCheckedChange = { onToggle() })
+            // RM-0056: name the checkbox, so TalkBack says what ticking it does.
+            val toggleLabel = stringResource(R.string.shopping_mark_bought, item.name)
+            Checkbox(
+                checked = item.is_purchased,
+                onCheckedChange = { onToggle() },
+                modifier = Modifier.semantics { contentDescription = toggleLabel }
+            )
             Column(modifier = Modifier.weight(1f).padding(start = Spacing.xs)) {
                 Text(
                     item.name,

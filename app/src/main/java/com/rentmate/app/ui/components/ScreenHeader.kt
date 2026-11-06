@@ -50,7 +50,7 @@ fun ScreenHeader(title: String, subtitle: String? = null, onBack: (() -> Unit)? 
             IconButton(onClick = onBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = stringResource(R.string.nav_back),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }

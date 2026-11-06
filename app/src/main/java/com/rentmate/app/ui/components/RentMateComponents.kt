@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -189,6 +192,25 @@ fun OnBrandButton(
     }
 }
 
+/**
+ * A row of chips or pills that wraps onto the next line when it runs out of
+ * room. RM-0056: at the largest font size three chips no longer fit on a
+ * phone, and a plain Row clips the last one.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ChipRow(
+    modifier: Modifier = Modifier,
+    spacing: Dp = Spacing.sm,
+    content: @Composable () -> Unit
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(spacing),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+    ) { content() }
+}
+
 /** Visual weight of a [StatusPill]. */
 enum class PillTone { Positive, Attention, Danger, Neutral }
 
@@ -221,10 +243,13 @@ fun StatusPill(text: String, tone: PillTone, modifier: Modifier = Modifier) {
 @Composable
 fun MemberAvatar(name: String, modifier: Modifier = Modifier, size: Dp = Sizes.avatarRow, userId: String? = null) {
     val colors = avatarColorsFor(userId ?: name)
+    // The initial is decoration: the name always sits next to the avatar, so
+    // TalkBack skips it instead of reading a lone letter.
     Box(
         modifier = modifier
             .size(size)
-            .background(colors.background, CircleShape),
+            .background(colors.background, CircleShape)
+            .clearAndSetSemantics { },
         contentAlignment = Alignment.Center
     ) {
         Text(

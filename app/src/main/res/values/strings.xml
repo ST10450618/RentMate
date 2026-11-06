@@ -272,4 +272,6 @@
     <string name="feedback_delete_item_pending">This item is still waiting to sync. Delete it once it has uploaded.</string>
     <string name="shopping_delete">Delete %1$s</string>
     <string name="chores_done">Done</string>
+    <string name="nav_back">Back</string>
+    <string name="shopping_mark_bought">Mark %1$s as bought</string>
 </resources>

@@ -33,6 +33,7 @@ import com.rentmate.app.data.SplitResult
 import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.ui.components.DatePickerField
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
+import com.rentmate.app.ui.components.ChipRow
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SectionLabel
@@ -127,7 +128,7 @@ fun AddBillScreen(
 
                 // Split mode (RM-0010)
                 SectionLabel(stringResource(R.string.split_mode_label), modifier = Modifier.padding(top = Spacing.sm))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                ChipRow {
                     FilterChip(selected = mode == SplitMode.Equal, onClick = { mode = SplitMode.Equal },
                         label = { Text(stringResource(R.string.split_equal)) })
                     FilterChip(selected = mode == SplitMode.Percentage, onClick = { mode = SplitMode.Percentage },
@@ -138,7 +139,7 @@ fun AddBillScreen(
 
                 // Repeat (RM-0049)
                 SectionLabel(stringResource(R.string.repeat_label), modifier = Modifier.padding(top = Spacing.sm))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                ChipRow {
                     FilterChip(selected = repeat == RepeatMode.Never, onClick = { repeat = RepeatMode.Never },
                         label = { Text(stringResource(R.string.repeat_never)) })
                     FilterChip(selected = repeat == RepeatMode.Weekly, onClick = { repeat = RepeatMode.Weekly },

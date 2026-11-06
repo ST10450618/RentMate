@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,6 +28,7 @@ import com.rentmate.app.data.AppLanguage
 import com.rentmate.app.data.SettingGroup
 import com.rentmate.app.data.SettingToggle
 import com.rentmate.app.data.UserSettings
+import com.rentmate.app.ui.components.ChipRow
 import com.rentmate.app.ui.components.ErrorState
 import com.rentmate.app.ui.components.InlineError
 import com.rentmate.app.ui.components.LoadingState
@@ -111,7 +114,7 @@ fun SettingsContent(
         }
 
         SettingsSection(title = stringResource(R.string.section_language)) {
-            Row3 {
+            ChipRow(Modifier.fillMaxWidth().padding(horizontal = Spacing.lg, vertical = Spacing.sm)) {
                 AppLanguage.entries.forEach { language ->
                     FilterChip(
                         selected = settings.language == language,
@@ -155,8 +158,13 @@ private fun ToggleRow(
     enabled: Boolean = true,
     note: String? = null
 ) {
+    // RM-0056: the whole row is the switch, so TalkBack reads the title with
+    // the state ("Bills, switch, on") and the touch target is the full row.
     androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -176,14 +184,6 @@ private fun ToggleRow(
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
     }
-}
-
-@Composable
-private fun Row3(content: @Composable () -> Unit) {
-    androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg, vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-    ) { content() }
 }

@@ -9,6 +9,8 @@ import androidx.compose.ui.unit.dp
  * so gutters, card padding and gaps between items stay identical everywhere.
  */
 object Spacing {
+    /** No gap, for layouts whose children set their own spacing. */
+    val none = 0.dp
     val xs = 4.dp
     val sm = 8.dp
     val md = 12.dp

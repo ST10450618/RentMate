@@ -35,7 +35,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.BillWithSharesRow
 import com.rentmate.app.data.attachments.PhotoLink
@@ -51,6 +50,8 @@ import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.StatusPill
 import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.tabular
+import com.rentmate.app.ui.theme.Sizes
+import com.rentmate.app.ui.components.ChipRow
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "BillsScreen"
@@ -179,8 +180,14 @@ private fun BillRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(stringResource(R.string.bills_due, bill.due_date.take(10)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Text(
+                stringResource(R.string.bills_due, bill.due_date.take(10)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            // Wraps the pills under each other at large font sizes instead of clipping them.
+            ChipRow(spacing = Spacing.xs) {
                 if (bill.pending) StatusPill(stringResource(R.string.sync_pending), PillTone.Neutral)
                 if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
             }
@@ -207,7 +214,7 @@ private fun BillRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
-                MemberAvatar(name, size = 28.dp, userId = share.user_id)
+                MemberAvatar(name, size = Sizes.avatarRow, userId = share.user_id)
                 Text(
                     stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
                     style = MaterialTheme.typography.bodyMedium.tabular(),

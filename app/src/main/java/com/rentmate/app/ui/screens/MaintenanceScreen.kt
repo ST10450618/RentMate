@@ -53,6 +53,7 @@ import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.data.attachments.PhotoLink
 import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
+import com.rentmate.app.ui.components.ChipRow
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
@@ -185,7 +186,7 @@ fun MaintenanceScreen(
                             stringResource(R.string.maintenance_category),
                             style = MaterialTheme.typography.labelMedium
                         )
-                        ChipRow {
+                        ChipRow(Modifier.fillMaxWidth()) {
                             MaintenanceCategory.entries.forEach { option ->
                                 FilterChip(
                                     selected = category == option,
@@ -199,7 +200,7 @@ fun MaintenanceScreen(
                             stringResource(R.string.maintenance_urgency),
                             style = MaterialTheme.typography.labelMedium
                         )
-                        ChipRow {
+                        ChipRow(Modifier.fillMaxWidth()) {
                             Urgency.entries.forEach { option ->
                                 FilterChip(
                                     selected = urgency == option,
@@ -321,7 +322,7 @@ private fun RequestCard(
             if (request.description.isNotBlank()) {
                 Text(request.description, style = MaterialTheme.typography.bodyMedium)
             }
-            ChipRow {
+            ChipRow(Modifier.fillMaxWidth()) {
                 AssistChip(onClick = {}, label = { Text(stringResource(request.category.labelRes)) })
                 AssistChip(onClick = {}, label = { Text(stringResource(request.urgency.labelRes)) })
             }
@@ -375,15 +376,6 @@ private fun StatusTimeline(request: MaintenanceRequest) {
             }
         }
     }
-}
-
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-@Composable
-private fun ChipRow(content: @Composable () -> Unit) {
-    androidx.compose.foundation.layout.FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        modifier = Modifier.fillMaxWidth()
-    ) { content() }
 }
 
 /** RM-0009: the email's wording, from string resources so it follows the app language. */

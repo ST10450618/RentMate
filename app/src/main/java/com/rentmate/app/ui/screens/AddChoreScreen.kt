@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
+import com.rentmate.app.ui.components.ChipRow
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SectionLabel
@@ -89,7 +90,7 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
                 )
 
                 SectionLabel(stringResource(R.string.add_chore_recurrence))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                ChipRow {
                     Recurrence.entries.forEach { option ->
                         FilterChip(
                             selected = recurrence == option,
