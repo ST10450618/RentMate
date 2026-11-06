@@ -111,6 +111,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    androidResources {
+        // RM-0026: generates the locale config from the values-* folders and adds
+        // android:localeConfig, so Android 13+ lists English, Afrikaans and
+        // isiXhosa under the app's language in system settings. The language of
+        // the default values/ folder is declared in res/resources.properties.
+        generateLocaleConfig = true
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -152,6 +159,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.biometric)
+    // RM-0026: per-app language (AppCompatDelegate.setApplicationLocales) on every API level.
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 

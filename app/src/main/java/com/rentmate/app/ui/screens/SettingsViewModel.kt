@@ -70,8 +70,11 @@ class SettingsViewModel @Inject constructor(
     fun setLanguage(language: AppLanguage) {
         Log.d(TAG, "setLanguage ${language.tag}")
         launchSafely(TAG) {
+            // RM-0026: save, then switch the UI straight away (this recreates the
+            // activity; the ViewModel and this coroutine survive that), then write
+            // it to the profile so it follows the user to other devices.
             repository.setLanguage(language)
-            applyLanguage(context, language)
+            applyLanguage(language)
             syncString("preferred_language", language.tag)
         }
     }

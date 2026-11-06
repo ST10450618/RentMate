@@ -51,7 +51,8 @@ class ProfileSettingsSync @Inject constructor(
 
             val previousLanguage = repository.settings.first().language
             repository.seed(toggles, language)
-            if (language != previousLanguage) applyLanguage(context, language)
+            // RM-0026: recreates the activity in the profile's language if it changed.
+            if (language != previousLanguage) applyLanguage(language)
 
             Log.d(TAG, "pulled ${toggles.size} toggles and language ${language.tag} from profile")
             true

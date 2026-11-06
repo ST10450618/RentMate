@@ -7,9 +7,6 @@
     <string name="notif_maintenance">Uhlaziyo ngolungiso</string>
 
     <string name="section_language">Ulwimi</string>
-    <string name="lang_english">IsiNgesi</string>
-    <string name="lang_afrikaans">IsiBhulu</string>
-    <string name="lang_xhosa">IsiXhosa</string>
 
     <string name="section_security">Ukhuseleko nomboniso</string>
     <string name="biometric_title">Vula ngebhayometriki</string>
