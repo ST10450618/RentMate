@@ -347,4 +347,11 @@
         <item quantity="one">%d om te koop</item>
         <item quantity="other">%d om te koop</item>
     </plurals>
+    <string name="money_empty_body">Voeg huur of elektrisiteit by om te begin verdeel.</string>
+    <string name="money_empty_action">Voeg rekening by</string>
+    <string name="money_added_by">Bygevoeg deur %1$s</string>
+    <string name="money_pay_then_confirm">Betaal %1$s en vra hulle dan om te bevestig</string>
+    <string name="money_detail_your_share">Jou deel</string>
+    <string name="money_detail_added_split">Bygevoeg deur %1$s · %2$s · %3$s altesaam</string>
+    <string name="money_detail_shares">Dele</string>
 </resources>

@@ -349,4 +349,11 @@
         <item quantity="one">%d yokuthenga</item>
         <item quantity="other">%d zokuthenga</item>
     </plurals>
+    <string name="money_empty_body">Yongeza irente okanye umbane ukuze uqalise ukwahlulahlula.</string>
+    <string name="money_empty_action">Yongeza ityala</string>
+    <string name="money_added_by">Yongezwe ngu-%1$s</string>
+    <string name="money_pay_then_confirm">Hlawula u-%1$s, emva koko umcele ukuba aqinisekise</string>
+    <string name="money_detail_your_share">Isabelo sakho</string>
+    <string name="money_detail_added_split">Yongezwe ngu-%1$s · %2$s · %3$s iyonke</string>
+    <string name="money_detail_shares">Izabelo</string>
 </resources>
