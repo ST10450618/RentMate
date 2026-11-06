@@ -1,0 +1,156 @@
+RENTMATE DEVICE TEST CHECKLIST
+==============================
+Tickets: RM-0047 (everyone's device checks, including Michael's)
+Tester: Ali (tablet)          Date: ____________
+
+SETUP
+-----
+[ ] Build from part-3-staging after PR #6 is merged (or from part-3-james before that).
+[ ] Live database is up to date: migrations 0001-0011 are applied (done 2026-11-06).
+[ ] Two test accounts in the SAME household:
+      Account A: ______________________   Account B: ______________________
+[ ] Second device for the two-device checks: ______________________
+[ ] Tablet Android version: ______   Older phone (Android 12 or lower, if possible): ______
+
+Mark each line: [x] pass   [!] fail (write what happened under it)
+
+
+1. NUMBER KEYPAD AND NO USER IDS (RM-0011)
+------------------------------------------
+[ ] Add Bill: the amount field opens a number keypad with a decimal point.
+[ ] Add Chore: the points field opens a number keypad.
+[ ] Chores, Bills and Shopping: every person is shown by name, never a long ID
+    like 3f2a9c1e-....
+[ ] A housemate with no display name shows as "Housemate", not an ID.
+
+
+2. SETTINGS FOLLOW THE USER (RM-0005)
+-------------------------------------
+[ ] Device 1, account A: open Settings and turn OFF "Chores assigned to me".
+[ ] Device 2: sign in as account A. "Chores assigned to me" is OFF there too.
+[ ] Repeat with "Show points leaderboard": it matches on both devices.
+[ ] Change the language on device 1, then sign in on device 2: same language.
+
+
+3. LANDLORD EMAIL AND STATUS RULES (RM-0009)
+--------------------------------------------
+[ ] Account A: log two maintenance requests.
+[ ] Tap "Send to landlord". The first time, it asks for the landlord's email.
+    Enter one and save.
+[ ] An email app opens with:
+      [ ] subject "Maintenance request - <household name>"
+      [ ] both faults numbered, each with category, urgency, date and description
+[ ] Back in the app, both requests now show "Sent".
+[ ] Tap Send again: it does NOT ask for the email again.
+[ ] Account B (did not log or send): the requests show "Only the housemate who
+    logged or sent this request can update it." and no status button.
+[ ] Account A: "Mark as acknowledged", then "Mark as resolved" both work.
+[ ] Enter an invalid email (e.g. "abc"): an error shows and nothing is saved.
+
+
+4. LANGUAGE PICKER (RM-0026)
+----------------------------
+[ ] Settings > Language shows English, Afrikaans, isiXhosa (each in its own name).
+[ ] Pick Afrikaans: every screen changes at once, including the bottom nav bar.
+[ ] Pick isiXhosa: same.
+[ ] Force-stop the app (Settings > Apps > RentMate > Force stop), reopen:
+    still the language you picked.
+[ ] Switching language does NOT make the fingerprint lock ask a second time.
+[ ] The app looks the same as before: colours, status bar, splash screen.
+[ ] Android 13+ only: phone Settings > Apps > RentMate > Language shows the
+    same language as the app.
+[ ] Repeat the force-stop check on the older phone, if you have one.
+
+
+5. PHOTO ATTACHMENTS (RM-0027, RM-0028, RM-0029)
+-----------------------------------------------
+[ ] New maintenance request > "Choose photo": pick a big photo.
+      [ ] a progress bar moves
+      [ ] it says "Uploaded (... KB)" with a number under 1000
+[ ] "Take photo": take a photo holding the device upright. It stays upright.
+[ ] Turn on airplane mode, start an upload: a failure message and "Retry" show.
+    Turn airplane mode off, tap Retry: it uploads.
+[ ] "Log request" is disabled while a photo is still uploading.
+[ ] The saved request shows a thumbnail. Tapping it opens the photo full size.
+[ ] Add Bill: attach a photo, save. The bill shows the thumbnail.
+[ ] Account B on the other device sees the same thumbnails.
+[ ] "Send to landlord": the email lists a photo link under each fault.
+[ ] Open a photo link in a browser where you are NOT logged in: the photo opens.
+
+
+6. MICHAEL'S FIXES AND APP LOCK (RM-0001 to RM-0004, RM-0013, RM-0014)
+-----------------------------------------------------------------------
+[ ] RM-0001: with airplane mode on, open every screen (Dashboard, Bills,
+    Chores, Shopping, Maintenance, Settings). Each shows a friendly error,
+    and nothing crashes.
+[ ] RM-0002: sign in, swipe the app away (kill it), reopen: lands on the
+    Dashboard without signing in again.
+[ ] RM-0003: on the Dashboard, press Back: the app closes. It never goes back
+    to Login or loops.
+[ ] RM-0004: no screen ever shows raw error text (e.g. "HttpRequestException",
+    "PGRST", stack traces) - only plain messages.
+[ ] RM-0013: in Settings, turn ON the app lock. Swipe the app away and
+    reopen: it asks for fingerprint, face or PIN before showing anything.
+[ ] RM-0013: cancel the prompt: the app stays locked. Unlock with the PIN
+    instead of a fingerprint: it opens.
+[ ] RM-0013: leave the app for more than a minute, come back: it asks
+    again. Back within a few seconds: no prompt. Rotating the screen does
+    not ask twice.
+[ ] RM-0013: on an Android 8-10 phone with only a screen-lock PIN (no
+    fingerprint), the lock still works with the PIN.
+[ ] RM-0014: turn the app lock OFF, reopen: no prompt.
+[ ] RM-0014: on a device with no screen lock at all, the toggle explains
+    that a screen lock is needed instead of crashing.
+[ ] RM-0002: after a backup restore or transfer to another phone, the app
+    opens on Login, not the Dashboard (the saved sign-in is not copied).
+[ ] RM-0016: open Bills, Chores, Shopping and the Dashboard once while
+    online. Turn on airplane mode, swipe the app away and reopen: all four
+    still show the same bills, chores, items and cards, with an offline
+    message instead of an empty screen.
+[ ] RM-0017: with airplane mode on, add a shopping item, mark another one
+    bought, and add a bill. Each shows "Waiting to sync". Swipe the app
+    away and reopen: they are still there with the badge.
+[ ] RM-0018: after the RM-0017 check, turn airplane mode off. Within a
+    minute the "Waiting to sync" badges go away, and a second phone in the
+    same household sees the item, the purchase and the bill (only once).
+[ ] RM-0031: with two housemates who owe each other, turn on airplane
+    mode, add a bill and tap Settle up. The dialog says it is a preview,
+    each row has a "Preview" pill, the amounts include the new bill, and
+    "Confirm received" is greyed out. Turn airplane mode off and keep the
+    dialog open: within about 20 seconds of the sync the label and pills
+    go, the amounts match a second phone, and Confirm received works.
+[ ] RM-0019: turn on airplane mode. Within a few seconds an amber banner
+    at the top says you are offline. Add a shopping item and a bill: it
+    adds "2 changes are waiting". The banner shows once on every screen
+    and never on Login. Turn airplane mode off: it shows "Syncing 2
+    changes", then "All changes synced", and hides after about 3 seconds.
+[ ] RM-0019: queue an offline purchase of an item that a housemate deletes
+    before you reconnect. After sync a grey notice says the change was not
+    saved because the item no longer exists. Tap Dismiss and restart the
+    app: the notice does not come back.
+[ ] RM-0023: with the app in the background, add a bill on phone A. Tap
+    the push on the tablet: Bills opens. Press Back: the Dashboard shows,
+    not Login.
+[ ] RM-0023: swipe the app away, then tap a bill push (cold start): Bills
+    opens after the splash screen.
+[ ] RM-0023: with the app lock ON, tap a bill push after more than a
+    minute away: the lock prompt shows first, then Bills after unlock.
+[ ] RM-0023: tap a repair status push: Maintenance opens. Tap a chore
+    reminder (or a console test message with data key channel=chores):
+    Chores opens.
+[ ] RM-0023: turn Bills notifications OFF in Settings, add a bill on
+    phone A: no push on the tablet. Turn it back ON: the next bill pushes.
+
+
+7. TRANSLATIONS (RM-0025)
+------------------------
+The translations are machine-translated and not reviewed by a native speaker
+(see "Translation accuracy" in the README). Only check that nothing breaks:
+[ ] In Afrikaans and isiXhosa, no text is cut off or overflows its button or card.
+[ ] No screen shows a raw key or a placeholder such as %1$s.
+
+
+WHEN DONE
+---------
+Send the failures to James and Michael. If everything passes:
+  ajiya ticket done RM-0047 --test

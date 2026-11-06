@@ -1,6 +1,5 @@
 ﻿package com.rentmate.app.data
 
-import android.graphics.Bitmap
 import androidx.annotation.StringRes
 import com.rentmate.app.R
 import java.util.UUID
@@ -55,12 +54,26 @@ data class MaintenanceRequest(
     val category: MaintenanceCategory = MaintenanceCategory.OTHER,
     val urgency: Urgency = Urgency.MEDIUM,
     val status: RequestStatus = RequestStatus.OPEN,
-    val photo: Bitmap? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val sentAt: Long? = null,
     val acknowledgedAt: Long? = null,
-    val resolvedAt: Long? = null
+    val resolvedAt: Long? = null,
+    /** Who logged the request; null for requests made on this device before the first sync. */
+    val raisedBy: String? = null,
+    /** Who sent it to the landlord (RM-0009); they record the landlord's response. */
+    val sentBy: String? = null
 ) {
+    /**
+     * RM-0009, mirrors advance_maintenance_status on the server: the person who
+     * logged a request sends it on its own, and the sender (or the person who
+     * logged it) records the landlord's response.
+     */
+    fun canChangeStatus(userId: String?): Boolean = userId != null && when (status) {
+        RequestStatus.OPEN -> userId == raisedBy
+        RequestStatus.SENT, RequestStatus.ACKNOWLEDGED -> userId == sentBy || userId == raisedBy
+        RequestStatus.RESOLVED -> false
+    }
+
     /** The timestamp recorded when the request entered the given status, if it has. */
     fun timestampFor(status: RequestStatus): Long? = when (status) {
         RequestStatus.OPEN -> createdAt

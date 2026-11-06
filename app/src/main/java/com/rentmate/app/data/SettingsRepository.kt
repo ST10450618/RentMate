@@ -22,10 +22,10 @@ data class UserSettings(
 /**
  * Preferences are stored locally with DataStore so they survive restart.
  *
- * US-3 also requires them to sync to the account so they follow the user to a
- * new device; that write goes through Seth's API and is wired up once the
- * endpoint exists. Storing locally first is the offline-first pattern the whole
- * app follows - the UI never waits on the network.
+ * US-3 also requires them to follow the user to a new device: SettingsViewModel
+ * writes each change to the `profiles` row, and [ProfileSettingsSync] reads it
+ * back on sign-in (RM-0005). Storing locally first is the offline-first pattern
+ * the whole app follows - the UI never waits on the network.
  */
 class SettingsRepository(private val context: Context) {
 
@@ -36,11 +36,22 @@ class SettingsRepository(private val context: Context) {
         )
     }
 
+    /** RM-0026: the language tag the user (or their profile) chose, or null if never set. */
+    val storedLanguageTag: Flow<String?> = context.settingsDataStore.data.map { it[LANGUAGE_KEY] }
+
     suspend fun setToggle(toggle: SettingToggle, value: Boolean) {
         context.settingsDataStore.edit { it[toggle.key] = value }
     }
 
     suspend fun setLanguage(language: AppLanguage) {
         context.settingsDataStore.edit { it[LANGUAGE_KEY] = language.tag }
+    }
+
+    /** RM-0005: overwrite local values with the ones read from the account, in one write. */
+    suspend fun seed(toggles: Map<SettingToggle, Boolean>, language: AppLanguage) {
+        context.settingsDataStore.edit { prefs ->
+            toggles.forEach { (toggle, value) -> prefs[toggle.key] = value }
+            prefs[LANGUAGE_KEY] = language.tag
+        }
     }
 }

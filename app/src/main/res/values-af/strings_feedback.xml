@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_retry">Probeer weer</string>
+    <string name="feedback_setting_failed">Kon nie hierdie instelling stoor nie. Probeer weer.</string>
+    <string name="feedback_language_failed">Kon nie die taal stoor nie. Probeer weer.</string>
+    <string name="feedback_sign_out_partial">Op hierdie toestel afgemeld. Ons kon nie die bediener bereik om die sessie oral te beëindig nie.</string>
+    <string name="feedback_save_bill_failed">Kon nie die rekening stoor nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_add_chore_failed">Kon nie die taak byvoeg nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_add_item_failed">Kon nie die item byvoeg nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_mark_bought_failed">Kon nie die item as gekoop merk nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_mark_paid_failed">Kon nie hierdie deel as betaal merk nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_mark_paid_not_allowed">Net die persoon wat hierdie rekening bygevoeg het, kan dit as betaal merk.</string>
+    <string name="feedback_stop_repeat_failed">Kon nie keer dat hierdie rekening herhaal nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_settle_up_failed">Kon nie uitwerk wie wat skuld nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_confirm_settlement_failed">Kon nie die betaling bevestig nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_complete_chore_failed">Kon nie die taak as klaar merk nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_create_household_failed">Kon nie die huishouding skep nie. Gaan jou verbinding na en tik Probeer weer.</string>
+    <string name="feedback_join_household_failed">Kon nie by die huishouding aansluit nie. Gaan jou verbinding na en tik Probeer weer.</string>
+</resources>

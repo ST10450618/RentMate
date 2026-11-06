@@ -1,4 +1,4 @@
-﻿package com.rentmate.app.ui.theme
+package com.rentmate.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,78 +12,78 @@ import androidx.compose.ui.graphics.Color
 private val LightColors = lightColorScheme(
     primary = Aloe,
     onPrimary = Color.White,
-    primaryContainer = AloeLight,
+    primaryContainer = AloeSoft,
     onPrimaryContainer = AloeDark,
     secondary = Amber,
     onSecondary = Ink,
-    secondaryContainer = Color(0xFFFCF2DC),
+    secondaryContainer = AmberSoft,
     onSecondaryContainer = AmberDark,
     tertiary = Amber,
     onTertiary = Ink,
-    tertiaryContainer = Color(0xFFFCF2DC),
+    tertiaryContainer = AmberSoft,
     onTertiaryContainer = AmberDark,
     error = Clay,
     onError = Color.White,
-    background = Sand,
+    background = Ground,
     onBackground = Ink,
     surface = Color.White,
     onSurface = Ink,
-    surfaceVariant = AloeLight,
+    surfaceVariant = Surface2,
     onSurfaceVariant = Muted,
     surfaceContainer = Color.White,
-    surfaceContainerLow = Sand,
+    surfaceContainerLow = Ground,
     surfaceContainerLowest = Color.White,
-    surfaceContainerHigh = Color.White,
-    surfaceContainerHighest = AloeLight,
-    surfaceDim = Sand,
+    surfaceContainerHigh = Surface2,
+    surfaceContainerHighest = Surface2,
+    surfaceDim = Ground,
     surfaceBright = Color.White,
     inverseSurface = Ink,
-    inverseOnSurface = Sand,
-    inversePrimary = AloeLight,
+    inverseOnSurface = Ground,
+    inversePrimary = AloeSoft,
     outline = Line,
     outlineVariant = Line,
     scrim = Ink
 )
 
-private val DarkSurface = Color(0xFF141C18)
-private val DarkSurfaceHigh = Color(0xFF1C2622)
-private val DarkBackground = Color(0xFF0B120F)
-
 private val DarkColors = darkColorScheme(
-    primary = AloeLight,
-    onPrimary = AloeDark,
-    primaryContainer = AloeDark,
-    onPrimaryContainer = AloeLight,
+    primary = DarkPrimary,
+    onPrimary = DarkGround,
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = AloeSoft,
     secondary = Amber,
     onSecondary = Ink,
     secondaryContainer = AmberDark,
-    onSecondaryContainer = Color(0xFFFCF2DC),
+    onSecondaryContainer = AmberSoft,
     tertiary = Amber,
     onTertiary = Ink,
     tertiaryContainer = AmberDark,
-    onTertiaryContainer = Color(0xFFFCF2DC),
-    error = Clay,
-    onError = Color.White,
-    background = DarkBackground,
-    onBackground = Sand,
+    onTertiaryContainer = AmberSoft,
+    error = DarkError,
+    onError = DarkGround,
+    background = DarkGround,
+    onBackground = DarkText,
     surface = DarkSurface,
-    onSurface = Sand,
-    surfaceVariant = DarkSurfaceHigh,
-    onSurfaceVariant = Sand,
-    surfaceContainer = DarkSurfaceHigh,
-    surfaceContainerLow = DarkSurface,
-    surfaceContainerLowest = DarkBackground,
-    surfaceContainerHigh = DarkSurfaceHigh,
-    surfaceContainerHighest = Color(0xFF243027),
-    surfaceDim = DarkBackground,
-    surfaceBright = DarkSurfaceHigh,
-    inverseSurface = Sand,
-    inverseOnSurface = Ink,
-    inversePrimary = AloeDark,
-    outline = Muted,
-    outlineVariant = Muted,
+    onSurface = DarkText,
+    surfaceVariant = DarkSurface2,
+    onSurfaceVariant = DarkMuted,
+    surfaceContainer = DarkSurface,
+    surfaceContainerLow = DarkGround,
+    surfaceContainerLowest = DarkGround,
+    surfaceContainerHigh = DarkSurface2,
+    surfaceContainerHighest = DarkSurface3,
+    surfaceDim = DarkGround,
+    surfaceBright = DarkSurface3,
+    inverseSurface = DarkText,
+    inverseOnSurface = DarkGround,
+    inversePrimary = Aloe,
+    outline = DarkLine,
+    outlineVariant = DarkLine,
     scrim = Color.Black
 )
+
+/** Schemes exposed so the contrast unit test checks what the app really uses. */
+internal val RentMateLightColors get() = LightColors
+internal val RentMateDarkColors get() = DarkColors
 
 @Composable
 fun RentMateTheme(
@@ -93,6 +93,7 @@ fun RentMateTheme(
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = Typography,
+        shapes = RentMateShapes,
         content = content
     )
 }

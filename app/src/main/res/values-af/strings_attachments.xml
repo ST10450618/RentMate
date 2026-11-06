@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RM-0028 / RM-0029: foto-aanhegsels. -->
+<resources>
+    <string name="photo_choose">Kies foto</string>
+    <string name="photo_take">Neem foto</string>
+    <string name="photo_preview_description">Foto om aan te heg</string>
+    <string name="photo_remove">Verwyder foto</string>
+    <string name="photo_status_preparing">Berei foto voor…</string>
+    <string name="photo_status_uploading">Laai op… %1$d%%</string>
+    <string name="photo_status_uploaded">Opgelaai (%1$d KB)</string>
+    <string name="photo_error_upload">Oplaai het misluk. Kontroleer jou verbinding en probeer weer.</string>
+    <string name="photo_error_unreadable">Daardie foto kon nie oopgemaak word nie. Probeer \'n ander een.</string>
+    <string name="photo_error_too_large">Daardie foto kon nie klein genoeg gemaak word om op te laai nie.</string>
+    <string name="photo_wait_for_upload">Wag tot die foto\'s klaar opgelaai is.</string>
+    <string name="photo_error_link">Gestoor, maar die foto\'s kon nie aangeheg word nie. Tik Probeer weer.</string>
+    <string name="photo_thumbnail_description">Foto %1$d van %2$d</string>
+    <string name="photo_full_description">Aangehegte foto, volle grootte</string>
+    <string name="landlord_email_photos">Foto\'s:</string>
+    <string name="photo_section_bill">Foto van die rekening of strokie (opsioneel)</string>
+</resources>

@@ -1,13 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Auto Backup rules for Android 11 and lower (API 31+ uses data_extraction_rules.xml).
+   The Room cache (rentmate.db) holds household money data and is rebuilt from
+   Supabase after sign-in, so it is never copied to Google Drive.
+   com.rentmate.app_preferences.xml holds the saved Supabase session (access and
+   refresh tokens, written by supabase-kt via multiplatform-settings). Restoring it
+   on another phone would sign that phone in without Google, so it is excluded too.
+   datastore/rentmate_household.preferences_pb holds the selected household id
+   (RM-0016). It belongs to this sign-in only, so it is excluded as well.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="database" path="rentmate.db" />
+    <exclude domain="database" path="rentmate.db-wal" />
+    <exclude domain="database" path="rentmate.db-shm" />
+    <exclude domain="sharedpref" path="com.rentmate.app_preferences.xml" />
+    <exclude domain="file" path="datastore/rentmate_household.preferences_pb" />
 </full-backup-content>

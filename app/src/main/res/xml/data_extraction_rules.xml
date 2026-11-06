@@ -1,19 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Backup rules for Android 12+ (API 31+).
+   The Room cache (rentmate.db) holds household money data and is rebuilt from
+   Supabase after sign-in, so it is excluded from cloud backup and device transfer.
+   com.rentmate.app_preferences.xml holds the saved Supabase session tokens; a
+   restored copy would sign another phone in without Google, so it is excluded too.
+   datastore/rentmate_household.preferences_pb holds the selected household id
+   (RM-0016). It belongs to this sign-in only, so it is excluded as well.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="database" path="rentmate.db" />
+        <exclude domain="database" path="rentmate.db-wal" />
+        <exclude domain="database" path="rentmate.db-shm" />
+        <exclude domain="sharedpref" path="com.rentmate.app_preferences.xml" />
+        <exclude domain="file" path="datastore/rentmate_household.preferences_pb" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="database" path="rentmate.db" />
+        <exclude domain="database" path="rentmate.db-wal" />
+        <exclude domain="database" path="rentmate.db-shm" />
+        <exclude domain="sharedpref" path="com.rentmate.app_preferences.xml" />
+        <exclude domain="file" path="datastore/rentmate_household.preferences_pb" />
     </device-transfer>
-    -->
 </data-extraction-rules>

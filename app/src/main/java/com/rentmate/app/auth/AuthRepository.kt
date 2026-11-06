@@ -1,13 +1,18 @@
 package com.rentmate.app.auth
 
+import android.util.Log
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.ProfileSettingsSync
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
+
+private const val TAG = "AuthRepository"
 
 /** Whether the signed-in user already belongs to a household, decides S1's next screen (S2 vs S3). */
 data class SignInResult(val hasHousehold: Boolean)
@@ -18,8 +23,9 @@ private data class HouseholdMembershipRow(val household_id: String)
 class AuthRepository @Inject constructor(
     private val googleAuthManager: GoogleAuthManager,
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
-) {
+    private val currentHousehold: CurrentHousehold,
+    private val profileSettingsSync: ProfileSettingsSync
+) : SessionRepository {
     suspend fun signIn(): Result<SignInResult> = runCatching {
         val idToken = googleAuthManager.signIn()
         supabase.auth.signInWith(IDToken) {
@@ -30,12 +36,53 @@ class AuthRepository @Inject constructor(
         val userId = supabase.auth.currentUserOrNull()?.id
             ?: error("Signed in but no user id was returned")
 
+        val hasHousehold = loadHousehold(userId)
+        // RM-0005: bring this account's settings onto this device. Never fails sign-in.
+        profileSettingsSync.pull()
+        SignInResult(hasHousehold = hasHousehold)
+    }
+
+    /**
+     * RM-0002: waits for Supabase to load the session saved on the device, then
+     * picks the first screen. A saved session skips Login; the household is
+     * looked up again so a removed membership is noticed; offline, the household
+     * saved by [CurrentHousehold] is used instead.
+     */
+    override suspend fun restoreSession(): StartDestination {
+        supabase.auth.awaitInitialization()
+        // RM-0016: load the saved household first, so an offline start still shows its cache.
+        currentHousehold.awaitRestored()
+        if (supabase.auth.currentSessionOrNull() == null) {
+            Log.d(TAG, "no saved session")
+            return StartDestination.LOGIN
+        }
+        val userId = supabase.auth.currentUserOrNull()?.id
+            ?: runCatching { supabase.auth.retrieveUserForCurrentSession(updateSession = true).id }.getOrNull()
+            // Signed in but the user can't be fetched (e.g. offline): still skip Login.
+            ?: return StartDestination.DASHBOARD
+
+        return try {
+            if (loadHousehold(userId)) StartDestination.DASHBOARD else StartDestination.HOUSEHOLD_SETUP
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Offline at launch: the user is still signed in, so go to the Dashboard,
+            // which shows its own error and retry.
+            Log.w(TAG, "household lookup failed on restore", e)
+            StartDestination.DASHBOARD
+        }
+    }
+
+    /** Selects the user's first household as current; returns whether they have one. */
+    private suspend fun loadHousehold(userId: String): Boolean {
         val memberships = supabase.from("household_members")
             .select { filter { eq("user_id", userId) } }
             .decodeList<HouseholdMembershipRow>()
-
-        memberships.firstOrNull()?.let { currentHousehold.set(it.household_id) }
-        SignInResult(hasHousehold = memberships.isNotEmpty())
+        // RM-0016: keep the saved household if the user still belongs to it.
+        val saved = currentHousehold.id.value
+        (memberships.firstOrNull { it.household_id == saved } ?: memberships.firstOrNull())
+            ?.let { currentHousehold.set(it.household_id) }
+        return memberships.isNotEmpty()
     }
 
     suspend fun signOut() {

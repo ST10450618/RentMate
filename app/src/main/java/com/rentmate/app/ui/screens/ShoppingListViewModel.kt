@@ -4,41 +4,51 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.ShoppingItemRow
+import com.rentmate.app.data.ShoppingRepository
+import com.rentmate.app.data.WriteResult
+import android.util.Log
+import com.rentmate.app.data.activity.ActivityLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import javax.inject.Inject
+import androidx.annotation.StringRes
+import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.R
+import com.rentmate.app.ui.feedback.FeedbackCenter
 
 data class ShoppingListUiState(
     val items: List<ShoppingItemRow> = emptyList(),
     val loading: Boolean = false,
-    val error: String? = null
+    @StringRes val error: Int? = null
 )
 
-// Explicit column list (no "*"): the raw FK columns would otherwise collide
-// with the aliased embeds below, since both want the same JSON key.
-private val SHOPPING_ITEM_COLUMNS = Columns.raw(
-    "id, household_id, name, is_purchased, purchased_at, converted_to_bill_id, created_at, " +
-        "added_by_user_id:profiles!added_by_user_id(display_name), " +
-        "purchased_by_user_id:profiles!purchased_by_user_id(display_name)"
-)
+private const val TAG = "ShoppingListViewModel"
 
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val activity: ActivityLogger,
+    private val shoppingRepository: ShoppingRepository,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShoppingListUiState())
     val state: StateFlow<ShoppingListUiState> = _state
 
     init {
+        // RM-0016: the list always comes from the Room cache, so it survives a failed refresh.
+        viewModelScope.launch {
+            shoppingRepository.items
+                .catch { Log.e(TAG, "could not read cached shopping items", it) }
+                .collect { items -> _state.update { it.copy(items = items) } }
+        }
         refresh()
     }
 
@@ -46,28 +56,30 @@ class ShoppingListViewModel @Inject constructor(
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching {
-                supabase.from("shopping_items")
-                    .select(columns = SHOPPING_ITEM_COLUMNS) { filter { eq("household_id", householdId) } }
-                    .decodeList<ShoppingItemRow>()
-            }.onSuccess { _state.value = _state.value.copy(loading = false, items = it) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
+            Log.d(TAG, "refresh household=$householdId")
+            runCatching { shoppingRepository.refresh() }
+                .onSuccess { _state.update { it.copy(loading = false) } }
+                .onFailure { e -> _state.update { it.copy(loading = false, error = ErrorMapper.toMessage(e)) } }
         }
     }
 
+    /**
+     * Marks an item bought. RM-0017: offline the change is queued and the row
+     * shows as pending; the repository refreshes the cache after an online save.
+     */
     fun purchase(id: String) {
+        val name = _state.value.items.firstOrNull { it.id == id }?.name
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
-            runCatching {
-                supabase.from("shopping_items").update({
-                    set("is_purchased", true)
-                    set("purchased_by_user_id", userId)
-                    set("purchased_at", Instant.now().toString())
-                }) {
-                    filter { eq("id", id) }
+            runCatching { shoppingRepository.markPurchased(id, userId) }
+                .onSuccess { result ->
+                    when (result) {
+                        is WriteResult.Sent -> if (name != null) activity.shoppingBought(name, id)
+                        // RM-0018: SyncWorker posts shoppingBought once the queued purchase uploads.
+                        is WriteResult.Queued -> Log.d(TAG, "purchase of $id queued offline")
+                    }
                 }
-            }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = it.message) }
+                .onFailure { feedback.failure(it, R.string.feedback_mark_bought_failed, retry = { purchase(id) }) }
         }
     }
 }

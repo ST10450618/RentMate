@@ -1,5 +1,16 @@
 package com.rentmate.app.ui.screens
 
+import androidx.compose.ui.res.pluralStringResource
+import android.util.Log
+import androidx.compose.ui.res.stringResource
+import com.rentmate.app.R
+import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.LoadingState
+import com.rentmate.app.ui.components.RefreshingIndicator
+import com.rentmate.app.ui.components.rememberHasStartedLoading
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +27,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ShoppingItemRow
+import com.rentmate.app.ui.components.PillTone
+import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
+import com.rentmate.app.ui.components.StatusPill
+import com.rentmate.app.ui.theme.Spacing
+
+private const val TAG = "ShoppingListScreen"
 
 // S8 - shared shopping list, tick off as bought (US-13).
 @Composable
@@ -32,20 +50,36 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
-        topBar = { ScreenHeader(title = "Shopping list", subtitle = "${state.items.size} item(s)") },
+        topBar = { ScreenHeader(title = stringResource(R.string.nav_shopping), subtitle = pluralStringResource(R.plurals.items_count, state.items.size, state.items.size)) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddItem) {
-                Icon(Icons.Filled.Add, contentDescription = "Add item")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_item_title))
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp)) {
-            if (state.loading) CircularProgressIndicator()
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            LazyColumn {
-                items(state.items, key = { it.id }) { item ->
-                    ShoppingItemRow(item, onToggle = { viewModel.purchase(item.id) })
+        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
+            val hasStarted = rememberHasStartedLoading(state.loading)
+            LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
+            val genericError = state.error?.let { stringResource(it) } ?: stringResource(R.string.state_error_generic)
+            when {
+                state.items.isEmpty() && state.error != null ->
+                    ErrorState(message = genericError, onRetry = viewModel::refresh)
+                state.items.isEmpty() && (state.loading || !hasStarted) -> LoadingState()
+                state.items.isEmpty() -> EmptyState(
+                    illustration = R.drawable.illus_empty_shopping,
+                    title = stringResource(R.string.empty_shopping_title),
+                    body = stringResource(R.string.empty_shopping_body),
+                    actionLabel = stringResource(R.string.empty_shopping_action),
+                    onAction = onAddItem
+                )
+                else -> {
+                    if (state.loading) RefreshingIndicator()
+                    if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        items(state.items, key = { it.id }) { item ->
+                            ShoppingItemRow(item, onToggle = { viewModel.purchase(item.id) })
+                        }
+                    }
                 }
             }
         }
@@ -54,11 +88,25 @@ fun ShoppingListScreen(onAddItem: () -> Unit, viewModel: ShoppingListViewModel =
 
 @Composable
 private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Checkbox(checked = item.is_purchased, onCheckedChange = { onToggle() })
-        Column {
-            Text(item.name, style = MaterialTheme.typography.bodyLarge)
-            Text("added by ${item.added_by_user_id?.display_name ?: "?"}", style = MaterialTheme.typography.bodySmall)
+    RentMateCard {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = item.is_purchased, onCheckedChange = { onToggle() })
+            Column(modifier = Modifier.weight(1f).padding(start = Spacing.xs)) {
+                Text(
+                    item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    textDecoration = if (item.is_purchased) TextDecoration.LineThrough else null,
+                    color = if (item.is_purchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    stringResource(R.string.shopping_added_by, item.added_by_user_id?.display_name ?: stringResource(R.string.housemate_fallback)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            // RM-0017: saved offline, not uploaded yet.
+            if (item.pending) StatusPill(stringResource(R.string.sync_pending), PillTone.Neutral, modifier = Modifier.padding(end = Spacing.xs))
+            if (item.is_purchased) StatusPill(stringResource(R.string.shopping_bought), PillTone.Positive)
         }
     }
 }

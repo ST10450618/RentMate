@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="app_name" translatable="false">RentMate</string>
 
     <string name="settings_title">Settings</string>
@@ -9,9 +9,12 @@
     <string name="notif_maintenance">Maintenance updates</string>
 
     <string name="section_language">Language</string>
-    <string name="lang_english">English</string>
-    <string name="lang_afrikaans">Afrikaans</string>
-    <string name="lang_xhosa">isiXhosa</string>
+    <string name="language_translation_disclaimer">Afrikaans and isiXhosa are machine-translated, similar to Google Translate, and may contain mistakes.</string>
+    <!-- RM-0026: each language is shown in its own name, whatever language the
+         app is in now, so these are not translated. -->
+    <string name="lang_english" translatable="false">English</string>
+    <string name="lang_afrikaans" translatable="false">Afrikaans</string>
+    <string name="lang_xhosa" translatable="false">isiXhosa</string>
 
     <string name="section_security">Security and display</string>
     <string name="biometric_title">Unlock with biometrics</string>
@@ -19,5 +22,245 @@
     <string name="leaderboard_title">Show points leaderboard</string>
     <string name="leaderboard_desc">Hides it for the whole household</string>
 
+    <string name="chore_error_not_assignee">Only the housemate whose turn it is can mark this chore done.</string>
+    <string name="chore_error_already_done">This chore has already been done this cycle.</string>
+
     <string name="sign_out">Sign out</string>
+    <string name="login_tagline">Bills, chores and repairs for your shared home, sorted.</string>
+    <string name="login_feature_bills">Split bills and settle up in fewer payments</string>
+    <string name="login_feature_chores">Fair chore rotation, planned four weeks ahead</string>
+    <string name="login_feature_maintenance">Log faults and send them to your landlord</string>
+    <string name="login_continue_google">Continue with Google</string>
+    <string name="login_try_again">Try again with Google</string>
+    <string name="login_signing_in">Signing you in…</string>
+    <string name="login_error">We couldn\'t sign you in. Check your connection and try again.</string>
+    <string name="login_privacy_note">We only use your Google name and email to set up your profile.</string>
+    <!-- Form validation (RM-0036) -->
+    <string name="error_required">This field is required</string>
+    <string name="error_too_short">Too short</string>
+    <string name="error_too_long">Too long, please shorten it</string>
+    <string name="error_not_a_number">Enter a number, e.g. 1250.50</string>
+    <string name="error_must_be_positive">Must be more than zero</string>
+    <string name="error_amount_too_large">Amount can\'t be more than R999,999.99</string>
+    <string name="error_too_many_decimals">Use at most 2 decimal places</string>
+    <string name="error_points_range">Points must be a whole number from 1 to 100</string>
+    <string name="error_date_past">Date can\'t be more than a year ago</string>
+    <string name="error_date_future">Date can\'t be more than two years ahead</string>
+    <string name="error_invite_code">Invite codes are 6 letters and numbers, e.g. K7M3QX</string>
+    <string name="error_no_members">No housemates found yet. Try again in a moment.</string>
+    <string name="pick_date">Pick a date</string>
+    <string name="save">Save</string>
+
+    <string name="add_bill_title">Add bill</string>
+    <string name="add_bill_name">What is the bill for?</string>
+    <string name="add_bill_amount">Amount (R)</string>
+    <string name="add_bill_due">Due date</string>
+    <plurals name="add_bill_split">
+        <item quantity="one">Split equally with %d housemate</item>
+        <item quantity="other">Split equally across %d housemates</item>
+    </plurals>
+
+    <string name="add_chore_title">Add chore</string>
+    <string name="add_chore_name">Chore name</string>
+    <string name="add_chore_recurrence">How often?</string>
+    <string name="recurrence_once">Once</string>
+    <string name="recurrence_weekly">Weekly</string>
+    <string name="recurrence_monthly">Monthly</string>
+    <string name="add_chore_points">Points (1–100)</string>
+    <plurals name="add_chore_rotation">
+        <item quantity="one">Rotates across %d housemate</item>
+        <item quantity="other">Rotates across %d housemates</item>
+    </plurals>
+
+    <string name="add_item_title">Add item</string>
+    <string name="add_item_name">Item name</string>
+
+    <string name="household_name">Household name</string>
+    <string name="household_invite_code">Invite code</string>
+    <string name="household_create">Create household</string>
+    <string name="household_join">Join household</string>
+    <!-- Notification channels (RM-0021) -->
+    <string name="channel_bills_name">Bills</string>
+    <string name="channel_bills_desc">New bills and payment reminders</string>
+    <string name="channel_chores_name">Chores</string>
+    <string name="channel_chores_desc">Chores assigned to you and when they\'re due</string>
+    <string name="channel_shopping_name">Shopping list</string>
+    <string name="channel_shopping_desc">Items added to or bought from the shared list</string>
+    <string name="channel_maintenance_name">Maintenance</string>
+    <string name="channel_maintenance_desc">Updates on repair requests</string>
+
+    <!-- RM-0035: list screen states -->
+    <string name="state_error_generic">Couldn\'t load this screen. Check your connection and tap Retry.</string>
+    <string name="state_retry">Try again</string>
+    <string name="empty_bills_title">No bills yet</string>
+    <string name="empty_bills_body">Add the first bill and RentMate will split it for everyone.</string>
+    <string name="empty_bills_action">Add a bill</string>
+    <string name="empty_chores_title">No chores yet</string>
+    <string name="empty_chores_body">Add a chore and RentMate will rotate it fairly between housemates.</string>
+    <string name="empty_chores_action">Add a chore</string>
+    <string name="empty_shopping_title">Your shopping list is empty</string>
+    <string name="empty_shopping_body">Add what the house needs and everyone can tick it off when it is bought.</string>
+    <string name="empty_shopping_action">Add an item</string>
+    <string name="empty_dashboard_title">No household yet</string>
+    <string name="empty_dashboard_body">Create or join a household to see bills, chores and balances here.</string>
+    <string name="activity_title">Activity</string>
+    <string name="activity_subtitle">What your housemates have been up to</string>
+    <string name="activity_today">Today</string>
+    <string name="activity_yesterday">Yesterday</string>
+    <string name="activity_just_now">Just now</string>
+    <string name="activity_empty_title">No activity yet</string>
+    <string name="activity_empty_body">Bills, chores, shopping and repairs will show up here as your household uses RentMate.</string>
+    <string name="activity_event">%1$s %2$s</string>
+    <string name="activity_error">Could not load activity. Please try again later.</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">%d min ago</item>
+        <item quantity="other">%d min ago</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+
+    <!-- RM-0004: friendly errors shown instead of raw exception text -->
+    <string name="error_no_connection">You\'re offline. Check your connection and try again.</string>
+    <string name="error_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_not_allowed">You don\'t have permission to do that.</string>
+    <string name="error_already_exists">That already exists.</string>
+    <string name="error_generic">That didn\'t work. Check your connection and try again.</string>
+    <string name="error_invalid_invite_code">That invite code isn\'t valid. Check it and try again.</string>
+    <string name="error_sign_in_failed">Sign-in didn\'t work. Please try again.</string>
+    <string name="error_amount_positive">Amount must be greater than 0.</string>
+    <string name="error_chore_title_blank">Give the chore a title.</string>
+    <string name="error_item_name_blank">Give the item a name.</string>
+
+    <string name="lock_prompt_title">Unlock RentMate</string>
+    <string name="lock_prompt_subtitle">Confirm it\'s you to continue</string>
+    <string name="lock_prompt_cancel">Cancel</string>
+    <string name="lock_locked">RentMate is locked</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_error_cancelled">Unlock cancelled. Try again to continue.</string>
+    <string name="lock_error_lockout">Too many attempts. Wait a moment, then try again.</string>
+    <string name="lock_error_no_credentials">No fingerprint, face or screen lock is set up on this device.</string>
+    <string name="lock_error_other">Unlocking didn\'t work. Try again.</string>
+
+    <string name="biometric_note_no_hardware">This device has no fingerprint or face unlock, so this setting is unavailable.</string>
+    <string name="biometric_note_unavailable">Biometric unlock is not available on this device right now.</string>
+    <string name="biometric_note_none_enrolled">Set up a fingerprint, face or screen lock first.</string>
+    <string name="biometric_enrol_title">Set up biometrics first</string>
+    <string name="biometric_enrol_message">No fingerprint, face or screen lock is set up on this device. Open your device settings to add one, then come back and turn this on.</string>
+    <string name="biometric_enrol_open">Open settings</string>
+    <string name="biometric_enrol_cancel">Not now</string>
+    <string name="housemate_fallback">Housemate</string>
+    <string name="split_mode_label">Split</string>
+    <string name="split_equal">Equal</string>
+    <string name="split_percentage">Percentage</string>
+    <string name="split_exact">Exact amount</string>
+    <string name="split_percent_for">%1$s (%%)</string>
+    <string name="split_amount_for">%1$s (R)</string>
+    <string name="split_unknown_member">Member</string>
+    <string name="split_error_percent">Percentages must add up to 100. They add up to %1$s.</string>
+    <string name="split_error_exact">Amounts must add up to R%2$s. They add up to R%1$s.</string>
+    <string name="split_error_number">Enter a number for every member (or leave it blank for 0).</string>
+    <string name="split_error_negative">Split values cannot be negative.</string>
+    <string name="split_error_too_large">Amount can\'t be more than R999,999.99.</string>
+    <string name="bills_confirm_received">Confirm received</string>
+    <string name="bills_waiting_for">Waiting for %1$s to confirm</string>
+    <string name="bills_ask_to_confirm">Ask %1$s to confirm you paid</string>
+    <!-- RM-0024: navigation and screen text moved out of the Kotlin code -->
+    <string name="nav_sign_in">Sign in</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_bills">Bills</string>
+    <string name="nav_chores">Chores</string>
+    <string name="nav_shopping">Shopping list</string>
+    <string name="nav_maintenance">Maintenance</string>
+    <string name="nav_more">More</string>
+    <string name="more_subtitle">Shopping, maintenance and settings</string>
+    <string name="more_shopping_desc">Shared items to buy</string>
+    <string name="more_maintenance_desc">Log and track faults</string>
+    <string name="more_activity_desc">Household activity</string>
+    <string name="more_settings_desc">Notifications, language, account</string>
+    <string name="continue_label">Continue</string>
+    <string name="close">Close</string>
+    <string name="google_badge" translatable="false">G</string>
+
+    <string name="settle_up">Settle up</string>
+    <string name="settle_up_none">The household is already settled.</string>
+    <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Preview: based on data on this phone. It may change after sync.</string>
+    <string name="settle_up_preview_pill">Preview</string>
+    <string name="settle_up_confirm_needs_sync">You can confirm once this phone is back online and synced.</string>
+    <plurals name="bills_count">
+        <item quantity="one">%d bill</item>
+        <item quantity="other">%d bills</item>
+    </plurals>
+    <string name="bills_due">Due %1$s</string>
+    <string name="bills_paid">Paid</string>
+    <string name="bills_outstanding">Outstanding</string>
+    <string name="bills_owes">Owes</string>
+    <string name="bills_mark_paid">Mark paid</string>
+    <string name="bills_share">%1$s · %2$s</string>
+
+    <string name="chores_subtitle">This week\'s roster</string>
+    <string name="chores_this_cycle">This cycle: %1$s</string>
+    <string name="chores_unassigned">unassigned</string>
+    <string name="chores_next_cycles">Next 4 cycles</string>
+    <string name="chores_forecast_row">%1$d. %2$s</string>
+    <string name="chores_mark_done">Mark done</string>
+    <string name="chores_leaderboard">Leaderboard</string>
+    <plurals name="chore_points">
+        <item quantity="one">%d pt</item>
+        <item quantity="other">%d pts</item>
+    </plurals>
+    <plurals name="leaderboard_points">
+        <item quantity="one">%1$d pt (%2$d total)</item>
+        <item quantity="other">%1$d pts (%2$d total)</item>
+    </plurals>
+
+    <plurals name="households_count">
+        <item quantity="one">%d household</item>
+        <item quantity="other">%d households</item>
+    </plurals>
+    <plurals name="bills_overdue">
+        <item quantity="one">%d overdue</item>
+        <item quantity="other">%d overdue</item>
+    </plurals>
+    <string name="dashboard_view_bills">View bills</string>
+    <string name="dashboard_balance">Your balance</string>
+    <string name="dashboard_owed_to_you">You\'re owed %1$s</string>
+    <string name="dashboard_you_owe">You owe %1$s</string>
+    <string name="dashboard_settled">You\'re all settled up</string>
+    <string name="dashboard_next_chore">Your next chore</string>
+    <string name="dashboard_no_chore">Nothing assigned to you right now.</string>
+    <string name="dashboard_view_chores">View chores</string>
+    <string name="dashboard_household">Household</string>
+
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="shopping_added_by">Added by %1$s</string>
+    <string name="shopping_bought">Bought</string>
+    <!-- RM-0017: shown on a bill or item saved offline that is not uploaded yet. -->
+    <string name="sync_pending">Waiting to sync</string>
+
+    <string name="household_setup_title">Set up your household</string>
+    <string name="household_setup_body">Create a new home or join your housemates with their invite code.</string>
+    <string name="household_new">New household</string>
+    <string name="household_join_existing">Join an existing one</string>
+    <string name="household_created">Household created. Share this invite code</string>
+
+    <!-- Activity sample feed -->
+    <string name="activity_sample_pill">Sample</string>
+    <string name="activity_sample_body">Example activity. Your household\'s real feed appears here once it\'s connected.</string>
+    <string name="repeat_label">Repeat</string>
+    <string name="repeat_never">Never</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
+    <string name="bills_repeats_weekly">Repeats weekly</string>
+    <string name="bills_repeats_monthly">Repeats monthly</string>
+    <string name="bills_stop_repeat">Stop repeating</string>
 </resources>

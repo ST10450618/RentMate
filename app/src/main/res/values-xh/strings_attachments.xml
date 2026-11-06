@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RM-0028 / RM-0029: iifoto eziqhotyoshelweyo. -->
+<resources>
+    <string name="photo_choose">Khetha ifoto</string>
+    <string name="photo_take">Thatha ifoto</string>
+    <string name="photo_preview_description">Ifoto eza kuqhotyoshelwa</string>
+    <string name="photo_remove">Susa ifoto</string>
+    <string name="photo_status_preparing">Ilungiselela ifoto…</string>
+    <string name="photo_status_uploading">Iyalayisha… %1$d%%</string>
+    <string name="photo_status_uploaded">Ilayishiwe (%1$d KB)</string>
+    <string name="photo_error_upload">Ukulayisha akuphumelelanga. Jonga uqhagamshelo lwakho uze uzame kwakhona.</string>
+    <string name="photo_error_unreadable">Loo foto ayikwazanga ukuvulwa. Zama enye.</string>
+    <string name="photo_error_too_large">Loo foto ayikwazanga ukwenziwa ibe ncinci ngokwaneleyo ukuba ilayishwe.</string>
+    <string name="photo_wait_for_upload">Linda de iifoto zigqibe ukulayishwa.</string>
+    <string name="photo_error_link">Igciniwe, kodwa iifoto azikwazanga ukuqhotyoshelwa. Cofa u-Zama kwakhona.</string>
+    <string name="photo_thumbnail_description">Ifoto %1$d kwezi-%2$d</string>
+    <string name="photo_full_description">Ifoto eqhotyoshelweyo, ubungakanani obupheleleyo</string>
+    <string name="landlord_email_photos">Iifoto:</string>
+    <string name="photo_section_bill">Ifoto yetyala okanye yerisithi (ayinyanzelekanga)</string>
+</resources>

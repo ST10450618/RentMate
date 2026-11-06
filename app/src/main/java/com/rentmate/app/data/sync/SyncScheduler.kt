@@ -1,0 +1,94 @@
+package com.rentmate.app.data.sync
+
+import android.content.Context
+import android.util.Log
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+
+private const val TAG = "SyncScheduler"
+
+/** RM-0018: asks for the outbox to be uploaded. An interface so tests can count requests. */
+interface SyncScheduler {
+    /** Schedules an upload of the outbox for as soon as there is a network. Safe to call often. */
+    fun requestSync()
+
+    /**
+     * RM-0019: starts an upload now, even if an earlier run is waiting out its
+     * retry delay. For the banner's Retry button. Still waits for a network.
+     */
+    fun syncNow() = requestSync()
+
+    /** Does nothing. For tests and code paths without WorkManager. */
+    object None : SyncScheduler {
+        override fun requestSync() = Unit
+    }
+}
+
+/**
+ * RM-0018: schedules [SyncWorker] as unique one-time work [WORK_NAME] that waits
+ * for a connected network.
+ *
+ * [ExistingWorkPolicy.KEEP]: if a sync is already waiting or running, a new
+ * request is ignored. That is safe because the worker reads the queue again
+ * after each entry, so a change queued while it runs is still sent. The only
+ * gap is a change queued in the moment after the worker found the queue empty
+ * and before it finished; the next request or next sign-in picks it up.
+ *
+ * When the network comes back, WorkManager starts waiting work within seconds,
+ * which gives the "within a minute" target. A retry backs off exponentially
+ * from [BACKOFF_SECONDS].
+ */
+@Singleton
+class WorkManagerSyncScheduler @Inject constructor(
+    @ApplicationContext private val context: Context
+) : SyncScheduler {
+
+    override fun requestSync() {
+        try {
+            WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, buildRequest())
+            Log.d(TAG, "sync requested")
+        } catch (e: IllegalStateException) {
+            // WorkManager not initialised (should not happen in the app). The entry stays queued.
+            Log.e(TAG, "could not schedule sync", e)
+        }
+    }
+
+    /**
+     * [ExistingWorkPolicy.REPLACE] drops a run that waits out its backoff and
+     * enqueues a fresh one without delay. The banner offers this only after a
+     * run failed, so no run is in progress to be cancelled.
+     */
+    override fun syncNow() {
+        try {
+            WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, buildRequest())
+            Log.d(TAG, "sync now requested")
+        } catch (e: IllegalStateException) {
+            Log.e(TAG, "could not schedule sync", e)
+        }
+    }
+
+    companion object {
+        /** Unique work name of the outbox upload. */
+        const val WORK_NAME = "outbox-sync"
+
+        /** First retry delay. WorkManager's minimum is 10 seconds. */
+        const val BACKOFF_SECONDS = 15L
+
+        /** The work request: needs a connected network, retries with exponential backoff. */
+        fun buildRequest(): OneTimeWorkRequest =
+            OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_SECONDS, TimeUnit.SECONDS)
+                .addTag(WORK_NAME)
+                .build()
+    }
+}

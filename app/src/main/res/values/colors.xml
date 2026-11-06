@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Brand colours used by XML resources (launch theme, notification accent).
+         Compose screens use the same values from ui/theme/Color.kt. -->
+    <color name="rentmate_aloe">#FF14564B</color>
+    <color name="rentmate_aloe_dark">#FF0E3F37</color>
+    <color name="rentmate_aloe_light">#FFD9E8E3</color>
+    <color name="rentmate_sand">#FFF5F1E6</color>
+    <color name="rentmate_amber">#FFE8B23A</color>
 </resources>

@@ -1,21 +1,261 @@
-﻿<resources>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- isiXhosa (RM-0025). Machine-drafted: needs review by an isiXhosa speaker
+     (see README, Translation review). Keep the same keys and order as
+     values/strings.xml. -->
+<resources>
     <string name="settings_title">Useto</string>
-    <string name="section_notifications">Ndazise ngazo</string>
+    <string name="section_notifications">Ndazise ngezi zinto</string>
     <string name="notif_bills">Iibhili ekufuneka zihlawulwe</string>
-    <string name="notif_chores">Imisebenzi endabelwe yona</string>
+    <string name="notif_chores">Imisebenzi endinikwe yona</string>
     <string name="notif_shopping">Utshintsho kuluhlu lokuthenga</string>
-    <string name="notif_maintenance">Uhlaziyo ngolungiso</string>
+    <string name="notif_maintenance">Uhlaziyo malunga nolungiso</string>
 
     <string name="section_language">Ulwimi</string>
-    <string name="lang_english">IsiNgesi</string>
-    <string name="lang_afrikaans">IsiBhulu</string>
-    <string name="lang_xhosa">IsiXhosa</string>
+    <string name="language_translation_disclaimer">IsiBhulu nesiXhosa ziguqulelwe ngomatshini, njengeGoogle Translate, kwaye zinokuba neempazamo.</string>
 
     <string name="section_security">Ukhuseleko nomboniso</string>
     <string name="biometric_title">Vula ngebhayometriki</string>
     <string name="biometric_desc">Umnwe okanye ubuso</string>
-    <string name="leaderboard_title">Bonisa ibhodi yamanqaku</string>
-    <string name="leaderboard_desc">Iyifihla kuyo yonke indlu</string>
+    <string name="leaderboard_title">Bonisa uluhlu lwamanqaku</string>
+    <string name="leaderboard_desc">Lufihlwa kulo lonke ikhaya</string>
+
+    <string name="chore_error_not_assignee">Ngumhlali-kunye okwithuba lakhe kuphela onokuphawula lo msebenzi njengowenziweyo.</string>
+    <string name="chore_error_already_done">Lo msebenzi sele wenziwe kulo mjikelo.</string>
 
     <string name="sign_out">Phuma</string>
+    <string name="login_tagline">Iibhili, imisebenzi yasekhaya nolungiso lwekhaya enihlala kulo kunye, konke kulungelelanisiwe.</string>
+    <string name="login_feature_bills">Yahlulani iibhili nihlawulane ngeentlawulo ezimbalwa</string>
+    <string name="login_feature_chores">Imisebenzi ijikeleziswa ngokulinganayo, icwangciswe iiveki ezine kwangaphambili</string>
+    <string name="login_feature_maintenance">Bhala iingxaki uze uzithumele kumnini-ndlu wakho</string>
+    <string name="login_continue_google">Qhubeka nge-Google</string>
+    <string name="login_try_again">Zama kwakhona nge-Google</string>
+    <string name="login_signing_in">Siyakungenisa…</string>
+    <string name="login_error">Asikwazanga ukukungenisa. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="login_privacy_note">Sisebenzisa igama le-Google kunye ne-imeyile yakho kuphela ukuseta iprofayile yakho.</string>
+    <!-- Form validation (RM-0036) -->
+    <string name="error_required">Le ndawo iyafuneka</string>
+    <string name="error_too_short">Imfutshane kakhulu</string>
+    <string name="error_too_long">Inde kakhulu, nceda uyifinyeze</string>
+    <string name="error_not_a_number">Faka inani, umz. 1250.50</string>
+    <string name="error_must_be_positive">Kufuneka ibe ngaphezu ko-0</string>
+    <string name="error_amount_too_large">Isixa asinakudlula i-R999,999.99</string>
+    <string name="error_too_many_decimals">Sebenzisa iindawo zedesimali ezi-2 kuphela</string>
+    <string name="error_points_range">Amanqaku kufuneka abe linani elipheleleyo ukusuka ku-1 ukuya ku-100</string>
+    <string name="error_date_past">Umhla awunakuba ngaphezu konyaka odlulileyo</string>
+    <string name="error_date_future">Umhla awunakuba ngaphezu kweminyaka emibini ezayo</string>
+    <string name="error_invite_code">Iikhowudi zesimemo zinoonobumba namanani ali-6, umz. K7M3QX</string>
+    <string name="error_no_members">Akukafunyanwa bahlali-kunye. Zama kwakhona kungekudala.</string>
+    <string name="pick_date">Khetha umhla</string>
+    <string name="save">Gcina</string>
+
+    <string name="add_bill_title">Yongeza ibhili</string>
+    <string name="add_bill_name">Ibhili yeyantoni?</string>
+    <string name="add_bill_amount">Isixa (R)</string>
+    <string name="add_bill_due">Umhla wokuhlawula</string>
+    <plurals name="add_bill_split">
+        <item quantity="one">Yahlulwe ngokulinganayo nomhlali-kunye o-%d</item>
+        <item quantity="other">Yahlulwe ngokulinganayo phakathi kwabahlali-kunye aba-%d</item>
+    </plurals>
+
+    <string name="add_chore_title">Yongeza umsebenzi</string>
+    <string name="add_chore_name">Igama lomsebenzi</string>
+    <string name="add_chore_recurrence">Kangaphi?</string>
+    <string name="recurrence_once">Kanye</string>
+    <string name="recurrence_weekly">Veki nganye</string>
+    <string name="recurrence_monthly">Nyanga nganye</string>
+    <string name="add_chore_points">Amanqaku (1–100)</string>
+    <plurals name="add_chore_rotation">
+        <item quantity="one">Ujikeleza kumhlali-kunye o-%d</item>
+        <item quantity="other">Ujikeleza phakathi kwabahlali-kunye aba-%d</item>
+    </plurals>
+
+    <string name="add_item_title">Yongeza into</string>
+    <string name="add_item_name">Igama lento</string>
+
+    <string name="household_name">Igama lekhaya</string>
+    <string name="household_invite_code">Ikhowudi yesimemo</string>
+    <string name="household_create">Yenza ikhaya</string>
+    <string name="household_join">Joyina ikhaya</string>
+    <!-- Notification channels (RM-0021) -->
+    <string name="channel_bills_name">Iibhili</string>
+    <string name="channel_bills_desc">Iibhili ezintsha nezikhumbuzo zokuhlawula</string>
+    <string name="channel_chores_name">Imisebenzi</string>
+    <string name="channel_chores_desc">Imisebenzi onikwe yona nexesha ekufuneka yenziwe ngalo</string>
+    <string name="channel_shopping_name">Uluhlu lokuthenga</string>
+    <string name="channel_shopping_desc">Izinto ezongezwe okanye ezithengiweyo kuluhlu ekwabelwana ngalo</string>
+    <string name="channel_maintenance_name">Ulungiso</string>
+    <string name="channel_maintenance_desc">Uhlaziyo ngezicelo zolungiso</string>
+
+    <!-- RM-0035: list screen states -->
+    <string name="state_error_generic">Asikwazanga ukulayisha le skrini. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
+    <string name="state_retry">Zama kwakhona</string>
+    <string name="empty_bills_title">Akukabikho bhili</string>
+    <string name="empty_bills_body">Yongeza ibhili yokuqala, kwaye i-RentMate iya kuyahlulela wonke umntu.</string>
+    <string name="empty_bills_action">Yongeza ibhili</string>
+    <string name="empty_chores_title">Akukabikho msebenzi</string>
+    <string name="empty_chores_body">Yongeza umsebenzi, kwaye i-RentMate iya kuwujikelezisa ngokulinganayo phakathi kwabahlali-kunye.</string>
+    <string name="empty_chores_action">Yongeza umsebenzi</string>
+    <string name="empty_shopping_title">Uluhlu lwakho lokuthenga alunanto</string>
+    <string name="empty_shopping_body">Yongeza izinto ezifunwa likhaya, kwaye wonke umntu angaziphawula xa sele zithengiwe.</string>
+    <string name="empty_shopping_action">Yongeza into</string>
+    <string name="empty_dashboard_title">Akukabikho khaya</string>
+    <string name="empty_dashboard_body">Yenza okanye ujoyine ikhaya ukuze ubone iibhili, imisebenzi neebhalansi apha.</string>
+    <string name="activity_title">Okwenzekileyo</string>
+    <string name="activity_subtitle">Into ebezenziwa ngabahlali-kunye bakho</string>
+    <string name="activity_today">Namhlanje</string>
+    <string name="activity_yesterday">Izolo</string>
+    <string name="activity_just_now">Kanye ngoku</string>
+    <string name="activity_empty_title">Akukabikho nto yenzekileyo</string>
+    <string name="activity_empty_body">Iibhili, imisebenzi, ukuthenga nolungiso ziya kubonakala apha njengoko ikhaya lakho lisebenzisa i-RentMate.</string>
+    <string name="activity_event">%1$s %2$s</string>
+    <string name="activity_error">Asikwazanga ukulayisha okwenzekileyo. Nceda uzame kwakhona emva kwexesha.</string>
+    <plurals name="activity_minutes_ago">
+        <item quantity="one">umzuzu o-%d odlulileyo</item>
+        <item quantity="other">imizuzu emi-%d edlulileyo</item>
+    </plurals>
+    <plurals name="activity_hours_ago">
+        <item quantity="one">iyure e-%d edlulileyo</item>
+        <item quantity="other">iiyure ezi-%d ezidlulileyo</item>
+    </plurals>
+    <plurals name="activity_days_ago">
+        <item quantity="one">usuku olu-%d oludlulileyo</item>
+        <item quantity="other">iintsuku ezi-%d ezidlulileyo</item>
+    </plurals>
+
+    <!-- RM-0004: friendly errors shown instead of raw exception text -->
+    <string name="error_no_connection">Awukho kwi-intanethi. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="error_session_expired">Iseshoni yakho iphelelwe lixesha. Nceda ungene kwakhona.</string>
+    <string name="error_not_allowed">Awunamvume yokwenza oko.</string>
+    <string name="error_already_exists">Oko sele kukhona.</string>
+    <string name="error_generic">Oko akusebenzanga. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="error_invalid_invite_code">Loo khowudi yesimemo ayisebenzi. Yijonge uzame kwakhona.</string>
+    <string name="error_sign_in_failed">Ukungena akuphumelelanga. Nceda uzame kwakhona.</string>
+    <string name="error_amount_positive">Isixa kufuneka sibe ngaphezu ko-0.</string>
+    <string name="error_chore_title_blank">Nika umsebenzi isihloko.</string>
+    <string name="error_item_name_blank">Nika into igama.</string>
+
+    <string name="lock_prompt_title">Vula i-RentMate</string>
+    <string name="lock_prompt_subtitle">Qinisekisa ukuba nguwe ukuze uqhubeke</string>
+    <string name="lock_prompt_cancel">Rhoxisa</string>
+    <string name="lock_locked">I-RentMate itshixiwe</string>
+    <string name="lock_unlock">Vula</string>
+    <string name="lock_error_cancelled">Ukuvula kurhoxisiwe. Zama kwakhona ukuze uqhubeke.</string>
+    <string name="lock_error_lockout">Iinzame ezininzi kakhulu. Linda kancinci uze uzame kwakhona.</string>
+    <string name="lock_error_no_credentials">Akukho mnwe, buso okanye isitshixo sesikrini esisetiweyo kwesi sixhobo.</string>
+    <string name="lock_error_other">Ukuvula akusebenzanga. Zama kwakhona.</string>
+
+    <string name="biometric_note_no_hardware">Esi sixhobo asikwazi ukuvula ngomnwe okanye ngobuso, ngoko olu seto alufumaneki.</string>
+    <string name="biometric_note_unavailable">Ukuvula ngebhayometriki akufumaneki kwesi sixhobo ngoku.</string>
+    <string name="biometric_note_none_enrolled">Qala usete umnwe, ubuso okanye isitshixo sesikrini.</string>
+    <string name="biometric_enrol_title">Qala usete ibhayometriki</string>
+    <string name="biometric_enrol_message">Akukho mnwe, buso okanye isitshixo sesikrini esisetiweyo kwesi sixhobo. Vula useto lwesixhobo sakho ukuze wongeze esinye, uze ubuye uvule oku.</string>
+    <string name="biometric_enrol_open">Vula useto</string>
+    <string name="biometric_enrol_cancel">Hayi ngoku</string>
+    <string name="housemate_fallback">Umhlali-kunye</string>
+    <string name="split_mode_label">Yahlula</string>
+    <string name="split_equal">Ngokulinganayo</string>
+    <string name="split_percentage">Ipesenti</string>
+    <string name="split_exact">Isixa esichanekileyo</string>
+    <string name="split_percent_for">%1$s (%%)</string>
+    <string name="split_amount_for">%1$s (R)</string>
+    <string name="split_unknown_member">Ilungu</string>
+    <string name="split_error_percent">Iipesenti kufuneka zidibane zibe yi-100. Ngoku zidibana zibe ngu-%1$s.</string>
+    <string name="split_error_exact">Izixa kufuneka zidibane zibe yi-R%2$s. Ngoku zidibana zibe yi-R%1$s.</string>
+    <string name="split_error_number">Faka inani lelungu ngalinye (okanye ushiye kungenanto ukuze kube ngu-0).</string>
+    <string name="split_error_negative">Amaxabiso okwahlula akanakuba ngaphantsi ko-0.</string>
+    <string name="split_error_too_large">Isixa asinakudlula i-R999,999.99.</string>
+    <string name="bills_confirm_received">Qinisekisa ukuba ifunyenwe</string>
+    <string name="bills_waiting_for">Silinde u-%1$s aqinisekise</string>
+    <string name="bills_ask_to_confirm">Cela u-%1$s aqinisekise ukuba uhlawulile</string>
+    <!-- RM-0024: navigation and screen text moved out of the Kotlin code -->
+    <string name="nav_sign_in">Ngena</string>
+    <string name="nav_dashboard">Isishwankathelo</string>
+    <string name="nav_bills">Iibhili</string>
+    <string name="nav_chores">Imisebenzi</string>
+    <string name="nav_shopping">Uluhlu lokuthenga</string>
+    <string name="nav_maintenance">Ulungiso</string>
+    <string name="nav_more">Okungakumbi</string>
+    <string name="more_subtitle">Ukuthenga, ulungiso noseto</string>
+    <string name="more_shopping_desc">Izinto ekwabelwana ngazo ekufuneka zithengwe</string>
+    <string name="more_maintenance_desc">Bhala uze ulandelele iingxaki</string>
+    <string name="more_activity_desc">Okwenzekileyo ekhaya</string>
+    <string name="more_settings_desc">Izaziso, ulwimi, iakhawunti</string>
+    <string name="continue_label">Qhubeka</string>
+    <string name="close">Vala</string>
+
+    <string name="settle_up">Lungelelanisa amatyala</string>
+    <string name="settle_up_none">Akukho matyala ekhaya.</string>
+    <string name="settle_up_payment">%1$s → %2$s: %3$s</string>
+    <string name="settle_up_preview_label">Umboniso: usekelwe kwidatha ekule fowuni. Ungatshintsha emva kokuvumelanisa.</string>
+    <string name="settle_up_preview_pill">Umboniso</string>
+    <string name="settle_up_confirm_needs_sync">Ungaqinisekisa xa le fowuni ibuyele kwi-intanethi kwaye ivumelanisiwe.</string>
+    <plurals name="bills_count">
+        <item quantity="one">%d ibhili</item>
+        <item quantity="other">%d iibhili</item>
+    </plurals>
+    <string name="bills_due">Ihlawulwa ngo-%1$s</string>
+    <string name="bills_paid">Ihlawuliwe</string>
+    <string name="bills_outstanding">Ayikahlawulwa</string>
+    <string name="bills_owes">Unetyala</string>
+    <string name="bills_mark_paid">Phawula ihlawuliwe</string>
+    <string name="bills_share">%1$s · %2$s</string>
+
+    <string name="chores_subtitle">Uluhlu lwale veki</string>
+    <string name="chores_this_cycle">Lo mjikelo: %1$s</string>
+    <string name="chores_unassigned">akanikwanga mntu</string>
+    <string name="chores_next_cycles">Imijikelo emi-4 elandelayo</string>
+    <string name="chores_forecast_row">%1$d. %2$s</string>
+    <string name="chores_mark_done">Phawula wenziwe</string>
+    <string name="chores_leaderboard">Uluhlu lwamanqaku</string>
+    <plurals name="chore_points">
+        <item quantity="one">%d inqaku</item>
+        <item quantity="other">%d amanqaku</item>
+    </plurals>
+    <plurals name="leaderboard_points">
+        <item quantity="one">%1$d inqaku (%2$d ewonke)</item>
+        <item quantity="other">%1$d amanqaku (%2$d ewonke)</item>
+    </plurals>
+
+    <plurals name="households_count">
+        <item quantity="one">%d ikhaya</item>
+        <item quantity="other">%d amakhaya</item>
+    </plurals>
+    <plurals name="bills_overdue">
+        <item quantity="one">%d ephelelwe lixesha</item>
+        <item quantity="other">%d eziphelelwe lixesha</item>
+    </plurals>
+    <string name="dashboard_view_bills">Jonga iibhili</string>
+    <string name="dashboard_balance">Ibhalansi yakho</string>
+    <string name="dashboard_owed_to_you">Kufuneka uhlawulwe %1$s</string>
+    <string name="dashboard_you_owe">Kufuneka uhlawule %1$s</string>
+    <string name="dashboard_settled">Akunatyala kwaphela</string>
+    <string name="dashboard_next_chore">Umsebenzi wakho olandelayo</string>
+    <string name="dashboard_no_chore">Akukho nto onikwe yona ngoku.</string>
+    <string name="dashboard_view_chores">Jonga imisebenzi</string>
+    <string name="dashboard_household">Ikhaya</string>
+
+    <plurals name="items_count">
+        <item quantity="one">%d into</item>
+        <item quantity="other">%d izinto</item>
+    </plurals>
+    <string name="shopping_added_by">Yongezwe ngu-%1$s</string>
+    <string name="shopping_bought">Ithengiwe</string>
+    <string name="sync_pending">Ilindele ukuvumelanisa</string>
+
+    <string name="household_setup_title">Seta ikhaya lakho</string>
+    <string name="household_setup_body">Yenza ikhaya elitsha okanye ujoyine abahlali-kunye bakho ngekhowudi yabo yesimemo.</string>
+    <string name="household_new">Ikhaya elitsha</string>
+    <string name="household_join_existing">Joyina elikhoyo</string>
+    <string name="household_created">Ikhaya lenziwe. Yabelana ngale khowudi yesimemo</string>
+
+    <!-- Activity sample feed -->
+    <string name="activity_sample_pill">Umzekelo</string>
+    <string name="activity_sample_body">Umzekelo wokwenzekileyo. Okwenzeka ngokwenene ekhaya lakho kuya kubonakala apha xa sele kudityanisiwe.</string>
+    <string name="repeat_label">Phinda</string>
+    <string name="repeat_never">Ngaphandle</string>
+    <string name="repeat_weekly">Evekini</string>
+    <string name="repeat_monthly">Inyanga nenyanga</string>
+    <string name="bills_repeats_weekly">Iyaphinda evekini</string>
+    <string name="bills_repeats_monthly">Iyaphinda inyanga nenyanga</string>
+    <string name="bills_stop_repeat">Yekela ukuphinda</string>
 </resources>
