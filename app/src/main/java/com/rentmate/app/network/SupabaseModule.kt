@@ -16,7 +16,7 @@ import javax.inject.Singleton
 private const val TAG = "SupabaseModule"
 
 /**
- * Hilt module that builds the one [SupabaseClient] the app uses, with Postgrest,
+ * Hilt module that builds the app's single [SupabaseClient], with Postgrest,
  * Storage and Auth installed. The URL and anon key come from BuildConfig.
  *
  * Based on: Supabase Kotlin reference, Initializing,
@@ -26,7 +26,7 @@ private const val TAG = "SupabaseModule"
 @InstallIn(SingletonComponent::class)
 object SupabaseModule {
 
-    /** Creates the client once per process; Auth saves and refreshes the session on the device. */
+    /** Creates the client once per process. Auth saves the session on the device and refreshes it. */
     @Provides
     @Singleton
     fun provideSupabaseClient(): SupabaseClient = createSupabaseClient(

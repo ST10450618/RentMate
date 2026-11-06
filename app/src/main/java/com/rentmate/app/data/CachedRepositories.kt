@@ -179,7 +179,7 @@ class CachedBillsRepository @Inject constructor(
         else memberDao.observeMembers(householdId).map { list -> list.map { HouseholdMemberRow(it.user_id, it.display_name) } }
     }
 
-    /** Fetches bills, then members; throws on a network or server error. */
+    /** Fetches bills, then members. Throws on a network or server error. */
     override suspend fun refresh() {
         currentHousehold.awaitRestored()
         val householdId = currentHousehold.id.value ?: run {

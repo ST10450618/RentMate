@@ -80,7 +80,7 @@ fun buildLandlordEmail(
     )
 }
 
-/** One @, a dot in the domain, a top-level domain of two or more characters, no whitespace. */
+/** Needs one @, a dot in the domain, a top-level domain of two or more characters and no whitespace. */
 private val EMAIL = Regex("""^[^\s@]+@[^\s@]+\.[^\s@]{2,}$""")
 
 /** Loose check before saving the landlord's address: something@domain.tld, no spaces. */

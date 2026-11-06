@@ -53,7 +53,7 @@ class SyncStatusTracker @Inject constructor(
     outbox: OutboxQueue,
     rejectionDao: SyncRejectionDao
 ) : SyncStatusSource {
-    /** The in-memory part of [SyncStatus]: what the worker last reported. */
+    /** The in-memory part of [SyncStatus]. It holds what the worker last reported. */
     private data class RunState(val phase: SyncPhase = SyncPhase.Idle, val lastSyncedAt: Long? = null)
 
     private val run = MutableStateFlow(RunState())

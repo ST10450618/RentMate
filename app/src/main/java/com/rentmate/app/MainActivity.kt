@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
         notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-    // Lifecycle callbacks below only log, so Logcat shows when the activity moves between states.
+    // These lifecycle callbacks only write to Logcat, so you can see when the activity changes state.
     override fun onStart() { super.onStart(); Log.d(TAG, "onStart") }
     override fun onResume() { super.onResume(); Log.d(TAG, "onResume") }
     override fun onPause() { super.onPause(); Log.d(TAG, "onPause") }

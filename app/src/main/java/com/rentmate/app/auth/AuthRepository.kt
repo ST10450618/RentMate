@@ -22,9 +22,9 @@ data class SignInResult(val hasHousehold: Boolean)
 private data class HouseholdMembershipRow(val household_id: String)
 
 /**
- * Signs the user in to Supabase with a Google ID token, restores a saved session at
- * launch and picks the current household. It also pulls the user's saved settings
- * after sign-in so a new device matches the old one.
+ * Signs the user in to Supabase with a Google ID token. At launch it restores the
+ * saved session and picks the current household. After sign-in it pulls the user's
+ * saved settings, so a new device matches the old one.
  *
  * Based on: Supabase Kotlin reference, Sign in with ID token,
  * https://supabase.com/docs/reference/kotlin/auth-signinwithidtoken (accessed 2026-11-06)

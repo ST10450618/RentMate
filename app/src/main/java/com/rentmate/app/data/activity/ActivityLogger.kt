@@ -27,7 +27,7 @@ private const val TAG = "ActivityLogger"
 interface ActivityLogger {
     /** Records that the user created the bill [billId]. */
     fun billAdded(title: String, amount: Double, billId: String?)
-    /** Records that a share of [title] was marked paid, by the payer or for [payerName]. */
+    /** Records that the user marked a share of [title] paid, either their own or [payerName]'s. */
     fun sharePaid(title: String, amount: Double, payerName: String?, billId: String?)
     /** Records that the user confirmed a settle-up payment from [fromName]. */
     fun settlementConfirmed(fromName: String, amount: Double)
@@ -56,8 +56,8 @@ object NoOpActivityLogger : ActivityLogger {
 }
 
 /**
- * The app's [ActivityLogger]: adds one document to `households/{id}/events` per call,
- * with the actor's display name read once from `profiles` and cached per user.
+ * The app's [ActivityLogger]. Each call adds one document to `households/{id}/events`.
+ * It reads the actor's display name from `profiles` once and caches it per user.
  *
  * Based on: Firebase docs, Add data to Cloud Firestore,
  * https://firebase.google.com/docs/firestore/manage-data/add-data (accessed 2026-11-06)
@@ -98,7 +98,7 @@ class FirestoreActivityLogger @Inject constructor(
     override fun maintenanceStatus(title: String, status: String, requestId: String?) =
         write(ActivityType.MAINTENANCE_STATUS, ActivityEventBuilder.maintenanceStatus(title, status), requestId)
 
-    /** Adds the event document in the background; does nothing when no household is selected. */
+    /** Adds the event document in the background. Does nothing when no household is selected. */
     private fun write(type: ActivityType, summary: String, refId: String?) {
         // Read now, on the caller's thread of execution, in case the user signs out before the coroutine runs.
         val householdId = currentHousehold.id.value ?: run {
@@ -121,7 +121,7 @@ class FirestoreActivityLogger @Inject constructor(
         }
     }
 
-    /** The signed-in user's display name, cached per user id; "Someone" when it cannot be read. */
+    /** The signed-in user's display name, cached per user id. Falls back to "Someone" when it cannot be read. */
     private suspend fun actorName(): String {
         val userId = supabase.auth.currentUserOrNull()?.id ?: return "Someone"
         cachedName?.takeIf { it.first == userId }?.let { return it.second }

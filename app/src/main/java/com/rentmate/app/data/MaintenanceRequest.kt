@@ -12,7 +12,7 @@ import java.util.UUID
  *
  * Fields mirror the MaintenanceRequest entity in Section 7 of the design document.
  *
- * [MaintenanceCategory] is the kind of fault, shown in the email so the landlord
+ * [MaintenanceCategory] is the kind of fault. The email shows it, so the landlord
  * knows which trade to call.
  */
 enum class MaintenanceCategory(@StringRes val labelRes: Int) {
@@ -53,7 +53,7 @@ enum class RequestStatus(@StringRes val labelRes: Int) {
     val canAdvance: Boolean get() = next() != null
 }
 
-/** A maintenance fault as the app works with it; times are epoch millis. */
+/** A maintenance fault as the app works with it. Times are epoch millis. */
 data class MaintenanceRequest(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
@@ -100,7 +100,7 @@ data class MaintenanceRequest(
         }
 }
 
-/** Why a request title was refused by [validateTitle]. */
+/** Why [validateTitle] refused a request title. */
 enum class TitleError { BLANK, TOO_LONG }
 
 /**

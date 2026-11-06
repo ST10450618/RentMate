@@ -58,7 +58,7 @@ class WorkManagerSyncScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SyncScheduler {
 
-    /** Enqueues [SyncWorker] as unique work; a sync already waiting or running is kept. */
+    /** Enqueues [SyncWorker] as unique work. If a sync is already waiting or running, it keeps that one. */
     override fun requestSync() {
         try {
             WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, buildRequest())

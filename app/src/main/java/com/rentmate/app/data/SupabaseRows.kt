@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 // Row shapes match Postgres columns (snake_case) from supabase/migrations/0001_init.sql.
-// Each class is decoded by supabase-kt Postgrest with kotlinx.serialization.
+// supabase-kt Postgrest decodes each class with kotlinx.serialization.
 
 /** One `households` row, including the landlord contact (RM-0009). */
 @Serializable
@@ -81,7 +81,7 @@ data class BillShareWithProfileRow(
     val profiles: ProfileNameRow? = null
 )
 
-/** A bill with its shares embedded; the row type the Bills and Dashboard screens use. */
+/** A bill with its shares embedded. The Bills and Dashboard screens use this row type. */
 @Serializable
 data class BillWithSharesRow(
     val id: String,
@@ -100,7 +100,7 @@ data class BillWithSharesRow(
     @Transient val pending: Boolean = false
 )
 
-/** One `chores` row; [rotation_order] lists user ids in turn order. */
+/** One `chores` row. [rotation_order] lists user ids in turn order. */
 @Serializable
 data class ChoreRow(
     val id: String,
@@ -152,7 +152,7 @@ data class ShoppingItemRow(
     @Transient val pending: Boolean = false
 )
 
-/** One `maintenance_requests` row; times are ISO-8601 text. */
+/** One `maintenance_requests` row. Times are ISO-8601 text. */
 @Serializable
 data class MaintenanceRequestRow(
     val id: String,

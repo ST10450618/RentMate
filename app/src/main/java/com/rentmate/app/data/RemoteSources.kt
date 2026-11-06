@@ -164,19 +164,19 @@ class SupabaseShoppingRemoteSource @Inject constructor(
             .also { Log.d(TAG, "GET shopping_items -> ${it.size}") }
     }
 
-    /** Inserts and selects the row back to read its id. */
+    /** Inserts the row and selects it back to read its id. */
     override suspend fun insertItem(insert: ShoppingItemInsert): String {
         Log.d(TAG, "POST shopping_items")
         return supabase.from("shopping_items").insert(insert) { select() }.decodeSingle<IdRow>().id
     }
 
-    /** Plain update; does not report whether a row matched. */
+    /** Runs a plain update. It does not report whether a row matched. */
     override suspend fun markPurchased(id: String, update: ShoppingItemPurchase) {
         Log.d(TAG, "PATCH shopping_items (purchase)")
         supabase.from("shopping_items").update(update) { filter { eq("id", id) } }
     }
 
-    /** Update that selects the changed ids back, so the caller can count them. */
+    /** Runs an update and selects the changed ids back, so the caller can count them. */
     override suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int =
         supabase.from("shopping_items")
             .update(update) {

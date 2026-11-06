@@ -29,7 +29,7 @@ class FirestoreActivityRepository @Inject constructor(
     private val firebaseSession: FirebaseSession
 ) : ActivityRepository {
 
-    /** Opens a snapshot listener for the newest [limit] events; it is removed when the flow is cancelled. */
+    /** Opens a snapshot listener for the newest [limit] events. Cancelling the flow removes the listener. */
     override fun observe(householdId: String, limit: Int): Flow<List<ActivityEvent>> = callbackFlow {
         firebaseSession.ensureSignedIn()
         Log.d(TAG, "listening to the activity feed (limit=$limit)")
@@ -53,7 +53,7 @@ class FirestoreActivityRepository @Inject constructor(
         }
     }
 
-    /** Maps one document to an event; skips types this app version does not know. */
+    /** Maps one document to an event. Skips types that this app version does not know. */
     private fun toEvent(doc: DocumentSnapshot, now: Instant): ActivityEvent? {
         val type = ActivityType.fromWireName(doc.getString("type")) ?: return null
         val createdAt = doc.getTimestamp("createdAt")?.toInstantOrNull() ?: now

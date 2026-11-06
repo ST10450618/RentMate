@@ -37,7 +37,7 @@ data class UserSettings(
  */
 class SettingsRepository(private val context: Context) {
 
-    /** Every setting, re-emitted on each change; unset values use their defaults. */
+    /** Emits every setting again on each change. Unset values use their defaults. */
     val settings: Flow<UserSettings> = context.settingsDataStore.data.map { prefs ->
         UserSettings(
             toggles = SettingToggle.entries.associateWith { prefs[it.key] ?: it.default },
@@ -48,13 +48,13 @@ class SettingsRepository(private val context: Context) {
     /** RM-0026: the language tag the user (or their profile) chose, or null if never set. */
     val storedLanguageTag: Flow<String?> = context.settingsDataStore.data.map { it[LANGUAGE_KEY] }
 
-    /** Saves one toggle on this device. Syncing it to the profile is the caller's job. */
+    /** Saves one toggle on this device. The caller syncs it to the profile. */
     suspend fun setToggle(toggle: SettingToggle, value: Boolean) {
         context.settingsDataStore.edit { it[toggle.key] = value }
         Log.d(TAG, "toggle ${toggle.name} = $value")
     }
 
-    /** Saves the language choice on this device; [applyLanguage] switches the UI. */
+    /** Saves the language choice on this device. [applyLanguage] switches the UI. */
     suspend fun setLanguage(language: AppLanguage) {
         context.settingsDataStore.edit { it[LANGUAGE_KEY] = language.tag }
         Log.d(TAG, "language = ${language.tag}")

@@ -51,7 +51,7 @@ class SyncStartup @Inject constructor(
         }
     }
 
-    /** Requests a sync only when the outbox holds entries; [why] goes in the log line. */
+    /** Requests a sync only when the outbox holds entries. [why] goes in the log line. */
     private suspend fun requestIfPending(why: String) {
         try {
             val pending = outboxDao.count()

@@ -27,12 +27,12 @@ object ActivityEventBuilder {
         return if (text.length <= EVENT_TEXT_MAX) text else text.take(EVENT_TEXT_MAX - 1) + "…"
     }
 
-    // Summary texts. Each one is the part of the feed row that follows the actor's name.
+    // Summary texts. Each one is the part of a feed row that comes after the actor's name.
 
     /** Summary for [ActivityType.BILL_ADDED]. */
     fun billAdded(title: String, amount: String) = "added a bill: $title $amount"
 
-    /** Summary for a paid share; names the payer when someone else's share was marked. */
+    /** Summary for a paid share. It names the payer when the user marked someone else's share. */
     fun sharePaid(title: String, amount: String, payerName: String?) =
         if (payerName.isNullOrBlank()) "marked a share of $title $amount as paid"
         else "marked ${payerName}'s share of $title $amount as paid"

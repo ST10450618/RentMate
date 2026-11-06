@@ -29,7 +29,7 @@ class RentMateMessagingService : FirebaseMessagingService() {
     /** Saves FCM tokens for the signed-in user. */
     @Inject lateinit var registrar: DeviceTokenRegistrar
 
-    /** FCM rotated the token; save it without blocking the service. */
+    /** FCM calls this when it rotates the token. Saves the new token without blocking the service. */
     override fun onNewToken(token: String) {
         Log.d(TAG, "new FCM token")
         registrar.registerInBackground(token)

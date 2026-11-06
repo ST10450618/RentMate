@@ -117,7 +117,7 @@ class OutboxReplayer @Inject constructor(
         }
     }
 
-    /** Ends a run that emptied the queue: refreshes changed caches and records the sync time. */
+    /** Ends a run that emptied the queue. Refreshes the changed caches and records the sync time. */
     private suspend fun finish(touched: Set<String>): ReplayResult {
         Log.d(TAG, "replay run done; refreshing ${touched.size} table(s)")
         refresh(touched)
@@ -125,7 +125,7 @@ class OutboxReplayer @Inject constructor(
         return ReplayResult.DONE
     }
 
-    /** Ends a run early: refreshes what changed so far and records why it will retry. */
+    /** Ends a run early. Refreshes what changed so far and records why it will retry. */
     private suspend fun stop(touched: Set<String>, reason: String?): ReplayResult {
         Log.d(TAG, "replay run stopped: $reason")
         refresh(touched)

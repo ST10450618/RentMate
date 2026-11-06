@@ -42,7 +42,7 @@ fun attachmentPath(householdId: String, kind: AttachmentKind, id: String = UUID.
 
 /** What an upload flow emits: progress from 0 to 1, then the stored path. */
 sealed interface UploadProgress {
-    /** Part of the file is sent; [fraction] runs from 0 to 1. */
+    /** The upload is in progress. [fraction] runs from 0 to 1. */
     data class Sending(val fraction: Float) : UploadProgress
     /** The file is stored at [path] in [ATTACHMENTS_BUCKET]. */
     data class Done(val path: String) : UploadProgress
@@ -112,7 +112,7 @@ interface AttachmentRepository {
     suspend fun signedUrls(paths: List<String>, expiresIn: Duration): Map<String, String>
 }
 
-/** Insert body for public.attachments; exactly one parent id is set. */
+/** Insert body for public.attachments. Exactly one parent id is set. */
 @Serializable
 private data class AttachmentInsert(
     val household_id: String,
@@ -145,7 +145,7 @@ class SupabaseAttachmentRepository @Inject constructor(
 
     private val bucket get() = supabase.storage.from(ATTACHMENTS_BUCKET)
 
-    /** Streams upload progress; `upsert = false` so a path can never overwrite another photo. */
+    /** Streams upload progress. `upsert = false` stops an upload from overwriting another photo at the same path. */
     override fun upload(kind: AttachmentKind, jpeg: ByteArray): Flow<UploadProgress> = flow {
         val householdId = currentHousehold.id.first() ?: throw IllegalStateException("No household selected")
         val path = attachmentPath(householdId, kind)
@@ -165,7 +165,7 @@ class SupabaseAttachmentRepository @Inject constructor(
         )
     }
 
-    /** Deletes the object from Storage. Any public.attachments row for it must be gone already. */
+    /** Deletes the object from Storage. The caller must delete any public.attachments row for it first. */
     override suspend fun delete(path: String) {
         Log.d(TAG, "delete photo")
         bucket.delete(path)
@@ -188,7 +188,7 @@ class SupabaseAttachmentRepository @Inject constructor(
         )
     }
 
-    /** Rows with neither parent id set are skipped; the table check should prevent them. */
+    /** Skips rows with neither parent id set. The table check should stop those rows from existing. */
     override suspend fun list(): List<Attachment> {
         val householdId = currentHousehold.id.first() ?: return emptyList()
         Log.d(TAG, "list attachments")

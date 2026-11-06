@@ -20,7 +20,7 @@ sealed interface AuthUiState {
     data object Idle : AuthUiState
     /** The account picker or Supabase call is in progress. */
     data object Loading : AuthUiState
-    /** Signed in; [hasHousehold] decides between Household setup and the Dashboard. */
+    /** Signed in. [hasHousehold] decides between Household setup and the Dashboard. */
     data class Success(val hasHousehold: Boolean) : AuthUiState
     /** [message] is the raw failure for logs only; show [messageRes] to the user. */
     data class Error(
@@ -41,7 +41,7 @@ class AuthViewModel @Inject constructor(
     /** Current Login screen state. */
     val state: StateFlow<AuthUiState> = _state
 
-    /** Starts Google sign-in; the result arrives through [state]. */
+    /** Starts Google sign-in. [state] reports the result. */
     fun signIn() {
         viewModelScope.launch {
             Log.d(TAG, "sign-in requested")

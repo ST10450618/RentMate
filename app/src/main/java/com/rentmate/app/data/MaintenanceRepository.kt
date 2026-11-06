@@ -46,7 +46,7 @@ private data class HouseholdLandlordRow(
 @Serializable
 private data class AdvanceStatusParams(val request_id_in: String)
 
-/** Insert body for a new `maintenance_requests` row; the server sets status and times. */
+/** Insert body for a new `maintenance_requests` row. The server sets the status and times. */
 @Serializable
 private data class MaintenanceInsert(
     val household_id: String,
@@ -103,14 +103,14 @@ class SupabaseMaintenanceRepository @Inject constructor(
 ) : MaintenanceRepository {
     private val _requests = MutableStateFlow<List<MaintenanceRequest>>(emptyList())
 
-    /** In-memory list; there is no Room cache for maintenance requests. */
+    /** In-memory list. Maintenance requests have no Room cache. */
     override val requests: StateFlow<List<MaintenanceRequest>> = _requests.asStateFlow()
 
-    /** Read from the Supabase session each time, so it follows sign-in and sign-out. */
+    /** Reads the Supabase session on every access, so it follows sign-in and sign-out. */
     override val currentUserId: String?
         get() = supabase.auth.currentUserOrNull()?.id
 
-    /** Replaces [requests] with the server list; does nothing when no household is selected. */
+    /** Replaces [requests] with the server list. Does nothing when no household is selected. */
     override suspend fun refresh() {
         val householdId = currentHousehold.id.first() ?: return
         Log.d(TAG, "refresh: fetching requests")
@@ -174,10 +174,10 @@ class SupabaseMaintenanceRepository @Inject constructor(
         return LandlordContact(row.name, row.landlord_name, row.landlord_email)
     }
 
-    /** Trims and saves the address; validation is the caller's job ([isValidEmail]). */
+    /** Trims and saves the address. The caller must validate it first with [isValidEmail]. */
     override suspend fun saveLandlordEmail(email: String) {
         val householdId = currentHousehold.id.first() ?: return
-        // The address itself is personal data, so it is not logged.
+        // The address is personal data, so we do not log it.
         Log.d(TAG, "saveLandlordEmail: updating household")
         supabase.from("households").update({ set("landlord_email", email.trim()) }) {
             filter { eq("id", householdId) }
@@ -185,8 +185,8 @@ class SupabaseMaintenanceRepository @Inject constructor(
     }
 }
 
-// The server stores enum values in title case ("Plumbing"); the app uses Kotlin enums.
-// Unknown server values fall back to a safe default instead of failing the whole list.
+// The server stores enum values in title case ("Plumbing"). The app uses Kotlin enums.
+// An unknown server value maps to a safe default, so one bad row does not fail the whole list.
 
 /** The `category` text the server stores. */
 private fun MaintenanceCategory.toDto() = when (this) {
@@ -197,7 +197,7 @@ private fun MaintenanceCategory.toDto() = when (this) {
     MaintenanceCategory.OTHER -> "Other"
 }
 
-/** Parses a server category; anything unknown becomes OTHER. */
+/** Parses a server category. Anything unknown becomes OTHER. */
 private fun String.toLocalCategory() = when (this) {
     "Plumbing" -> MaintenanceCategory.PLUMBING
     "Electrical" -> MaintenanceCategory.ELECTRICAL
@@ -213,7 +213,7 @@ private fun Urgency.toDto() = when (this) {
     Urgency.HIGH -> "High"
 }
 
-/** Parses a server urgency; anything unknown becomes MEDIUM. */
+/** Parses a server urgency. Anything unknown becomes MEDIUM. */
 private fun String.toLocalUrgency() = when (this) {
     "Low" -> Urgency.LOW
     "High" -> Urgency.HIGH
@@ -228,7 +228,7 @@ private fun RequestStatus.toDto() = when (this) {
     RequestStatus.RESOLVED -> "Resolved"
 }
 
-/** Parses a server status; anything unknown becomes RESOLVED. */
+/** Parses a server status. Anything unknown becomes RESOLVED. */
 private fun String.toLocalStatus() = when (this) {
     "Open" -> RequestStatus.OPEN
     "Sent" -> RequestStatus.SENT
@@ -241,7 +241,7 @@ private fun parseMillis(iso: String?): Long? = iso?.let {
     runCatching { java.time.Instant.parse(it).toEpochMilli() }.getOrNull()
 }
 
-/** Maps a server row to the app model; a bad created_at falls back to now. */
+/** Maps a server row to the app model. A bad created_at falls back to now. */
 private fun MaintenanceRow.toLocal() = MaintenanceRequest(
     id = id,
     title = title,

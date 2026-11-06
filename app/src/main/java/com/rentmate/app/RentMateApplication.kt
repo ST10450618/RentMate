@@ -30,7 +30,7 @@ class RentMateApplication : Application(), Configuration.Provider {
     /** Builds workers with Hilt-injected constructors. */
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
-    /** Read by WorkManager the first time it is used, because on-demand initialisation is on. */
+    /** WorkManager reads this the first time the app uses it, because on-demand initialisation is on. */
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)

@@ -6,14 +6,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 /**
- * Hilt module that binds [SessionRepository] to the Supabase-backed [AuthRepository],
- * so [StartupViewModel] depends on the interface and tests can swap in a fake.
+ * Hilt module that binds [SessionRepository] to the Supabase-backed [AuthRepository].
+ * [StartupViewModel] depends on the interface, so tests can pass in a fake.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AuthModule {
 
-    /** Hands out the app-wide [AuthRepository] wherever a [SessionRepository] is injected. */
+    /** Provides the app-wide [AuthRepository] wherever code injects a [SessionRepository]. */
     @Binds
     abstract fun bindSessionRepository(impl: AuthRepository): SessionRepository
 }

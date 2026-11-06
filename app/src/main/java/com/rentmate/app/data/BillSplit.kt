@@ -6,11 +6,11 @@ import java.math.RoundingMode
 
 /** The three ways a bill can be divided. [wire] is the value stored in bills.split_method. */
 enum class SplitMode(val wire: String) {
-    /** Everyone pays the same; the last share takes the rounding remainder. */
+    /** Everyone pays the same amount. The last share takes the rounding remainder. */
     Equal("Equal"),
-    /** Each member pays a percentage; the percentages total 100. */
+    /** Each member pays a percentage. The percentages total 100. */
     Percentage("Percentage"),
-    /** Each member pays a typed rand amount; the amounts total the bill. */
+    /** Each member pays a typed rand amount. The amounts total the bill. */
     ExactAmount("ExactAmount")
 }
 
@@ -39,7 +39,7 @@ data class SplitShare(val userId: String, val cents: Long, val value: BigDecimal
     val amount: BigDecimal get() = BigDecimal.valueOf(cents, 2)
 }
 
-/** Why [BillSplit.compute] refused a split; the form maps each one to a message. */
+/** Why [BillSplit.compute] refused a split. The form maps each reason to a message. */
 sealed interface SplitError {
     /** The bill total is missing, zero or negative. */
     data object InvalidAmount : SplitError
@@ -59,9 +59,9 @@ sealed interface SplitError {
 
 /** The outcome of [BillSplit.compute]. */
 sealed interface SplitResult {
-    /** The split is good; [shares] are in member order and total the bill. */
+    /** The split is valid. [shares] are in member order and total the bill. */
     data class Valid(val shares: List<SplitShare>) : SplitResult
-    /** The split was refused for [error]. */
+    /** [BillSplit.compute] refused the split because of [error]. */
     data class Invalid(val error: SplitError) : SplitResult
 }
 

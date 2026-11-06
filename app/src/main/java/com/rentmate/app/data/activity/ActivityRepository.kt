@@ -31,7 +31,7 @@ interface ActivityRepository {
 @Singleton
 class InMemoryActivityRepository @Inject constructor() : ActivityRepository {
 
-    /** Always true: this data is invented. */
+    /** Always true, because these events are made up. */
     override val isSampleData: Boolean = true
 
     /** Emits the sample list once, cut to [limit]. */

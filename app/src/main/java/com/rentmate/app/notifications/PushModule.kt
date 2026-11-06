@@ -49,7 +49,7 @@ class FirebasePushTokenSource(private val context: Context) : PushTokenSource {
 
 /** Saves tokens through the RPCs in migration 0015_device_tokens.sql. */
 class SupabaseDeviceTokenStore(private val supabase: SupabaseClient) : DeviceTokenStore {
-    /** Calls `register_device_token`; skips the call and returns false when signed out. */
+    /** Calls `register_device_token`. When signed out, it skips the call and returns false. */
     override suspend fun register(token: String): Boolean {
         if (supabase.auth.currentSessionOrNull() == null) return false
         supabase.postgrest.rpc("register_device_token", RegisterTokenParams(token).toRpcParams())
@@ -57,7 +57,7 @@ class SupabaseDeviceTokenStore(private val supabase: SupabaseClient) : DeviceTok
         return true
     }
 
-    /** Calls `unregister_device_token`; does nothing when signed out. */
+    /** Calls `unregister_device_token`. Does nothing when signed out. */
     override suspend fun unregister(token: String) {
         if (supabase.auth.currentSessionOrNull() == null) return
         supabase.postgrest.rpc("unregister_device_token", UnregisterTokenParams(token).toRpcParams())
@@ -70,7 +70,7 @@ class SupabaseDeviceTokenStore(private val supabase: SupabaseClient) : DeviceTok
 @InstallIn(SingletonComponent::class)
 object PushModule {
 
-    /** One registrar for the app, with its own IO scope so saves outlive the messaging service. */
+    /** Provides one registrar for the app. Its own IO scope lets a save finish after the messaging service stops. */
     @Provides
     @Singleton
     fun provideDeviceTokenRegistrar(
