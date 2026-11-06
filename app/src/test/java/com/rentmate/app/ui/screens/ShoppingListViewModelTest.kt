@@ -125,6 +125,39 @@ class ShoppingListViewModelTest {
         assertTrue(repository.deleted.isEmpty())
     }
 
+    /** RM-0059: a tap moves the item to Bought at once; Undo moves it back and nothing is sent. */
+    @Test
+    fun purchase_movesToBoughtAndUndoMovesItBack() {
+        val repository = FakeShoppingRepository(offline = false)
+        repository.items.value = listOf(item("i1"), item("i2"))
+        val vm = viewModel(repository)
+        feedback.drain()
+
+        vm.purchase("i1")
+        assertEquals(listOf("i2"), vm.state.value.toBuy.map { it.id })
+        assertEquals(listOf("i1"), vm.state.value.bought.map { it.id })
+
+        val message = feedback.drain().single()
+        assertEquals(R.string.house_undo_bought, message.messageRes)
+        message.undo!!.invoke()
+        undoScope.advanceTimeBy(UndoQueue.UNDO_WINDOW_MS * 2)
+        undoScope.runCurrent()
+
+        assertEquals(listOf("i1", "i2"), vm.state.value.toBuy.map { it.id })
+        assertTrue(vm.state.value.bought.isEmpty())
+    }
+
+    /** RM-0059: an item already bought on the server sits under Bought, not To buy. */
+    @Test
+    fun purchasedItems_areSplitFromItemsToBuy() {
+        val repository = FakeShoppingRepository(offline = false)
+        repository.items.value = listOf(item("i1"), item("i2").copy(is_purchased = true))
+        val vm = viewModel(repository)
+
+        assertEquals(listOf("i1"), vm.state.value.toBuy.map { it.id })
+        assertEquals(listOf("i2"), vm.state.value.bought.map { it.id })
+    }
+
     @Test
     fun offlineDelete_bringsTheItemBackWithRetry() {
         val repository = FakeShoppingRepository(offline = true)

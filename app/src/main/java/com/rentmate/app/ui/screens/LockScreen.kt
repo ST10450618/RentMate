@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Fingerprint
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -23,7 +23,6 @@ import com.rentmate.app.ui.components.OnBrandButton
 import com.rentmate.app.ui.theme.Aloe
 import com.rentmate.app.ui.theme.AloeDark
 import com.rentmate.app.ui.theme.AloeLight
-import com.rentmate.app.ui.theme.Amber
 import com.rentmate.app.ui.theme.Spacing
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +39,10 @@ import com.rentmate.app.auth.AuthFailure
  * RM-0013: opaque screen shown while the app is locked. It swallows touches so the
  * content below cannot be used, explains why the last attempt failed (if it did),
  * and offers a Retry button that shows the prompt again.
+ *
+ * RM-0061: matches the mockup. Under the title, one line says how to unlock.
+ * The white Unlock button is full width. A footer note says why the lock is
+ * there and that Settings can turn it off.
  */
 @Composable
 fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = Modifier) {
@@ -58,12 +61,17 @@ fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = 
         ) {
             BrandMark(size = 96.dp)
             Spacer(Modifier.height(Spacing.xl))
-            Icon(Icons.Outlined.Lock, contentDescription = null, tint = Amber, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = stringResource(R.string.lock_locked),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = stringResource(R.string.lock_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AloeLight,
                 textAlign = TextAlign.Center
             )
             if (failure != null) {
@@ -79,7 +87,16 @@ fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = 
             OnBrandButton(
                 text = stringResource(R.string.lock_unlock),
                 onClick = onRetry,
+                modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Outlined.Fingerprint, contentDescription = null, tint = Aloe) }
+            )
+            Spacer(Modifier.height(Spacing.lg))
+            // RM-0061: say why the lock is there and where to turn it off.
+            Text(
+                text = stringResource(R.string.lock_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = AloeLight,
+                textAlign = TextAlign.Center
             )
         }
     }
