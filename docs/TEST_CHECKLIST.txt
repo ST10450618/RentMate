@@ -109,8 +109,10 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
     message instead of an empty screen.
 [ ] RM-0017: with airplane mode on, add a shopping item, mark another one
     bought, and add a bill. Each shows "Waiting to sync". Swipe the app
-    away and reopen: they are still there with the badge. (They upload in
-    RM-0018, not yet.)
+    away and reopen: they are still there with the badge.
+[ ] RM-0018: after the RM-0017 check, turn airplane mode off. Within a
+    minute the "Waiting to sync" badges go away, and a second phone in the
+    same household sees the item, the purchase and the bill (only once).
 [ ] RM-0023: with the app in the background, add a bill on phone A. Tap
     the push on the tablet: Bills opens. Press Back: the Dashboard shows,
     not Login.

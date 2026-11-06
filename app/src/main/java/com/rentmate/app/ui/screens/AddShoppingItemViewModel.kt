@@ -53,7 +53,7 @@ class AddShoppingItemViewModel @Inject constructor(
                 .onSuccess { result ->
                     when (result) {
                         is WriteResult.Sent -> activity.shoppingAdded(name.trim(), result.id)
-                        // TODO(RM-0018): post the shoppingAdded activity event once the outbox replay succeeds.
+                        // RM-0018: SyncWorker posts shoppingAdded once the queued insert uploads.
                         is WriteResult.Queued -> Log.d(TAG, "item queued offline: ${result.id}")
                     }
                     _state.value = AddShoppingItemUiState.Saved

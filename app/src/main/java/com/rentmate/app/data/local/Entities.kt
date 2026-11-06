@@ -137,7 +137,37 @@ data class OutboxEntry(
     @ColumnInfo(defaultValue = "0")
     val attemptCount: Int = 0,
     /** Message of the last failed replay, if any. */
-    val lastError: String? = null
+    val lastError: String? = null,
+    /**
+     * RM-0018: Storage paths of photos that were already uploaded when the change
+     * was queued. The worker links them to the row the server creates (only
+     * `create_bill` uses it). Empty for every other entry.
+     */
+    @ColumnInfo(defaultValue = "'[]'")
+    val attachmentPaths: List<String> = emptyList()
+)
+
+/**
+ * RM-0018: a queued change the server refused for good, so the worker dropped
+ * it. Kept so RM-0019 can tell the user what was not saved and why.
+ */
+@Entity(tableName = "sync_rejections")
+data class SyncRejectionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    /** [OutboxEntry.op] of the dropped entry. */
+    val op: String,
+    /** [OutboxEntry.tableName] of the dropped entry. */
+    val tableName: String,
+    /** [OutboxEntry.entityId] of the dropped entry. */
+    val entityId: String,
+    /** Why it was dropped: a [com.rentmate.app.data.sync.DropReason] name. */
+    val reason: String,
+    /** Server or exception message, for logs and support. Not shown to users as is. */
+    val message: String? = null,
+    /** True when this entry was dropped only because an earlier change to the same row was. */
+    val dependant: Boolean = false,
+    /** When the worker dropped it, epoch millis. */
+    val rejectedAt: Long
 )
 
 /**

@@ -60,6 +60,10 @@ abstract class BillDao {
     @Query("UPDATE bill_shares SET syncState = 'SYNCED' WHERE id = :id")
     abstract suspend fun markShareSynced(id: String)
 
+    /** One bill by id, or null. */
+    @Query("SELECT * FROM bills WHERE id = :id")
+    abstract suspend fun getBill(id: String): BillEntity?
+
     /** Deletes a bill (its shares cascade). */
     @Query("DELETE FROM bills WHERE id = :id")
     abstract suspend fun deleteBill(id: String)
@@ -227,6 +231,35 @@ interface OutboxDao {
     /** Removes the entry with [id] (after it was uploaded). */
     @Query("DELETE FROM outbox WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    /** RM-0018: number of entries still queued for the local row [entityId]. */
+    @Query("SELECT COUNT(*) FROM outbox WHERE entityId = :entityId")
+    suspend fun countForEntity(entityId: String): Int
+
+    /** RM-0018: number of pending entries right now (not a Flow). */
+    @Query("SELECT COUNT(*) FROM outbox")
+    suspend fun count(): Int
+}
+
+/** RM-0018: changes the server refused for good (RM-0019 reads them). */
+@Dao
+interface SyncRejectionDao {
+
+    /** Records a dropped change. */
+    @Insert
+    suspend fun insert(rejection: SyncRejectionEntity): Long
+
+    /** Every recorded rejection, newest first, updated live. */
+    @Query("SELECT * FROM sync_rejections ORDER BY rejectedAt DESC, id DESC")
+    fun observeAll(): Flow<List<SyncRejectionEntity>>
+
+    /** Removes one rejection, e.g. after the user saw it. */
+    @Query("DELETE FROM sync_rejections WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
+    /** Removes every rejection. */
+    @Query("DELETE FROM sync_rejections")
+    suspend fun clear()
 }
 
 /** Access to the cached household roster (RM-0017). */

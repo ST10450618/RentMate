@@ -42,7 +42,7 @@ sealed interface WriteResult {
     /** Supabase accepted the write. */
     data class Sent(override val id: String) : WriteResult
 
-    /** No connection: the change is stored locally with an outbox entry for RM-0018 to upload. */
+    /** No connection: the change is stored locally with an outbox entry that SyncWorker uploads (RM-0018). */
     data class Queued(override val id: String) : WriteResult
 }
 
@@ -87,7 +87,13 @@ data class NewBill(
     val mode: SplitMode,
     val shares: List<SplitShare>,
     val repeat: RepeatMode,
-    val issuedByUserId: String
+    val issuedByUserId: String,
+    /**
+     * RM-0018: Storage paths of photos already uploaded for this bill. Online the
+     * caller links them; when the bill is queued, the outbox keeps them and the
+     * sync worker links them once the bill exists on the server.
+     */
+    val photoPaths: List<String> = emptyList()
 )
 
 /**
@@ -246,7 +252,8 @@ class CachedBillsRepository @Inject constructor(
             tableName = "create_bill",
             payloadJson = OutboxJson.encodeToString(CreateBillParams.serializer(), params),
             createdAt = now,
-            entityId = billId
+            entityId = billId,
+            attachmentPaths = bill.photoPaths
         )
         outbox.enqueue(entry) {
             dao.upsertBills(listOf(entity))
