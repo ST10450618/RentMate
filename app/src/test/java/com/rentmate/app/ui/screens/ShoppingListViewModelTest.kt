@@ -13,13 +13,19 @@ import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import com.rentmate.app.ui.feedback.UndoQueue
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
@@ -36,7 +42,16 @@ class ShoppingListViewModelTest {
         }
         override suspend fun addItem(householdId: String, name: String, addedByUserId: String) = WriteResult.Queued("x")
         override suspend fun markPurchased(id: String, userId: String) = WriteResult.Queued(id)
+        val deleted = mutableListOf<String>()
+        override suspend fun deleteItem(id: String) {
+            if (offline) throw IOException("Unable to resolve host")
+            deleted += id
+            items.value = items.value.filterNot { it.id == id }
+        }
     }
+
+    private val undoScope = TestScope()
+    private val feedback = FeedbackCenter()
 
     // Never called on the refresh path; only the constructor needs a client.
     private val supabase = createSupabaseClient("https://example.supabase.co", "test-key") { install(Postgrest) }
@@ -53,7 +68,7 @@ class ShoppingListViewModelTest {
     private fun viewModel(repository: ShoppingRepository): ShoppingListViewModel {
         val household = CurrentHousehold(InMemoryHouseholdIdStore(), Dispatchers.Unconfined)
         household.set("h1")
-        return ShoppingListViewModel(supabase, household, NoOpActivityLogger, repository, FeedbackCenter())
+        return ShoppingListViewModel(supabase, household, NoOpActivityLogger, repository, feedback, UndoQueue(feedback, undoScope, UndoQueue.UNDO_WINDOW_MS))
     }
 
     @Test
@@ -76,5 +91,55 @@ class ShoppingListViewModelTest {
         repository.items.value = listOf(item("i3"))
         assertEquals(listOf("i3"), vm.state.value.items.map { it.id })
         assertNull(vm.state.value.error)
+    }
+
+    /** RM-0056: delete hides the item at once and sends nothing for 5 s. */
+    @Test
+    fun delete_hidesAtOnceAndDeletesAfterUndoWindow() {
+        val repository = FakeShoppingRepository(offline = false)
+        repository.items.value = listOf(item("i1"), item("i2"))
+        val vm = viewModel(repository)
+
+        vm.delete("i1")
+        assertEquals(listOf("i2"), vm.state.value.visibleItems.map { it.id })
+        assertTrue(repository.deleted.isEmpty())
+
+        undoScope.advanceTimeBy(UndoQueue.UNDO_WINDOW_MS + 1)
+        undoScope.runCurrent()
+        assertEquals(listOf("i1"), repository.deleted)
+        assertEquals(listOf("i2"), vm.state.value.visibleItems.map { it.id })
+    }
+
+    @Test
+    fun undo_bringsTheItemBackAndNeverDeletes() {
+        val repository = FakeShoppingRepository(offline = false)
+        repository.items.value = listOf(item("i1"))
+        val vm = viewModel(repository)
+
+        vm.delete("i1")
+        feedback.drain().single().undo!!.invoke()
+        undoScope.advanceTimeBy(UndoQueue.UNDO_WINDOW_MS * 2)
+        undoScope.runCurrent()
+
+        assertEquals(listOf("i1"), vm.state.value.visibleItems.map { it.id })
+        assertTrue(repository.deleted.isEmpty())
+    }
+
+    @Test
+    fun offlineDelete_bringsTheItemBackWithRetry() {
+        val repository = FakeShoppingRepository(offline = true)
+        repository.items.value = listOf(item("i1"))
+        val vm = viewModel(repository)
+        feedback.drain()
+
+        vm.delete("i1")
+        feedback.drain()
+        undoScope.advanceTimeBy(UndoQueue.UNDO_WINDOW_MS + 1)
+        undoScope.runCurrent()
+
+        assertEquals(listOf("i1"), vm.state.value.visibleItems.map { it.id })
+        val message = feedback.drain().single()
+        assertEquals(R.string.feedback_delete_item_failed, message.messageRes)
+        assertNotNull(message.retry)
     }
 }

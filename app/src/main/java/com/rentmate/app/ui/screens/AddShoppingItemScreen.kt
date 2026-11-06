@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +33,7 @@ import com.rentmate.app.ui.validation.validateRequiredText
 @Composable
 fun AddShoppingItemScreen(onClose: () -> Unit, viewModel: AddShoppingItemViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
+    val loadState by viewModel.loadState.collectAsState()
 
     var name by remember { mutableStateOf("") }
     var submitted by remember { mutableStateOf(false) }
@@ -42,29 +45,31 @@ fun AddShoppingItemScreen(onClose: () -> Unit, viewModel: AddShoppingItemViewMod
 
     Column(modifier = Modifier.fillMaxSize()) {
         ScreenHeader(title = stringResource(R.string.add_item_title), onBack = onClose)
-        Column(
-            modifier = Modifier.fillMaxSize().padding(Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-        ) {
-            ValidatedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = stringResource(R.string.add_item_name),
-                error = nameError,
-                showErrors = submitted,
-                maxLength = Limits.ITEM_NAME_MAX + 10,
-                imeAction = ImeAction.Done
-            )
+        FormLoadGate(loadState, onRetry = {}) {
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                ValidatedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = stringResource(R.string.add_item_name),
+                    error = nameError,
+                    showErrors = submitted,
+                    maxLength = Limits.ITEM_NAME_MAX + 10,
+                    imeAction = ImeAction.Done
+                )
 
-            PrimaryButton(
-                text = stringResource(R.string.save),
-                loading = state is AddShoppingItemUiState.Loading,
-                onClick = {
-                    submitted = true
-                    if (nameError == null) viewModel.add(name.trim())
-                },
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
-            )
+                PrimaryButton(
+                    text = stringResource(R.string.save),
+                    loading = state is AddShoppingItemUiState.Loading,
+                    onClick = {
+                        submitted = true
+                        if (nameError == null) viewModel.add(name.trim())
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
+                )
+            }
         }
     }
 }

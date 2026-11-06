@@ -31,13 +31,13 @@
     <string name="login_error">Ons kon jou nie aanmeld nie. Gaan jou verbinding na en probeer weer.</string>
     <string name="login_privacy_note">Ons gebruik net jou Google-naam en -e-posadres om jou profiel op te stel.</string>
     <!-- Form validation (RM-0036) -->
-    <string name="error_required">Hierdie veld is verpligtend</string>
-    <string name="error_too_short">Te kort</string>
-    <string name="error_too_long">Te lank, maak dit asseblief korter</string>
-    <string name="error_not_a_number">Voer \'n getal in, bv. 1250.50</string>
-    <string name="error_must_be_positive">Moet meer as nul wees</string>
-    <string name="error_amount_too_large">Die bedrag kan nie meer as R999,999.99 wees nie</string>
-    <string name="error_too_many_decimals">Gebruik hoogstens 2 desimale plekke</string>
+    <string name="error_required">Vul hierdie veld in.</string>
+    <string name="error_too_short">Te kort. Voeg nog ’n paar karakters by.</string>
+    <string name="error_too_long">Te lank. Maak dit korter sodat dit pas.</string>
+    <string name="error_not_a_number">Voer ’n getal in, byvoorbeeld 1 250,50.</string>
+    <string name="error_must_be_positive">Voer ’n bedrag meer as R 0 in.</string>
+    <string name="error_amount_too_large">Voer R 999 999,99 of minder in.</string>
+    <string name="error_too_many_decimals">Gebruik hoogstens 2 desimale plekke, byvoorbeeld 1 200,50.</string>
     <string name="error_points_range">Punte moet \'n heelgetal van 1 tot 100 wees</string>
     <string name="error_date_past">Die datum kan nie meer as \'n jaar gelede wees nie</string>
     <string name="error_date_future">Die datum kan nie meer as twee jaar vooruit wees nie</string>
@@ -46,8 +46,8 @@
     <string name="pick_date">Kies \'n datum</string>
     <string name="save">Stoor</string>
 
-    <string name="add_bill_title">Voeg rekening by</string>
-    <string name="add_bill_name">Waarvoor is die rekening?</string>
+    <string name="add_bill_title">Nuwe rekening</string>
+    <string name="add_bill_name">Waarvoor is dit?</string>
     <string name="add_bill_amount">Bedrag (R)</string>
     <string name="add_bill_due">Vervaldatum</string>
     <plurals name="add_bill_split">
@@ -152,13 +152,13 @@
     <string name="housemate_fallback">Huisgenoot</string>
     <string name="split_mode_label">Verdeel</string>
     <string name="split_equal">Gelykop</string>
-    <string name="split_percentage">Persentasie</string>
-    <string name="split_exact">Presiese bedrag</string>
+    <string name="split_percentage">Volgens %</string>
+    <string name="split_exact">Presiese bedrae</string>
     <string name="split_percent_for">%1$s (%%)</string>
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Lid</string>
     <string name="split_error_percent">Die persentasies moet saam 100 wees. Hulle is saam %1$s.</string>
-    <string name="split_error_exact">Die bedrae moet saam R%2$s wees. Hulle is saam R%1$s.</string>
+    <string name="split_error_exact">Die bedrae moet saam %2$s wees. Hulle is saam %1$s.</string>
     <string name="split_error_number">Voer \'n getal vir elke lid in (of laat dit leeg vir 0).</string>
     <string name="split_error_negative">Verdelingswaardes kan nie negatief wees nie.</string>
     <string name="split_error_too_large">Die bedrag kan nie meer as R999,999.99 wees nie.</string>
@@ -256,4 +256,59 @@
     <string name="bills_repeats_weekly">Herhaal weekliks</string>
     <string name="bills_repeats_monthly">Herhaal maandeliks</string>
     <string name="bills_stop_repeat">Stop herhaling</string>
+    <!-- RM-0056: UI redesign -->
+    <string name="form_error_members">Kon nie jou huismaats laai nie. Kontroleer jou verbinding en tik Probeer weer.</string>
+    <string name="settings_error_load">Kon nie jou gestoorde instellings lees nie. Tik Probeer weer.</string>
+    <string name="settings_error_sync">Kon nie instellings van jou ander toestelle laai nie. Wys dié wat op hierdie foon gestoor is.</string>
+    <string name="feedback_undo">Ontdoen</string>
+    <string name="undo_marked_paid">As betaal gemerk</string>
+    <string name="undo_item_deleted">Item uitgevee</string>
+    <string name="undo_chore_done">Taak as klaar gemerk</string>
+    <string name="feedback_delete_item_failed">Kon nie die item uitvee nie. Kontroleer jou verbinding en tik Probeer weer.</string>
+    <string name="feedback_delete_item_pending">Hierdie item wag nog om te sinkroniseer. Vee dit uit sodra dit opgelaai is.</string>
+    <string name="shopping_delete">Vee %1$s uit</string>
+    <string name="chores_done">Klaar</string>
+    <string name="nav_back">Terug</string>
+    <string name="shopping_mark_bought">Merk %1$s as gekoop</string>
+    <string name="home_title">Tuis</string>
+    <string name="home_you_owe_label">Jy skuld</string>
+    <string name="home_owed_label">Jy word geskuld</string>
+    <string name="home_pay">Betaal %1$s</string>
+    <string name="home_open_money">Maak Geld oop</string>
+    <string name="home_settled_body">Niemand skuld nou iets nie.</string>
+    <string name="home_this_week">Hierdie week</string>
+    <string name="home_your_turn">Jou beurt: %1$s</string>
+    <string name="home_see_all">Sien alle aktiwiteit</string>
+    <plurals name="home_also_owe">
+        <item quantity="one">Jy skuld ook %d ander huismaat</item>
+        <item quantity="other">Jy skuld ook %d ander huismaats</item>
+    </plurals>
+    <plurals name="home_also_owed">
+        <item quantity="one">%d ander huismaat skuld jou ook</item>
+        <item quantity="other">%d ander huismaats skuld jou ook</item>
+    </plurals>
+    <string name="nav_home">Tuis</string>
+    <string name="nav_money">Geld</string>
+    <string name="nav_house">Huis</string>
+    <string name="house_subtitle">Inkopies en herstelwerk</string>
+    <string name="home_owe_detail">%1$s · %2$s, betaalbaar %3$s</string>
+    <string name="home_overdue">Agterstallig</string>
+    <string name="home_due_today">Vandag</string>
+    <plurals name="home_days_left">
+        <item quantity="one">%d dag</item>
+        <item quantity="other">%d dae</item>
+    </plurals>
+    <string name="money_filter_open">Oop</string>
+    <string name="money_filter_paid">Betaal</string>
+    <string name="money_filter_repeating">Herhalend</string>
+    <string name="money_no_bills_in_filter">Geen rekeninge hier nie.</string>
+    <string name="money_split_equally">gelyk verdeel</string>
+    <string name="money_split_percent">volgens persentasie verdeel</string>
+    <string name="money_split_exact">presiese bedrae</string>
+    <string name="money_you_pay">Jy betaal %1$s</string>
+    <string name="money_pays_you">%1$s betaal jou</string>
+    <string name="money_pays">%1$s betaal %2$s</string>
+    <string name="money_tap_received">Tik sodra jy dit ontvang het</string>
+    <string name="undo_marked_received">%1$s as ontvang gemerk</string>
+    <string name="save_bill">Stoor rekening</string>
 </resources>

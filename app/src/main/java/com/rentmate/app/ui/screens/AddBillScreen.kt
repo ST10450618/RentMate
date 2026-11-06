@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +32,12 @@ import com.rentmate.app.data.SplitResult
 import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.ui.components.DatePickerField
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
+import com.rentmate.app.ui.components.ChoiceChips
+import com.rentmate.app.ui.components.ListHeading
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.ScreenHeader
-import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.ValidatedTextField
+import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.Spacing
 import com.rentmate.app.ui.validation.Limits
 import com.rentmate.app.ui.validation.parseAmount
@@ -64,6 +65,7 @@ fun AddBillScreen(
 ) {
     val members by viewModel.members.collectAsState()
     val state by viewModel.state.collectAsState()
+    val loadState by viewModel.loadState.collectAsState()
     val photos by photosViewModel.photos.collectAsState()
     val photosBusy = photos.any { it.status is PhotoStatus.Compressing || it.status is PhotoStatus.Uploading }
 
@@ -89,137 +91,151 @@ fun AddBillScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         ScreenHeader(title = stringResource(R.string.add_bill_title), onBack = onClose)
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-        ) {
-            ValidatedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = stringResource(R.string.add_bill_name),
-                error = titleError,
-                showErrors = submitted,
-                maxLength = Limits.TITLE_MAX + 10
-            )
-            ValidatedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = stringResource(R.string.add_bill_amount),
-                error = amountError,
-                showErrors = submitted,
-                maxLength = 15,
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Done
-            )
-            DatePickerField(
-                date = dueDate,
-                onDateChange = { dueDate = it },
-                label = stringResource(R.string.add_bill_due),
-                error = dateError,
-                showErrors = true
-            )
-
-            // Split mode (RM-0010)
-            SectionLabel(stringResource(R.string.split_mode_label), modifier = Modifier.padding(top = Spacing.sm))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                FilterChip(selected = mode == SplitMode.Equal, onClick = { mode = SplitMode.Equal },
-                    label = { Text(stringResource(R.string.split_equal)) })
-                FilterChip(selected = mode == SplitMode.Percentage, onClick = { mode = SplitMode.Percentage },
-                    label = { Text(stringResource(R.string.split_percentage)) })
-                FilterChip(selected = mode == SplitMode.ExactAmount, onClick = { mode = SplitMode.ExactAmount },
-                    label = { Text(stringResource(R.string.split_exact)) })
-            }
-
-            // Repeat (RM-0049)
-            SectionLabel(stringResource(R.string.repeat_label), modifier = Modifier.padding(top = Spacing.sm))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                FilterChip(selected = repeat == RepeatMode.Never, onClick = { repeat = RepeatMode.Never },
-                    label = { Text(stringResource(R.string.repeat_never)) })
-                FilterChip(selected = repeat == RepeatMode.Weekly, onClick = { repeat = RepeatMode.Weekly },
-                    label = { Text(stringResource(R.string.repeat_weekly)) })
-                FilterChip(selected = repeat == RepeatMode.Monthly, onClick = { repeat = RepeatMode.Monthly },
-                    label = { Text(stringResource(R.string.repeat_monthly)) })
-            }
-
-            when {
-                members.isEmpty() -> Text(
-                    stringResource(R.string.error_no_members),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (submitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+        FormLoadGate(loadState, onRetry = viewModel::refreshMembers) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(Spacing.screen),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                ValidatedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = stringResource(R.string.add_bill_name),
+                    error = titleError,
+                    showErrors = submitted,
+                    maxLength = Limits.TITLE_MAX + 10
                 )
-                mode == SplitMode.Equal -> Text(
-                    pluralStringResource(R.plurals.add_bill_split, members.size, members.size),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                ValidatedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = stringResource(R.string.add_bill_amount),
+                    error = amountError,
+                    showErrors = submitted,
+                    maxLength = 15,
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
                 )
-                else -> members.forEach { member ->
-                    val name = member.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
-                    ValidatedTextField(
-                        value = splitInputs[member.user_id].orEmpty(),
-                        onValueChange = { splitInputs = splitInputs + (member.user_id to it) },
-                        label = stringResource(
-                            if (mode == SplitMode.Percentage) R.string.split_percent_for else R.string.split_amount_for,
-                            name
-                        ),
-                        error = null,
-                        showErrors = false,
-                        maxLength = 12,
-                        keyboardType = KeyboardType.Decimal
+                DatePickerField(
+                    date = dueDate,
+                    onDateChange = { dueDate = it },
+                    label = stringResource(R.string.add_bill_due),
+                    error = dateError,
+                    showErrors = true
+                )
+
+                // Split mode (RM-0010). RM-0056: the shared chips, as in the New bill mockup.
+                ListHeading(stringResource(R.string.split_mode_label), modifier = Modifier.padding(top = Spacing.sm))
+                ChoiceChips(
+                    options = SplitMode.entries,
+                    selected = mode,
+                    onSelect = { mode = it },
+                    label = { stringResource(it.labelRes) }
+                )
+
+                // Repeat (RM-0049)
+                ListHeading(stringResource(R.string.repeat_label), modifier = Modifier.padding(top = Spacing.sm))
+                ChoiceChips(
+                    options = RepeatMode.entries,
+                    selected = repeat,
+                    onSelect = { repeat = it },
+                    label = { stringResource(it.labelRes) }
+                )
+
+                when {
+                    members.isEmpty() -> Text(
+                        stringResource(R.string.error_no_members),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (submitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-            }
-
-            // Inline message until the split adds up; amount and title errors show under their own fields.
-            if (split is SplitResult.Invalid && parsedAmount != null && parsedAmount.signum() > 0 && members.isNotEmpty()) {
-                val message = when (val e = split.error) {
-                    is SplitError.PercentTotal ->
-                        stringResource(R.string.split_error_percent, e.total.stripTrailingZeros().toPlainString())
-                    is SplitError.ExactTotal -> stringResource(
-                        R.string.split_error_exact,
-                        e.total.toPlainString(),
-                        parsedAmount.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                    mode == SplitMode.Equal -> Text(
+                        pluralStringResource(R.plurals.add_bill_split, members.size, members.size),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    SplitError.NotANumber -> stringResource(R.string.split_error_number)
-                    SplitError.Negative -> stringResource(R.string.split_error_negative)
-                    SplitError.TooLarge -> stringResource(R.string.split_error_too_large)
-                    SplitError.InvalidAmount, SplitError.NoMembers -> null
-                }
-                message?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
-            }
-
-            // RM-0029: a photo of the bill or slip, e.g. the municipal account.
-            SectionLabel(stringResource(R.string.photo_section_bill), modifier = Modifier.padding(top = Spacing.sm))
-            PhotoAttachmentPicker(
-                photos = photos,
-                onPicked = { photosViewModel.add(it, AttachmentKind.BILL) },
-                onRetry = photosViewModel::retry,
-                onRemove = photosViewModel::remove,
-                maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
-            )
-            if (photosBusy) {
-                Text(
-                    stringResource(R.string.photo_wait_for_upload),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            PrimaryButton(
-                text = stringResource(R.string.save),
-                enabled = !photosBusy,
-                loading = state is AddBillUiState.Loading,
-                onClick = {
-                    submitted = true
-                    val date = dueDate
-                    if (formValid && parsedAmount != null && date != null && split is SplitResult.Valid) {
-                        viewModel.createBill(title.trim(), parsedAmount, date, mode, split.shares, repeat, photosViewModel.uploadedPaths)
+                    else -> members.forEach { member ->
+                        val name = member.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
+                        ValidatedTextField(
+                            value = splitInputs[member.user_id].orEmpty(),
+                            onValueChange = { splitInputs = splitInputs + (member.user_id to it) },
+                            label = stringResource(
+                                if (mode == SplitMode.Percentage) R.string.split_percent_for else R.string.split_amount_for,
+                                name
+                            ),
+                            error = null,
+                            showErrors = false,
+                            maxLength = 12,
+                            keyboardType = KeyboardType.Decimal
+                        )
                     }
-                },
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
-            )
+                }
+
+                // Inline message until the split adds up; amount and title errors show under their own fields.
+                if (split is SplitResult.Invalid && parsedAmount != null && parsedAmount.signum() > 0 && members.isNotEmpty()) {
+                    val message = when (val e = split.error) {
+                        is SplitError.PercentTotal ->
+                            stringResource(R.string.split_error_percent, e.total.stripTrailingZeros().toPlainString())
+                        is SplitError.ExactTotal -> stringResource(
+                            R.string.split_error_exact,
+                            e.total.toPlainString(),
+                            parsedAmount.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                        )
+                        SplitError.NotANumber -> stringResource(R.string.split_error_number)
+                        SplitError.Negative -> stringResource(R.string.split_error_negative)
+                        SplitError.TooLarge -> stringResource(R.string.split_error_too_large)
+                        SplitError.InvalidAmount, SplitError.NoMembers -> null
+                    }
+                    message?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+                }
+
+                // RM-0029: a photo of the bill or slip, for example the municipal account.
+                ListHeading(stringResource(R.string.photo_section_bill), modifier = Modifier.padding(top = Spacing.sm))
+                PhotoAttachmentPicker(
+                    photos = photos,
+                    onPicked = { photosViewModel.add(it, AttachmentKind.BILL) },
+                    onRetry = photosViewModel::retry,
+                    onRemove = photosViewModel::remove,
+                    maxPhotos = PhotoAttachmentsViewModel.MAX_PHOTOS
+                )
+                if (photosBusy) {
+                    Text(
+                        stringResource(R.string.photo_wait_for_upload),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // RM-0056: Save bill stays disabled (faded) until the form is valid,
+                // and each field says how to fix its value underneath.
+                PrimaryButton(
+                    text = stringResource(R.string.save_bill),
+                    enabled = formValid && !photosBusy,
+                    loading = state is AddBillUiState.Loading,
+                    onClick = {
+                        submitted = true
+                        val date = dueDate
+                        if (formValid && parsedAmount != null && date != null && split is SplitResult.Valid) {
+                            viewModel.createBill(title.trim(), parsedAmount, date, mode, split.shares, repeat, photosViewModel.uploadedPaths)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
+                )
+            }
         }
     }
 }
+
+private val SplitMode.labelRes: Int
+    get() = when (this) {
+        SplitMode.Equal -> R.string.split_equal
+        SplitMode.Percentage -> R.string.split_percentage
+        SplitMode.ExactAmount -> R.string.split_exact
+    }
+
+private val RepeatMode.labelRes: Int
+    get() = when (this) {
+        RepeatMode.Never -> R.string.repeat_never
+        RepeatMode.Weekly -> R.string.repeat_weekly
+        RepeatMode.Monthly -> R.string.repeat_monthly
+    }

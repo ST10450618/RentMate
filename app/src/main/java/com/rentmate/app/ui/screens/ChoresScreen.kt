@@ -16,8 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +31,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
@@ -44,6 +42,9 @@ import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.StatusPill
+import com.rentmate.app.ui.theme.Sizes
+import com.rentmate.app.ui.components.AdaptiveList
+import com.rentmate.app.ui.components.fullWidthItem
 import com.rentmate.app.ui.theme.Spacing
 
 private const val TAG = "ChoresScreen"
@@ -80,12 +81,13 @@ fun ChoresScreen(onAddChore: () -> Unit, viewModel: ChoresViewModel = hiltViewMo
                 else -> {
                     if (state.loading) RefreshingIndicator()
                     if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    // RM-0056: two columns of chores at 600 dp and wider; the leaderboard spans both.
+                    AdaptiveList {
                         items(state.chores, key = { it.id }) { chore ->
-                            ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), onComplete = { viewModel.complete(chore.id) })
+                            ChoreRow(chore, state.memberNames, state.forecasts[chore.id].orEmpty(), done = chore.id in state.pendingDone, onComplete = { viewModel.complete(chore.id) })
                         }
                         if (state.showLeaderboard) {
-                            state.leaderboard?.let { item { LeaderboardCard(it) } }
+                            state.leaderboard?.let { fullWidthItem(key = "leaderboard") { LeaderboardCard(it) } }
                         }
                     }
                 }
@@ -99,6 +101,7 @@ private fun ChoreRow(
     chore: ChoreRow,
     memberNames: Map<String, String>,
     forecast: List<ChoreForecastRow>,
+    done: Boolean = false,
     onComplete: () -> Unit
 ) {
     RentMateCard {
@@ -113,7 +116,7 @@ private fun ChoreRow(
         val housemate = stringResource(R.string.housemate_fallback)
         val current = chore.currentAssignee()?.let { memberNames[it] ?: housemate }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = Spacing.xs)) {
-            MemberAvatar(current ?: "?", size = 28.dp, userId = chore.currentAssignee())
+            MemberAvatar(current ?: "?", size = Sizes.avatarRow, userId = chore.currentAssignee())
             Text(
                 stringResource(R.string.chores_this_cycle, current ?: stringResource(R.string.chores_unassigned)),
                 style = MaterialTheme.typography.bodyMedium,
@@ -128,7 +131,12 @@ private fun ChoreRow(
                 Text(stringResource(R.string.chores_forecast_row, row.cycle_number, memberNames[row.assignee_user_id] ?: housemate), style = MaterialTheme.typography.bodySmall)
             }
         }
-        SecondaryButton(stringResource(R.string.chores_mark_done), onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+        // RM-0056: while the Undo snackbar shows, the chore reads as done and cannot be tapped again.
+        if (done) {
+            StatusPill(stringResource(R.string.chores_done), PillTone.Positive, modifier = Modifier.padding(top = Spacing.sm))
+        } else {
+            SecondaryButton(stringResource(R.string.chores_mark_done), onClick = onComplete, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm))
+        }
     }
 }
 
@@ -142,7 +150,7 @@ private fun LeaderboardCard(leaderboard: List<LeaderboardRow>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("${index + 1}", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(end = Spacing.sm))
-                MemberAvatar(entry.display_name, size = 28.dp, userId = entry.user_id)
+                MemberAvatar(entry.display_name, size = Sizes.avatarRow, userId = entry.user_id)
                 Text(entry.display_name, modifier = Modifier.weight(1f).padding(start = Spacing.sm))
                 Text(
                     pluralStringResource(R.plurals.leaderboard_points, entry.month_points.toInt(), entry.month_points, entry.total_points),

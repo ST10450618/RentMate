@@ -36,13 +36,13 @@
     <string name="login_error">We couldn\'t sign you in. Check your connection and try again.</string>
     <string name="login_privacy_note">We only use your Google name and email to set up your profile.</string>
     <!-- Form validation (RM-0036) -->
-    <string name="error_required">This field is required</string>
-    <string name="error_too_short">Too short</string>
-    <string name="error_too_long">Too long, please shorten it</string>
-    <string name="error_not_a_number">Enter a number, e.g. 1250.50</string>
-    <string name="error_must_be_positive">Must be more than zero</string>
-    <string name="error_amount_too_large">Amount can\'t be more than R999,999.99</string>
-    <string name="error_too_many_decimals">Use at most 2 decimal places</string>
+    <string name="error_required">Fill in this field.</string>
+    <string name="error_too_short">Too short. Add a few more characters.</string>
+    <string name="error_too_long">Too long. Shorten it so it fits.</string>
+    <string name="error_not_a_number">Enter a number, for example 1 250,50.</string>
+    <string name="error_must_be_positive">Enter an amount more than R 0.</string>
+    <string name="error_amount_too_large">Enter R 999 999,99 or less.</string>
+    <string name="error_too_many_decimals">Use at most 2 decimal places, for example 1 200,50.</string>
     <string name="error_points_range">Points must be a whole number from 1 to 100</string>
     <string name="error_date_past">Date can\'t be more than a year ago</string>
     <string name="error_date_future">Date can\'t be more than two years ahead</string>
@@ -51,8 +51,8 @@
     <string name="pick_date">Pick a date</string>
     <string name="save">Save</string>
 
-    <string name="add_bill_title">Add bill</string>
-    <string name="add_bill_name">What is the bill for?</string>
+    <string name="add_bill_title">New bill</string>
+    <string name="add_bill_name">What is it for?</string>
     <string name="add_bill_amount">Amount (R)</string>
     <string name="add_bill_due">Due date</string>
     <plurals name="add_bill_split">
@@ -156,14 +156,14 @@
     <string name="biometric_enrol_cancel">Not now</string>
     <string name="housemate_fallback">Housemate</string>
     <string name="split_mode_label">Split</string>
-    <string name="split_equal">Equal</string>
-    <string name="split_percentage">Percentage</string>
-    <string name="split_exact">Exact amount</string>
+    <string name="split_equal">Equally</string>
+    <string name="split_percentage">By %</string>
+    <string name="split_exact">Exact amounts</string>
     <string name="split_percent_for">%1$s (%%)</string>
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Member</string>
     <string name="split_error_percent">Percentages must add up to 100. They add up to %1$s.</string>
-    <string name="split_error_exact">Amounts must add up to R%2$s. They add up to R%1$s.</string>
+    <string name="split_error_exact">Amounts must add up to %2$s. They add up to %1$s.</string>
     <string name="split_error_number">Enter a number for every member (or leave it blank for 0).</string>
     <string name="split_error_negative">Split values cannot be negative.</string>
     <string name="split_error_too_large">Amount can\'t be more than R999,999.99.</string>
@@ -256,11 +256,66 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Sample</string>
     <string name="activity_sample_body">Example activity. Your household\'s real feed appears here once it\'s connected.</string>
-    <string name="repeat_label">Repeat</string>
+    <string name="repeat_label">Repeats</string>
     <string name="repeat_never">Never</string>
     <string name="repeat_weekly">Weekly</string>
     <string name="repeat_monthly">Monthly</string>
     <string name="bills_repeats_weekly">Repeats weekly</string>
     <string name="bills_repeats_monthly">Repeats monthly</string>
     <string name="bills_stop_repeat">Stop repeating</string>
+    <!-- RM-0056: UI redesign -->
+    <string name="form_error_members">Couldn\'t load your housemates. Check your connection and tap Try again.</string>
+    <string name="settings_error_load">Couldn\'t read your saved settings. Tap Try again.</string>
+    <string name="settings_error_sync">Couldn\'t load settings from your other devices. Showing the ones saved on this phone.</string>
+    <string name="feedback_undo">Undo</string>
+    <string name="undo_marked_paid">Marked as paid</string>
+    <string name="undo_item_deleted">Item deleted</string>
+    <string name="undo_chore_done">Chore marked done</string>
+    <string name="feedback_delete_item_failed">Couldn\'t delete the item. Check your connection and tap Retry.</string>
+    <string name="feedback_delete_item_pending">This item is still waiting to sync. Delete it once it has uploaded.</string>
+    <string name="shopping_delete">Delete %1$s</string>
+    <string name="chores_done">Done</string>
+    <string name="nav_back">Back</string>
+    <string name="shopping_mark_bought">Mark %1$s as bought</string>
+    <string name="home_title">Home</string>
+    <string name="home_you_owe_label">You owe</string>
+    <string name="home_owed_label">You\'re owed</string>
+    <string name="home_pay">Pay %1$s</string>
+    <string name="home_open_money">Open Money</string>
+    <string name="home_settled_body">Nobody owes anything right now.</string>
+    <string name="home_this_week">This week</string>
+    <string name="home_your_turn">Your turn: %1$s</string>
+    <string name="home_see_all">See all activity</string>
+    <plurals name="home_also_owe">
+        <item quantity="one">You also owe %d other housemate</item>
+        <item quantity="other">You also owe %d other housemates</item>
+    </plurals>
+    <plurals name="home_also_owed">
+        <item quantity="one">%d other housemate also owes you</item>
+        <item quantity="other">%d other housemates also owe you</item>
+    </plurals>
+    <string name="nav_home">Home</string>
+    <string name="nav_money">Money</string>
+    <string name="nav_house">House</string>
+    <string name="house_subtitle">Shopping and repairs</string>
+    <string name="home_owe_detail">%1$s · %2$s, due %3$s</string>
+    <string name="home_overdue">Overdue</string>
+    <string name="home_due_today">Today</string>
+    <plurals name="home_days_left">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="money_filter_open">Open</string>
+    <string name="money_filter_paid">Paid</string>
+    <string name="money_filter_repeating">Repeating</string>
+    <string name="money_no_bills_in_filter">No bills here.</string>
+    <string name="money_split_equally">split equally</string>
+    <string name="money_split_percent">split by percentage</string>
+    <string name="money_split_exact">exact amounts</string>
+    <string name="money_you_pay">You pay %1$s</string>
+    <string name="money_pays_you">%1$s pays you</string>
+    <string name="money_pays">%1$s pays %2$s</string>
+    <string name="money_tap_received">Tap when you have received it</string>
+    <string name="undo_marked_received">Marked %1$s as received</string>
+    <string name="save_bill">Save bill</string>
 </resources>

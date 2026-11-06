@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,7 +22,7 @@ import com.rentmate.app.ui.feedback.LocalSnackbarHostState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import com.rentmate.app.ui.theme.Spacing
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -51,7 +48,12 @@ import com.rentmate.app.ui.screens.DashboardScreen
 import com.rentmate.app.ui.screens.HouseholdSetupScreen
 import com.rentmate.app.ui.screens.LoginScreen
 import com.rentmate.app.ui.screens.MaintenanceScreen
-import com.rentmate.app.ui.screens.MoreScreen
+import com.rentmate.app.ui.screens.HouseScreen
+import com.rentmate.app.ui.screens.SettingsAvatarButton
+import com.rentmate.app.ui.components.LocalHeaderAction
+import com.rentmate.app.ui.components.RentMateSnackbar
+import com.rentmate.app.ui.components.TabItem
+import com.rentmate.app.ui.components.RentMateTabBar
 import com.rentmate.app.ui.screens.SettingsScreen
 import com.rentmate.app.ui.screens.ShoppingListScreen
 import com.rentmate.app.ui.sync.SyncBannerHost
@@ -80,7 +82,8 @@ fun RentMateApp(
     val currentRoute = backStackEntry?.destination?.route
 
     // RM-0023: open the screen of a tapped notification. The tab is anchored on
-    // the Dashboard, so Back returns there. A tap waits on Login and household setup.
+    // Home, so Back returns there. A tap waits on Login and household setup.
+    // RM-0056: Shopping and Maintenance open under the House tab (deepLinkPath).
     val pendingFlow = deepLinks?.pending ?: remember { MutableStateFlow<String?>(null) }
     val pendingRoute by pendingFlow.collectAsStateWithLifecycle()
     LaunchedEffect(pendingRoute, currentRoute) {
@@ -89,7 +92,7 @@ fun RentMateApp(
             DeepLinkStep.Hold -> Unit
             DeepLinkStep.AlreadyThere -> deepLinks?.consume(pending)
             is DeepLinkStep.Open -> {
-                navController.navigateTopLevel(step.screen)
+                navController.openDeepLink(step.screen)
                 deepLinks?.consume(pending)
             }
         }
@@ -101,22 +104,31 @@ fun RentMateApp(
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) { RentMateSnackbar(it) } },
         bottomBar = {
             if (currentRoute in routesWithBottomBar) {
-                NavigationBar {
-                    bottomNavItems.forEach { item ->
-                        NavigationBarItem(
-                            selected = currentRoute == item.screen.route,
-                            onClick = { navController.navigateTopLevel(item.screen) },
-                            icon = { Icon(item.icon, contentDescription = stringResource(item.screen.titleRes)) },
-                            label = { Text(stringResource(item.screen.titleRes)) }
+                // RM-0056: tabs named after jobs. Shopping and Maintenance highlight
+                // House, and Activity highlights Home (tabFor).
+                val selectedTab = tabFor(currentRoute)
+                RentMateTabBar(
+                    tabs = bottomNavItems.map { item ->
+                        TabItem(
+                            label = stringResource(item.screen.titleRes),
+                            icon = item.icon,
+                            selectedIcon = item.selectedIcon,
+                            selected = item.screen == selectedTab,
+                            onClick = { navController.navigateTopLevel(item.screen) }
                         )
                     }
-                }
+                )
             }
         }
     ) { innerPadding ->
+        // RM-0056: the four tab screens show the avatar that opens Settings at the end of their header.
+        val headerAction: (@Composable () -> Unit)? = if (currentRoute in tabRootRoutes) {
+            { SettingsAvatarButton(onClick = { navController.navigate(Screen.Settings.route) { launchSingleTop = true } }) }
+        } else null
+        CompositionLocalProvider(LocalHeaderAction provides headerAction) {
         Column(Modifier.padding(innerPadding)) {
         // RM-0019: one offline/sync banner above every signed-in screen.
         if (currentRoute != null && currentRoute != Screen.Login.route) SyncBannerHost()
@@ -137,7 +149,8 @@ fun RentMateApp(
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
                     onOpenBills = { navController.navigateTopLevel(Screen.Bills) },
-                    onOpenChores = { navController.navigateTopLevel(Screen.Chores) }
+                    onOpenChores = { navController.navigateTopLevel(Screen.Chores) },
+                    onOpenActivity = { navController.navigate(Screen.Activity.route) }
                 )
             }
             composable(Screen.Bills.route) {
@@ -152,8 +165,8 @@ fun RentMateApp(
             composable(Screen.AddChore.route) {
                 AddChoreScreen(onClose = { navController.popBackStack() })
             }
-            composable(Screen.More.route) {
-                MoreScreen(onOpen = { screen -> navController.navigate(screen.route) })
+            composable(Screen.House.route) {
+                HouseScreen(onOpen = { screen -> navController.navigate(screen.route) })
             }
             composable(Screen.ShoppingList.route) {
                 ShoppingListScreen(onAddItem = { navController.navigate(Screen.AddShoppingItem.route) })
@@ -168,6 +181,7 @@ fun RentMateApp(
                     onSignedOut = { navController.onSignedOut() }
                 )
             }
+        }
         }
         }
     }
@@ -189,7 +203,7 @@ private fun SplashScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Spacing.xl))
         CircularProgressIndicator()
     }
 }

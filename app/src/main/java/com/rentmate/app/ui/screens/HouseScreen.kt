@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
@@ -19,29 +21,34 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import com.rentmate.app.navigation.Screen
-import com.rentmate.app.navigation.moreItems
+import com.rentmate.app.navigation.houseItems
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.theme.Spacing
 
-/** Fourth bottom-bar tab: reaches S8, S9 and S10. */
+/**
+ * The House tab (RM-0056): the jobs that keep the house running, Shopping (S8)
+ * and Maintenance (S9). It replaced the More tab. Settings moved to the avatar
+ * in the header, and Activity moved into Home.
+ */
 @Composable
-fun MoreScreen(onOpen: (Screen) -> Unit) {
+fun HouseScreen(onOpen: (Screen) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        ScreenHeader(title = stringResource(R.string.nav_more), subtitle = stringResource(R.string.more_subtitle))
+        ScreenHeader(title = stringResource(R.string.nav_house), subtitle = stringResource(R.string.house_subtitle))
         Column(
-            modifier = Modifier.padding(Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            modifier = Modifier.verticalScroll(rememberScrollState()).padding(Spacing.screen),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            moreItems.forEach { item ->
+            houseItems.forEach { item ->
                 RentMateCard(
-                    modifier = Modifier.clickable { onOpen(item.screen) },
+                    modifier = Modifier.clickable(role = Role.Button) { onOpen(item.screen) },
                     contentPadding = PaddingValues()
                 ) {
                     ListItem(
                         headlineContent = { Text(stringResource(item.screen.titleRes), style = MaterialTheme.typography.titleMedium) },
-                        supportingContent = { moreScreenDescription(item.screen)?.let { Text(stringResource(it)) } },
+                        supportingContent = { houseScreenDescription(item.screen)?.let { Text(stringResource(it)) } },
                         leadingContent = {
                             Icon(item.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         },
@@ -57,10 +64,8 @@ fun MoreScreen(onOpen: (Screen) -> Unit) {
 }
 
 @StringRes
-private fun moreScreenDescription(screen: Screen): Int? = when (screen) {
+private fun houseScreenDescription(screen: Screen): Int? = when (screen) {
     Screen.ShoppingList -> R.string.more_shopping_desc
     Screen.Maintenance -> R.string.more_maintenance_desc
-    Screen.Activity -> R.string.more_activity_desc
-    Screen.Settings -> R.string.more_settings_desc
     else -> null
 }

@@ -23,7 +23,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -71,6 +78,18 @@ internal suspend fun saveWithRollback(
     }
 }
 
+/** RM-0056: what the Settings screen shows while the saved settings load. */
+sealed interface SettingsLoad {
+    /** The settings file has not been read yet. Shows LoadingState. */
+    data object Loading : SettingsLoad
+
+    /** The settings are on screen. */
+    data object Ready : SettingsLoad
+
+    /** The settings file could not be read. Shows ErrorState with Retry. */
+    data object Failed : SettingsLoad
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -84,12 +103,49 @@ class SettingsViewModel @Inject constructor(
 
     private val repository = SettingsRepository(context)
 
+    private val reloads = MutableStateFlow(0)
+    private val _syncFailed = MutableStateFlow(false)
+
+    /**
+     * True when the last read of the profile failed. The screen then shows an
+     * InlineError above the settings saved on this phone, with Retry.
+     */
+    val syncFailed: StateFlow<Boolean> = _syncFailed
+
+    /** RM-0056: drives LoadingState and ErrorState on the Settings screen. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val load: StateFlow<SettingsLoad> = reloads.flatMapLatest {
+        repository.settings
+            .map<UserSettings, SettingsLoad> { SettingsLoad.Ready }
+            .onStart { emit(SettingsLoad.Loading) }
+            .catch { e ->
+                Log.e(TAG, "could not read saved settings", e)
+                emit(SettingsLoad.Failed)
+            }
+    }.distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsLoad.Loading)
+
     init {
-        // RM-0005: pick up changes made on another device since sign-in.
-        launchSafely(TAG) { profileSettingsSync.pull() }
+        pullFromProfile()
     }
 
-    val state: StateFlow<UserSettings> = repository.settings.stateIn(
+    /** RM-0005: pick up changes made on another device since sign-in. */
+    fun pullFromProfile() {
+        Log.d(TAG, "pullFromProfile")
+        launchSafely(TAG, onError = { _syncFailed.value = true }) {
+            _syncFailed.value = !profileSettingsSync.pull()
+        }
+    }
+
+    /** Called by the ErrorState's Retry button after the settings file failed to load. */
+    fun reload() {
+        Log.d(TAG, "reload")
+        reloads.value++
+    }
+
+    val state: StateFlow<UserSettings> = repository.settings
+        .catch { Log.e(TAG, "settings flow failed", it) }
+        .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = UserSettings()

@@ -33,13 +33,13 @@
     <string name="login_error">Asikwazanga ukukungenisa. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
     <string name="login_privacy_note">Sisebenzisa igama le-Google kunye ne-imeyile yakho kuphela ukuseta iprofayile yakho.</string>
     <!-- Form validation (RM-0036) -->
-    <string name="error_required">Le ndawo iyafuneka</string>
-    <string name="error_too_short">Imfutshane kakhulu</string>
-    <string name="error_too_long">Inde kakhulu, nceda uyifinyeze</string>
-    <string name="error_not_a_number">Faka inani, umz. 1250.50</string>
-    <string name="error_must_be_positive">Kufuneka ibe ngaphezu ko-0</string>
-    <string name="error_amount_too_large">Isixa asinakudlula i-R999,999.99</string>
-    <string name="error_too_many_decimals">Sebenzisa iindawo zedesimali ezi-2 kuphela</string>
+    <string name="error_required">Gcwalisa le ndawo.</string>
+    <string name="error_too_short">Imfutshane kakhulu. Yongeza oonobumba abambalwa.</string>
+    <string name="error_too_long">Inde kakhulu. Yifinyeze ukuze ilingane.</string>
+    <string name="error_not_a_number">Faka inani, umzekelo 1 250,50.</string>
+    <string name="error_must_be_positive">Faka isixa esingaphezu kwe-R 0.</string>
+    <string name="error_amount_too_large">Faka i-R 999 999,99 okanye ngaphantsi.</string>
+    <string name="error_too_many_decimals">Sebenzisa iindawo zedesimali ezi-2 kuphela, umzekelo 1 200,50.</string>
     <string name="error_points_range">Amanqaku kufuneka abe linani elipheleleyo ukusuka ku-1 ukuya ku-100</string>
     <string name="error_date_past">Umhla awunakuba ngaphezu konyaka odlulileyo</string>
     <string name="error_date_future">Umhla awunakuba ngaphezu kweminyaka emibini ezayo</string>
@@ -48,8 +48,8 @@
     <string name="pick_date">Khetha umhla</string>
     <string name="save">Gcina</string>
 
-    <string name="add_bill_title">Yongeza ibhili</string>
-    <string name="add_bill_name">Ibhili yeyantoni?</string>
+    <string name="add_bill_title">Ibhili entsha</string>
+    <string name="add_bill_name">Yeyantoni?</string>
     <string name="add_bill_amount">Isixa (R)</string>
     <string name="add_bill_due">Umhla wokuhlawula</string>
     <plurals name="add_bill_split">
@@ -154,13 +154,13 @@
     <string name="housemate_fallback">Umhlali-kunye</string>
     <string name="split_mode_label">Yahlula</string>
     <string name="split_equal">Ngokulinganayo</string>
-    <string name="split_percentage">Ipesenti</string>
-    <string name="split_exact">Isixa esichanekileyo</string>
+    <string name="split_percentage">Nge-%</string>
+    <string name="split_exact">Izixa ezichanekileyo</string>
     <string name="split_percent_for">%1$s (%%)</string>
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Ilungu</string>
     <string name="split_error_percent">Iipesenti kufuneka zidibane zibe yi-100. Ngoku zidibana zibe ngu-%1$s.</string>
-    <string name="split_error_exact">Izixa kufuneka zidibane zibe yi-R%2$s. Ngoku zidibana zibe yi-R%1$s.</string>
+    <string name="split_error_exact">Izixa kufuneka zidibane zibe yi-%2$s. Ngoku zidibana zibe yi-%1$s.</string>
     <string name="split_error_number">Faka inani lelungu ngalinye (okanye ushiye kungenanto ukuze kube ngu-0).</string>
     <string name="split_error_negative">Amaxabiso okwahlula akanakuba ngaphantsi ko-0.</string>
     <string name="split_error_too_large">Isixa asinakudlula i-R999,999.99.</string>
@@ -251,11 +251,66 @@
     <!-- Activity sample feed -->
     <string name="activity_sample_pill">Umzekelo</string>
     <string name="activity_sample_body">Umzekelo wokwenzekileyo. Okwenzeka ngokwenene ekhaya lakho kuya kubonakala apha xa sele kudityanisiwe.</string>
-    <string name="repeat_label">Phinda</string>
+    <string name="repeat_label">Iyaphinda</string>
     <string name="repeat_never">Ngaphandle</string>
     <string name="repeat_weekly">Evekini</string>
     <string name="repeat_monthly">Inyanga nenyanga</string>
     <string name="bills_repeats_weekly">Iyaphinda evekini</string>
     <string name="bills_repeats_monthly">Iyaphinda inyanga nenyanga</string>
     <string name="bills_stop_repeat">Yekela ukuphinda</string>
+    <!-- RM-0056: UI redesign -->
+    <string name="form_error_members">Asikwazanga ukulayisha abahlali bakho. Jonga uqhagamshelo lwakho uze ucofe Zama kwakhona.</string>
+    <string name="settings_error_load">Asikwazanga ukufunda iisetingi zakho ezigciniweyo. Cofa Zama kwakhona.</string>
+    <string name="settings_error_sync">Asikwazanga ukulayisha iisetingi kwezinye izixhobo zakho. Kuboniswa ezigcinwe kule fowuni.</string>
+    <string name="feedback_undo">Rhoxisa</string>
+    <string name="undo_marked_paid">Kuphawulwe njengokuhlawulwe</string>
+    <string name="undo_item_deleted">Into icinyiwe</string>
+    <string name="undo_chore_done">Umsebenzi uphawulwe njengogqityiweyo</string>
+    <string name="feedback_delete_item_failed">Asikwazanga ukucima into. Jonga uqhagamshelo lwakho uze ucofe Zama kwakhona.</string>
+    <string name="feedback_delete_item_pending">Le nto isalindele ukuvumelanisa. Yicime xa sele ilayishiwe.</string>
+    <string name="shopping_delete">Cima %1$s</string>
+    <string name="chores_done">Kugqityiwe</string>
+    <string name="nav_back">Buyela umva</string>
+    <string name="shopping_mark_bought">Phawula u-%1$s njengothengiweyo</string>
+    <string name="home_title">Ikhaya</string>
+    <string name="home_you_owe_label">Unetyala</string>
+    <string name="home_owed_label">Uyatyalwa</string>
+    <string name="home_pay">Hlawula u-%1$s</string>
+    <string name="home_open_money">Vula iMali</string>
+    <string name="home_settled_body">Akukho mntu unetyala ngoku.</string>
+    <string name="home_this_week">Kule veki</string>
+    <string name="home_your_turn">Ithuba lakho: %1$s</string>
+    <string name="home_see_all">Bona yonke imisebenzi</string>
+    <plurals name="home_also_owe">
+        <item quantity="one">Ukwanetyala kumhlali o-%d omnye</item>
+        <item quantity="other">Ukwanetyala kubahlali abanye abangama-%d</item>
+    </plurals>
+    <plurals name="home_also_owed">
+        <item quantity="one">Umhlali o-%d omnye ukwakunetyala</item>
+        <item quantity="other">Abahlali abanye abangama-%d bakwanetyala kuwe</item>
+    </plurals>
+    <string name="nav_home">Ikhaya</string>
+    <string name="nav_money">Imali</string>
+    <string name="nav_house">Indlu</string>
+    <string name="house_subtitle">Ukuthenga nokulungisa</string>
+    <string name="home_owe_detail">%1$s · %2$s, ihlawulwa ngomhla %3$s</string>
+    <string name="home_overdue">Iphelelwe lixesha</string>
+    <string name="home_due_today">Namhlanje</string>
+    <plurals name="home_days_left">
+        <item quantity="one">Usuku olu-%d</item>
+        <item quantity="other">Iintsuku ezi-%d</item>
+    </plurals>
+    <string name="money_filter_open">Ezivulekileyo</string>
+    <string name="money_filter_paid">Ezihlawuliweyo</string>
+    <string name="money_filter_repeating">Eziphindayo</string>
+    <string name="money_no_bills_in_filter">Akukho zibhatalo apha.</string>
+    <string name="money_split_equally">zahlulwe ngokulinganayo</string>
+    <string name="money_split_percent">zahlulwe ngepesenti</string>
+    <string name="money_split_exact">izixa ezichanekileyo</string>
+    <string name="money_you_pay">Uhlawula u-%1$s</string>
+    <string name="money_pays_you">U-%1$s uyakuhlawula</string>
+    <string name="money_pays">U-%1$s uhlawula u-%2$s</string>
+    <string name="money_tap_received">Cofa xa uyifumene</string>
+    <string name="undo_marked_received">U-%1$s uphawulwe njengofunyenweyo</string>
+    <string name="save_bill">Gcina ibhili</string>
 </resources>

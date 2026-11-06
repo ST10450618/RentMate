@@ -5,6 +5,7 @@
     <color name="rentmate_aloe">#FF14564B</color>
     <color name="rentmate_aloe_dark">#FF0E3F37</color>
     <color name="rentmate_aloe_light">#FFD9E8E3</color>
-    <color name="rentmate_sand">#FFF5F1E6</color>
+    <!-- RM-0056: page ground from the redesign plan; replaces Sand as the window background. -->
+    <color name="rentmate_ground">#FFF7FBFA</color>
     <color name="rentmate_amber">#FFE8B23A</color>
 </resources>

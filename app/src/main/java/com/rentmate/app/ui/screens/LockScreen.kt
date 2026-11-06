@@ -17,6 +17,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.rentmate.app.ui.components.BrandMark
+import com.rentmate.app.ui.components.CenteredScrollColumn
+import androidx.compose.foundation.layout.PaddingValues
 import com.rentmate.app.ui.components.OnBrandButton
 import com.rentmate.app.ui.theme.Aloe
 import com.rentmate.app.ui.theme.AloeDark
@@ -49,10 +51,10 @@ fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = 
             .pointerInput(Unit) { /* consume every touch */ },
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.screen, vertical = Spacing.xxl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        // RM-0056: scrolls at the largest font size instead of clipping the Unlock button.
+        CenteredScrollColumn(
+            contentPadding = PaddingValues(horizontal = Spacing.screen, vertical = Spacing.xxl),
+            spacing = Spacing.none
         ) {
             BrandMark(size = 96.dp)
             Spacer(Modifier.height(Spacing.xl))

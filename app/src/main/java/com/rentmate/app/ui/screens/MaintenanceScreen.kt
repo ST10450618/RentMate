@@ -19,8 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,6 +52,9 @@ import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.data.attachments.PhotoLink
 import com.rentmate.app.ui.components.AttachmentThumbnails
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
+import com.rentmate.app.ui.components.AdaptiveList
+import com.rentmate.app.ui.components.ChipRow
+import com.rentmate.app.ui.components.fullWidthItem
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
@@ -126,16 +128,14 @@ fun MaintenanceScreen(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ScreenHeader(title = stringResource(R.string.maintenance_title))
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-        ) {
+        // RM-0056: the form and headings span the width; requests sit in two columns at 600 dp and wider.
+        AdaptiveList(modifier = Modifier.fillMaxWidth().padding(Spacing.screen)) {
             if (uiState.loading) {
-                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                fullWidthItem { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             }
 
             uiState.error?.let { messageRes ->
-                item {
+                fullWidthItem {
                     ErrorCard(
                         message = stringResource(messageRes),
                         onRetry = viewModel::refresh,
@@ -144,7 +144,7 @@ fun MaintenanceScreen(
                 }
             }
 
-            item {
+            fullWidthItem {
                 RentMateCard {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         Text(
@@ -185,7 +185,7 @@ fun MaintenanceScreen(
                             stringResource(R.string.maintenance_category),
                             style = MaterialTheme.typography.labelMedium
                         )
-                        ChipRow {
+                        ChipRow(Modifier.fillMaxWidth()) {
                             MaintenanceCategory.entries.forEach { option ->
                                 FilterChip(
                                     selected = category == option,
@@ -199,7 +199,7 @@ fun MaintenanceScreen(
                             stringResource(R.string.maintenance_urgency),
                             style = MaterialTheme.typography.labelMedium
                         )
-                        ChipRow {
+                        ChipRow(Modifier.fillMaxWidth()) {
                             Urgency.entries.forEach { option ->
                                 FilterChip(
                                     selected = urgency == option,
@@ -245,7 +245,7 @@ fun MaintenanceScreen(
             }
 
             if (openCount > 0) {
-                item {
+                fullWidthItem {
                     PrimaryButton(
                         text = pluralStringResource(R.plurals.maintenance_send_to_landlord, openCount, openCount),
                         onClick = {
@@ -257,7 +257,7 @@ fun MaintenanceScreen(
                 }
             }
 
-            item {
+            fullWidthItem {
                 Text(
                     stringResource(R.string.maintenance_logged),
                     style = MaterialTheme.typography.titleMedium
@@ -265,7 +265,7 @@ fun MaintenanceScreen(
             }
 
             if (requests.isEmpty()) {
-                item {
+                fullWidthItem {
                     Text(
                         stringResource(R.string.maintenance_empty),
                         style = MaterialTheme.typography.bodyMedium,
@@ -321,7 +321,7 @@ private fun RequestCard(
             if (request.description.isNotBlank()) {
                 Text(request.description, style = MaterialTheme.typography.bodyMedium)
             }
-            ChipRow {
+            ChipRow(Modifier.fillMaxWidth()) {
                 AssistChip(onClick = {}, label = { Text(stringResource(request.category.labelRes)) })
                 AssistChip(onClick = {}, label = { Text(stringResource(request.urgency.labelRes)) })
             }
@@ -375,15 +375,6 @@ private fun StatusTimeline(request: MaintenanceRequest) {
             }
         }
     }
-}
-
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-@Composable
-private fun ChipRow(content: @Composable () -> Unit) {
-    androidx.compose.foundation.layout.FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        modifier = Modifier.fillMaxWidth()
-    ) { content() }
 }
 
 /** RM-0009: the email's wording, from string resources so it follows the app language. */

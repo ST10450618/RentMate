@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.RentMate" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@color/rentmate_sand</item>
+        <item name="android:windowBackground">@color/rentmate_ground</item>
     </style>
 
     <!-- Launch theme (RM-0037): aloe background with the house mark, then hands

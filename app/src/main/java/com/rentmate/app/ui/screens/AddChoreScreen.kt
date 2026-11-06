@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
+import com.rentmate.app.ui.components.ChipRow
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SectionLabel
@@ -54,6 +55,7 @@ private enum class Recurrence(val value: String, @StringRes val labelRes: Int) {
 fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewModel()) {
     val members by viewModel.members.collectAsState()
     val state by viewModel.state.collectAsState()
+    val loadState by viewModel.loadState.collectAsState()
 
     var title by remember { mutableStateOf("") }
     var recurrence by remember { mutableStateOf(Recurrence.WEEKLY) }
@@ -70,62 +72,64 @@ fun AddChoreScreen(onClose: () -> Unit, viewModel: AddChoreViewModel = hiltViewM
 
     Column(modifier = Modifier.fillMaxSize()) {
         ScreenHeader(title = stringResource(R.string.add_chore_title), onBack = onClose)
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(Spacing.screen),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-        ) {
-            ValidatedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = stringResource(R.string.add_chore_name),
-                error = titleError,
-                showErrors = submitted,
-                maxLength = Limits.TITLE_MAX + 10
-            )
+        FormLoadGate(loadState, onRetry = viewModel::loadMembers) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(Spacing.screen),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                ValidatedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = stringResource(R.string.add_chore_name),
+                    error = titleError,
+                    showErrors = submitted,
+                    maxLength = Limits.TITLE_MAX + 10
+                )
 
-            SectionLabel(stringResource(R.string.add_chore_recurrence))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                Recurrence.entries.forEach { option ->
-                    FilterChip(
-                        selected = recurrence == option,
-                        onClick = { recurrence = option },
-                        label = { Text(stringResource(option.labelRes)) }
-                    )
+                SectionLabel(stringResource(R.string.add_chore_recurrence))
+                ChipRow {
+                    Recurrence.entries.forEach { option ->
+                        FilterChip(
+                            selected = recurrence == option,
+                            onClick = { recurrence = option },
+                            label = { Text(stringResource(option.labelRes)) }
+                        )
+                    }
                 }
+
+                ValidatedTextField(
+                    value = pointValue,
+                    onValueChange = { input -> pointValue = input.filter { it.isDigit() } },
+                    label = stringResource(R.string.add_chore_points),
+                    error = pointsError,
+                    showErrors = submitted,
+                    maxLength = 3,
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                )
+
+                Text(
+                    if (members.isEmpty()) stringResource(R.string.error_no_members)
+                    else pluralStringResource(R.plurals.add_chore_rotation, members.size, members.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (members.isEmpty() && submitted) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                PrimaryButton(
+                    text = stringResource(R.string.save),
+                    loading = state is AddChoreUiState.Loading,
+                    onClick = {
+                        submitted = true
+                        val points = pointValue.toIntOrNull()
+                        if (formValid && points != null) viewModel.create(title.trim(), recurrence.value, points)
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
+                )
             }
-
-            ValidatedTextField(
-                value = pointValue,
-                onValueChange = { input -> pointValue = input.filter { it.isDigit() } },
-                label = stringResource(R.string.add_chore_points),
-                error = pointsError,
-                showErrors = submitted,
-                maxLength = 3,
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            )
-
-            Text(
-                if (members.isEmpty()) stringResource(R.string.error_no_members)
-                else pluralStringResource(R.plurals.add_chore_rotation, members.size, members.size),
-                style = MaterialTheme.typography.bodySmall,
-                color = if (members.isEmpty() && submitted) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            PrimaryButton(
-                text = stringResource(R.string.save),
-                loading = state is AddChoreUiState.Loading,
-                onClick = {
-                    submitted = true
-                    val points = pointValue.toIntOrNull()
-                    if (formValid && points != null) viewModel.create(title.trim(), recurrence.value, points)
-                },
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
-            )
         }
     }
 }
