@@ -41,6 +41,8 @@ class ThemeContrastTest {
         check("light onPrimaryContainer/primaryContainer", s.onPrimaryContainer, s.primaryContainer)
         check("light onSecondaryContainer/secondaryContainer", s.onSecondaryContainer, s.secondaryContainer)
         check("light error/surface", s.error, s.surface)
+        check("light error/background", s.error, s.background)
+        check("light error/surfaceVariant", s.error, s.surfaceVariant)
         check("light onError/error", s.onError, s.error)
     }
 
