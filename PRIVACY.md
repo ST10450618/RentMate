@@ -2,7 +2,7 @@
 
 _Last updated: 5 November 2026_
 
-RentMate is a household management app built by students for PROG7314 at The IIE (Varsity College). This policy explains what data the app collects, why, where it is kept, and how to have it removed. We follow the principles of South Africa's Protection of Personal Information Act (POPIA).
+RentMate is a household management app built by students for PROG7314 at Emeris. This policy explains what data the app collects, why, where it is kept, and how to have it removed. We follow the principles of South Africa's Protection of Personal Information Act (POPIA).
 
 ## What we collect
 
