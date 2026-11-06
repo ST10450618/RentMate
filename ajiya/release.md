@@ -10,7 +10,7 @@ RM-0039: signingConfigs.release reads keystore path and passwords from local.pro
 | ID | App | Ticket | Done when | Depends | Tags | Status |
 |---|---|---|---|---|---|---|
 | RM-0039 | android | Release build: signing config from secrets, R8 minify, versionCode bump | assembleRelease produces a signed APK/AAB that installs and runs on a physical phone | RM-0037 | - | 🟨 In progress |
-| RM-0040 | infra | CI builds signed release artefact on tag | Pushing a tag uploads the signed APK as a workflow artefact | RM-0012, RM-0039 | - | 🟥 Pending |
+| RM-0040 | infra | CI builds signed release artefact on tag | Pushing a tag uploads the signed APK as a workflow artefact | RM-0012, RM-0039 | - | 🟨 In progress: RM-0039 code is in (091928b); its phone test is moving to a separate device-check ticket. |
 | RM-0041 | infra | Play Store listing pack: screenshots, feature graphic, description, privacy policy | docs/store/ holds phone screenshots, 1024x500 graphic, listing text and hosted privacy policy URL | RM-0035, RM-0037 | - | 🟨 In progress |
 | RM-0042 | infra | README as technical report with images, DevOps section and release notes | README has purpose, design, architecture diagram, CI, screenshots, release notes since prototype | RM-0041 | - | 🟨 In progress |
 | RM-0043 | infra | AI-use write-up (max 500 words) with citations | AI_USAGE.md is filled in, under 500 words, cites tools and prompts | - | - | 🟥 Pending |
