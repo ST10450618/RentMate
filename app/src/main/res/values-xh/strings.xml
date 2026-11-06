@@ -86,7 +86,7 @@
     <string name="channel_maintenance_desc">Uhlaziyo ngezicelo zolungiso</string>
 
     <!-- RM-0035: list screen states -->
-    <string name="state_error_generic">Kukho into engahambanga kakuhle. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
+    <string name="state_error_generic">Asikwazanga ukulayisha le skrini. Jonga uqhagamshelo lwakho uze ucofe u-Zama kwakhona.</string>
     <string name="state_retry">Zama kwakhona</string>
     <string name="empty_bills_title">Akukabikho bhili</string>
     <string name="empty_bills_body">Yongeza ibhili yokuqala, kwaye i-RentMate iya kuyahlulela wonke umntu.</string>
@@ -126,7 +126,7 @@
     <string name="error_session_expired">Iseshoni yakho iphelelwe lixesha. Nceda ungene kwakhona.</string>
     <string name="error_not_allowed">Awunamvume yokwenza oko.</string>
     <string name="error_already_exists">Oko sele kukhona.</string>
-    <string name="error_generic">Kukho into engahambanga kakuhle. Nceda uzame kwakhona.</string>
+    <string name="error_generic">Oko akusebenzanga. Jonga uqhagamshelo lwakho uzame kwakhona.</string>
     <string name="error_invalid_invite_code">Loo khowudi yesimemo ayisebenzi. Yijonge uzame kwakhona.</string>
     <string name="error_sign_in_failed">Ukungena akuphumelelanga. Nceda uzame kwakhona.</string>
     <string name="error_amount_positive">Isixa kufuneka sibe ngaphezu ko-0.</string>
@@ -141,7 +141,7 @@
     <string name="lock_error_cancelled">Ukuvula kurhoxisiwe. Zama kwakhona ukuze uqhubeke.</string>
     <string name="lock_error_lockout">Iinzame ezininzi kakhulu. Linda kancinci uze uzame kwakhona.</string>
     <string name="lock_error_no_credentials">Akukho mnwe, buso okanye isitshixo sesikrini esisetiweyo kwesi sixhobo.</string>
-    <string name="lock_error_other">Kukho into engahambanga kakuhle ekuvuleni. Zama kwakhona.</string>
+    <string name="lock_error_other">Ukuvula akusebenzanga. Zama kwakhona.</string>
 
     <string name="biometric_note_no_hardware">Esi sixhobo asikwazi ukuvula ngomnwe okanye ngobuso, ngoko olu seto alufumaneki.</string>
     <string name="biometric_note_unavailable">Ukuvula ngebhayometriki akufumaneki kwesi sixhobo ngoku.</string>
