@@ -83,8 +83,10 @@ class AndroidPhotoCompressor @Inject constructor(
     private fun decodeUpright(uri: Uri): Bitmap {
         val resolver = context.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
-            ?: throw PhotoUnreadableException("Cannot open $uri")
+        // decodeStream returns null on purpose when it only reads the bounds, so the
+        // null check belongs on the stream, not on the result of use { }.
+        val boundsStream = resolver.openInputStream(uri) ?: throw PhotoUnreadableException("Cannot open $uri")
+        boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw PhotoUnreadableException("Not an image: $uri")
 
         var sample = 1
