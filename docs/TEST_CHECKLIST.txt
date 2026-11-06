@@ -103,6 +103,10 @@ Mark each line: [x] pass   [!] fail (write what happened under it)
     that a screen lock is needed instead of crashing.
 [ ] RM-0002: after a backup restore or transfer to another phone, the app
     opens on Login, not the Dashboard (the saved sign-in is not copied).
+[ ] RM-0016: open Bills, Chores, Shopping and the Dashboard once while
+    online. Turn on airplane mode, swipe the app away and reopen: all four
+    still show the same bills, chores, items and cards, with an offline
+    message instead of an empty screen.
 
 
 7. TRANSLATION REVIEW (RM-0025) - for a native speaker, not Ali
