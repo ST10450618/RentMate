@@ -172,6 +172,8 @@ The Afrikaans (`values-af`) and isiXhosa (`values-xh`) translations are machine-
 
 Expect accuracy similar to Google Translate. Most screens read correctly, but some wording may be awkward, too literal or wrong, especially plurals and isiXhosa number forms. English (`values`) is the reference text.
 
+The app says the same thing in Settings, under the language picker (`language_translation_disclaimer`), so users see it before they switch.
+
 If you find a wrong translation, fix the string in `values-af` or `values-xh`. `TranslationCompletenessTest` checks that every English string still has an Afrikaans and an isiXhosa version.
 
 **Privacy.** Data is scoped to a household by Row Level Security. Biometric data never leaves the device. See [PRIVACY.md](PRIVACY.md).
