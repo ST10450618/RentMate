@@ -53,3 +53,10 @@ TestResults/
 Thumbs.db
 *~
 .mockup-extract/
+
+#  Firebase emulator / rules tests 
+firebase/node_modules/
+node_modules/
+firestore-debug.log
+firebase-debug.log
+ui-debug.log

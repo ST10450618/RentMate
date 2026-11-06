@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// RM-0032: household activity events.
+// Users sign in to Firebase with a custom token from the firebase-token Edge Function.
+// Its `households` claim lists the household ids the user belongs to.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isMember(hid) {
+      return request.auth != null
+        && request.auth.token.households is list
+        && hid in request.auth.token.households;
+    }
+
+    function boundedString(value) {
+      return value is string && value.size() > 0 && value.size() <= 200;
+    }
+
+    function validEvent() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['type', 'actorName', 'summary', 'refId', 'createdAt'])
+        && d.keys().hasAll(['type', 'actorName', 'summary', 'refId', 'createdAt'])
+        && d.type in [
+          'bill_added', 'bill_paid', 'chore_completed', 'shopping_added',
+          'shopping_bought', 'maintenance_logged', 'maintenance_status'
+        ]
+        && boundedString(d.actorName)
+        && boundedString(d.summary)
+        && (d.refId == null || boundedString(d.refId))
+        && d.createdAt == request.time;
+    }
+
+    match /households/{hid}/events/{eid} {
+      allow read: if isMember(hid);
+      allow create: if isMember(hid) && validEvent();
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
