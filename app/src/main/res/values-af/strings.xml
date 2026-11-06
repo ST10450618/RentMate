@@ -7,9 +7,6 @@
     <string name="notif_maintenance">Opdaterings oor onderhoud</string>
 
     <string name="section_language">Taal</string>
-    <string name="lang_english">Engels</string>
-    <string name="lang_afrikaans">Afrikaans</string>
-    <string name="lang_xhosa">isiXhosa</string>
 
     <string name="section_security">Sekuriteit en vertoning</string>
     <string name="biometric_title">Ontsluit met biometrie</string>

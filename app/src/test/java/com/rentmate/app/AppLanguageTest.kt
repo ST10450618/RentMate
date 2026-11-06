@@ -2,8 +2,10 @@
 
 import com.rentmate.app.data.AppLanguage
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
 
 /**
  * US-4 requires the app to default to a supported language and fall back to
@@ -35,6 +37,37 @@ class AppLanguageTest {
         val tags = AppLanguage.entries.map { it.tag }
         assertEquals(tags.size, tags.toSet().size)
         assertTrue(tags.none { it.isBlank() })
+    }
+
+    @Test
+    fun `locale list maps to the language on its first supported entry`() {
+        assertEquals(AppLanguage.AFRIKAANS, AppLanguage.fromLocaleTags("af"))
+        assertEquals(AppLanguage.AFRIKAANS, AppLanguage.fromLocaleTags("af-ZA"))
+        assertEquals(AppLanguage.XHOSA, AppLanguage.fromLocaleTags("xh-ZA,en-US"))
+        assertEquals(AppLanguage.ENGLISH, AppLanguage.fromLocaleTags("en-GB"))
+        assertEquals(AppLanguage.XHOSA, AppLanguage.fromLocaleTags("zu-ZA, xh"))
+    }
+
+    @Test
+    fun `empty or unsupported locale list means follow the system`() {
+        assertNull(AppLanguage.fromLocaleTags(""))
+        assertNull(AppLanguage.fromLocaleTags(null))
+        assertNull(AppLanguage.fromLocaleTags("zu-ZA,fr"))
+    }
+
+    @Test
+    fun `every language survives the round trip through its tag`() {
+        AppLanguage.entries.forEach { language ->
+            assertEquals(language, AppLanguage.fromTag(language.tag))
+            assertEquals(language, AppLanguage.fromLocaleTags(language.tag))
+        }
+    }
+
+    @Test
+    fun `every language has a values folder`() {
+        AppLanguage.entries.filter { it != AppLanguage.ENGLISH }.forEach { language ->
+            assertTrue(File("src/main/res/values-${language.tag}/strings.xml").isFile)
+        }
     }
 
     @Test
