@@ -1,6 +1,7 @@
 package com.rentmate.app.ui.screens
 
 import com.rentmate.app.data.MaintenanceCategory
+import com.rentmate.app.data.activity.NoOpActivityLogger
 import com.rentmate.app.data.LandlordContact
 import com.rentmate.app.data.MaintenanceRepository
 import com.rentmate.app.data.MaintenanceRequest
@@ -91,7 +92,7 @@ class MaintenanceViewModelTest {
     }
 
     private fun viewModel(repository: FakeMaintenanceRepository, attachments: AttachmentRepository = FakeAttachments()) =
-        MaintenanceViewModel(repository, attachments)
+        MaintenanceViewModel(repository, attachments, NoOpActivityLogger)
 
     @Before
     fun setUp() {

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.ChoreForecastRow
 import com.rentmate.app.data.ChoreRow
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.data.LeaderboardRow
 import com.rentmate.app.R
 import com.rentmate.app.data.SettingToggle
@@ -74,7 +75,8 @@ private data class LeaderboardParams(val household_id_in: String)
 class ChoresViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val activity: ActivityLogger
 ) : ViewModel() {
     private val settingsRepository = SettingsRepository(context)
     private val _state = MutableStateFlow(ChoresUiState())
@@ -145,9 +147,13 @@ class ChoresViewModel @Inject constructor(
 
     /** US-9: records who completed the chore; the server advances the rotation. */
     fun complete(choreId: String) {
+        val title = _state.value.chores.firstOrNull { it.id == choreId }?.title
         viewModelScope.launch {
             runCatching { supabase.postgrest.rpc("complete_chore", CompleteChoreParams(choreId).toRpcParams()) }
-                .onSuccess { refresh() }
+                .onSuccess {
+                    if (title != null) activity.choreCompleted(title, choreId)
+                    refresh()
+                }
                 .onFailure {
                     // Seth's specific chore rules first (RM-0008), then the app-wide mapper (RM-0004).
                     val res = (it as? PostgrestRestException)

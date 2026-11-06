@@ -21,6 +21,7 @@ import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
 import android.util.Log
+import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
 import com.rentmate.app.data.attachments.PhotoLink
@@ -55,7 +56,8 @@ private val BILL_WITH_SHARES_COLUMNS = Columns.raw("*, bill_shares(*, profiles(d
 class BillsViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
-    private val attachments: AttachmentRepository
+    private val attachments: AttachmentRepository,
+    private val activity: ActivityLogger
 ) : ViewModel() {
     private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
@@ -93,13 +95,19 @@ class BillsViewModel @Inject constructor(
     }
 
     fun payShare(shareId: String) {
+        val bill = _state.value.bills.firstOrNull { b -> b.bill_shares.any { it.id == shareId } }
+        val share = bill?.bill_shares?.firstOrNull { it.id == shareId }
         viewModelScope.launch {
             runCatching {
                 // RM-0006: shares can't be updated directly any more (RLS has no
                 // update policy); the RPC only lets the bill's issuer (the creditor) mark a share paid.
                 supabase.postgrest.rpc("mark_share_paid", MarkSharePaidParams(shareId).toRpcParams())
-            }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+            }.onSuccess {
+                if (bill != null && share != null) {
+                    activity.sharePaid(bill.title, share.amount_owed, share.profiles?.display_name, bill.id)
+                }
+                refresh()
+            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 
@@ -122,6 +130,8 @@ class BillsViewModel @Inject constructor(
             runCatching {
                 supabase.postgrest.rpc("confirm_settlement", ConfirmSettlementParams(householdId, fromUserId, amount).toRpcParams())
             }.onSuccess {
+                val fromName = _state.value.settleUp?.firstOrNull { it.from_user_id == fromUserId }?.from_display_name
+                activity.settlementConfirmed(fromName ?: "a housemate", amount)
                 _state.value = _state.value.copy(settleUp = null)
                 refresh()
             }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }

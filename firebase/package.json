@@ -1,0 +1,12 @@
+{
+  "name": "rentmate-firestore-rules-tests",
+  "private": true,
+  "description": "Tests for ../firestore.rules, run against the Firestore emulator.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.0.0"
+  }
+}
