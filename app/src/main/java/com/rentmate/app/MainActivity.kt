@@ -45,6 +45,13 @@ private const val KEY_ASKED_NOTIFICATIONS = "asked_notification_permission"
  *
  * It is an AppCompatActivity (RM-0026) so AppCompatDelegate.setApplicationLocales
  * can switch the language in-app on Android 8-12 as well as 13+.
+ *
+ * Based on: Android Developers, Splash screens,
+ * https://developer.android.com/develop/ui/views/launch/splash-screen (accessed 2026-11-06)
+ * Based on: Android Developers, Request runtime permissions,
+ * https://developer.android.com/training/permissions/requesting (accessed 2026-11-06)
+ * Based on: Android Developers, Per-app language preferences,
+ * https://developer.android.com/guide/topics/resources/app-languages (accessed 2026-11-06)
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -59,6 +66,10 @@ class MainActivity : AppCompatActivity() {
             Log.i(TAG, "POST_NOTIFICATIONS granted=$granted")
         }
 
+    /**
+     * Installs the splash screen, starts the session followers (Firestore, FCM token,
+     * outbox sync) and sets the Compose content behind the app lock.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -116,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
+    // Lifecycle callbacks below only log, so Logcat shows when the activity moves between states.
     override fun onStart() { super.onStart(); Log.d(TAG, "onStart") }
     override fun onResume() { super.onResume(); Log.d(TAG, "onResume") }
     override fun onPause() { super.onPause(); Log.d(TAG, "onPause") }
