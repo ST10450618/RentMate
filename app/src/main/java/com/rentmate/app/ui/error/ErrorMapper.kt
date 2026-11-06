@@ -34,6 +34,12 @@ object ErrorMapper {
         return if (error == AppError.GENERIC) fallback else error.messageRes
     }
 
+    /** Logs [throwable] and returns its kind, for callers that choose their own message. */
+    fun classifyAndLog(throwable: Throwable): AppError {
+        Log.e(TAG, "Request failed", throwable)
+        return classify(throwable)
+    }
+
     /** Walks the cause chain, since Ktor and Supabase sometimes wrap the real failure. */
     fun classify(throwable: Throwable): AppError {
         var current: Throwable? = throwable

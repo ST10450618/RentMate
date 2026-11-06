@@ -1,6 +1,7 @@
 package com.rentmate.app.ui.screens
 
 import com.rentmate.app.data.MaintenanceCategory
+import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.data.activity.NoOpActivityLogger
 import com.rentmate.app.data.LandlordContact
 import com.rentmate.app.data.MaintenanceRepository
@@ -91,8 +92,10 @@ class MaintenanceViewModelTest {
             paths.associateWith { "https://signed/$it?e=${expiresIn.inWholeSeconds}" }
     }
 
+    private val feedback = FeedbackCenter()
+
     private fun viewModel(repository: FakeMaintenanceRepository, attachments: AttachmentRepository = FakeAttachments()) =
-        MaintenanceViewModel(repository, attachments, NoOpActivityLogger)
+        MaintenanceViewModel(repository, attachments, NoOpActivityLogger, feedback)
 
     @Before
     fun setUp() {
@@ -119,7 +122,10 @@ class MaintenanceViewModelTest {
         val titleError = viewModel.log("Leaking tap", "", MaintenanceCategory.PLUMBING, Urgency.HIGH)
 
         assertNull(titleError)
-        assertEquals(MaintenanceError.SAVE.messageRes, viewModel.state.value.error)
+        // RM-0052: a failed tap is a snackbar. The error card still shows the
+        // offline load error from init, not the save error.
+        assertEquals(MaintenanceError.LOAD.messageRes, viewModel.state.value.error)
+        assertEquals(listOf(MaintenanceError.SAVE.messageRes), feedback.drain().map { it.messageRes })
     }
 
     @Test
@@ -127,10 +133,10 @@ class MaintenanceViewModelTest {
         val viewModel = viewModel(FakeMaintenanceRepository(offline = true))
 
         viewModel.advance("any-id")
-        assertEquals(MaintenanceError.UPDATE.messageRes, viewModel.state.value.error)
+        assertEquals(listOf(MaintenanceError.UPDATE.messageRes), feedback.drain().map { it.messageRes })
 
         viewModel.sendOpenRequests()
-        assertEquals(MaintenanceError.SEND.messageRes, viewModel.state.value.error)
+        assertEquals(listOf(MaintenanceError.SEND.messageRes), feedback.drain().map { it.messageRes })
     }
 
     @Test
