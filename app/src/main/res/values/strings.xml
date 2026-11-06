@@ -315,4 +315,33 @@
     <string name="money_tap_received">Tap when you have received it</string>
     <string name="undo_marked_received">Marked %1$s as received</string>
     <string name="save_bill">Save bill</string>
+    <!-- RM-0060: Settings redesign -->
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_privacy">Privacy and language</string>
+    <string name="settings_bills_title">Bills</string>
+    <string name="settings_chores_title">Chores</string>
+    <string name="settings_shopping_title">Shopping</string>
+    <string name="settings_repairs_title">Repairs</string>
+    <string name="settings_app_lock_title">App lock</string>
+    <string name="settings_bills_desc">New bills and payments</string>
+    <string name="settings_chores_desc">The day your turn comes up</string>
+    <string name="settings_shopping_desc">When someone adds to the shopping list</string>
+    <string name="settings_repairs_desc">When a fault changes status</string>
+    <string name="settings_app_lock_desc">Asks for your fingerprint, face or PIN to open RentMate</string>
+    <string name="settings_leaderboard_desc">For the whole household</string>
+    <string name="settings_language_current">On</string>
+    <string name="settings_copy_code">Copy invite code</string>
+    <string name="settings_code_copied">Invite code copied</string>
+    <string name="settings_profile_line">%1$s · code %2$s</string>
+    <string name="settings_language_options" translatable="false">English · Afrikaans · isiXhosa</string>
+    <!-- RM-0060: Activity redesign -->
+    <string name="activity_context_bills">Bills</string>
+    <string name="activity_context_chores">Chores</string>
+    <string name="activity_context_shopping">Shopping</string>
+    <string name="activity_context_repairs">Repairs</string>
+    <string name="activity_pill_paid">Paid</string>
+    <string name="activity_pill_done">Done</string>
+    <string name="activity_pill_bought">Bought</string>
+    <string name="activity_pill_updated">Updated</string>
+    <string name="activity_row_meta">%1$s · %2$s</string>
 </resources>
