@@ -141,7 +141,6 @@ fun HouseholdSetupScreen(
         Spacer(Modifier.height(16.dp))
         when (val s = state) {
             is HouseholdSetupUiState.Loading -> Row { CircularProgressIndicator() }
-            is HouseholdSetupUiState.Error -> Text(stringResource(s.messageRes), color = MaterialTheme.colorScheme.error)
             is HouseholdSetupUiState.Created -> {
                 RentMateCard(accent = MaterialTheme.colorScheme.primary) {
                     SectionLabel(stringResource(R.string.household_created))

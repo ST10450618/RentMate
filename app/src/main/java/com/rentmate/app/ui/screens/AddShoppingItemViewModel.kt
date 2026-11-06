@@ -18,13 +18,12 @@ import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.R
-import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.ui.feedback.FeedbackCenter
 
 sealed interface AddShoppingItemUiState {
     data object Idle : AddShoppingItemUiState
     data object Loading : AddShoppingItemUiState
     data object Saved : AddShoppingItemUiState
-    data class Error(@StringRes val messageRes: Int) : AddShoppingItemUiState
 }
 
 @Serializable
@@ -37,7 +36,8 @@ private data class InsertedItemRow(val id: String)
 class AddShoppingItemViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
-    private val activity: ActivityLogger
+    private val activity: ActivityLogger,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val _state = MutableStateFlow<AddShoppingItemUiState>(AddShoppingItemUiState.Idle)
     val state: StateFlow<AddShoppingItemUiState> = _state
@@ -56,8 +56,10 @@ class AddShoppingItemViewModel @Inject constructor(
             }.onSuccess {
                 activity.shoppingAdded(name.trim(), it.id)
                 _state.value = AddShoppingItemUiState.Saved
+            }.onFailure {
+                _state.value = AddShoppingItemUiState.Idle
+                feedback.failure(it, R.string.feedback_add_item_failed, retry = { add(name) })
             }
-                .onFailure { _state.value = AddShoppingItemUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }
 }

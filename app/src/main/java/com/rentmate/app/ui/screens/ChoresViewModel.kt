@@ -34,6 +34,7 @@ import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.ui.feedback.FeedbackCenter
 
 data class ChoresUiState(
     val chores: List<ChoreRow> = emptyList(),
@@ -80,7 +81,8 @@ class ChoresViewModel @Inject constructor(
     private val currentHousehold: CurrentHousehold,
     @ApplicationContext private val context: Context,
     private val activity: ActivityLogger,
-    private val choresRepository: ChoresRepository
+    private val choresRepository: ChoresRepository,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val settingsRepository = SettingsRepository(context)
     private val _state = MutableStateFlow(ChoresUiState())
@@ -169,7 +171,11 @@ class ChoresViewModel @Inject constructor(
                     val res = (it as? PostgrestRestException)
                         ?.let { e -> completeChoreErrorRes(e.code, e.message) }
                         ?: completeChoreErrorRes(null, it.message)
-                    _state.value = _state.value.copy(error = res ?: ErrorMapper.toMessage(it))
+                    if (res != null) {
+                        feedback.show(res)
+                    } else {
+                        feedback.failure(it, R.string.feedback_complete_chore_failed, retry = { complete(choreId) })
+                    }
                 }
         }
     }

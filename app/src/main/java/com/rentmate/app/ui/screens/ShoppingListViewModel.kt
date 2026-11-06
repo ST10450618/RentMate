@@ -21,6 +21,8 @@ import java.time.Instant
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.R
+import com.rentmate.app.ui.feedback.FeedbackCenter
 
 data class ShoppingListUiState(
     val items: List<ShoppingItemRow> = emptyList(),
@@ -35,7 +37,8 @@ class ShoppingListViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     private val activity: ActivityLogger,
-    private val shoppingRepository: ShoppingRepository
+    private val shoppingRepository: ShoppingRepository,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShoppingListUiState())
     val state: StateFlow<ShoppingListUiState> = _state
@@ -76,7 +79,7 @@ class ShoppingListViewModel @Inject constructor(
             }.onSuccess {
                 if (name != null) activity.shoppingBought(name, id)
                 refresh()
-            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+            }.onFailure { feedback.failure(it, R.string.feedback_mark_bought_failed, retry = { purchase(id) }) }
         }
     }
 }

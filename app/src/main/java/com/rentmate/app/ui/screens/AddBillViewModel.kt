@@ -28,7 +28,7 @@ import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.R
-import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.data.activity.ActivityLogger
 import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
@@ -39,7 +39,6 @@ sealed interface AddBillUiState {
     data object Idle : AddBillUiState
     data object Loading : AddBillUiState
     data object Saved : AddBillUiState
-    data class Error(@StringRes val messageRes: Int) : AddBillUiState
 }
 
 @Serializable
@@ -67,7 +66,8 @@ class AddBillViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     private val attachments: AttachmentRepository,
-    private val activity: ActivityLogger
+    private val activity: ActivityLogger,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     /**
      * Set once create_bill succeeded. If linking the photos then fails, Save
@@ -122,7 +122,7 @@ class AddBillViewModel @Inject constructor(
             createdBillId?.let { billId ->
                 runCatching { attachments.link(AttachmentParent.Bill(billId), photoPaths) }
                     .onSuccess { _state.value = AddBillUiState.Saved }
-                    .onFailure { linkFailed(it) }
+                    .onFailure { linkFailed(it) { createBill(title, amount, dueDate, mode, shares, repeat, photoPaths) } }
                 return@launch
             }
             runCatching {
@@ -141,14 +141,22 @@ class AddBillViewModel @Inject constructor(
                 activity.billAdded(title, amount.toDouble(), bill.id)
                 runCatching { attachments.link(AttachmentParent.Bill(bill.id), photoPaths) }
                     .onSuccess { _state.value = AddBillUiState.Saved }
-                    .onFailure { linkFailed(it) }
-            }.onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
+                    .onFailure { linkFailed(it) { createBill(title, amount, dueDate, mode, shares, repeat, photoPaths) } }
+            }.onFailure {
+                _state.value = AddBillUiState.Idle
+                feedback.failure(
+                    it, R.string.feedback_save_bill_failed,
+                    retry = { createBill(title, amount, dueDate, mode, shares, repeat, photoPaths) }
+                )
+            }
         }
     }
 
-    private fun linkFailed(cause: Throwable) {
+    /** The bill exists; only the photos are missing. Retry links them without creating the bill again. */
+    private fun linkFailed(cause: Throwable, retry: () -> Unit) {
         if (cause is kotlinx.coroutines.CancellationException) throw cause
         Log.e(TAG, "Bill saved but its photos could not be linked", cause)
-        _state.value = AddBillUiState.Error(R.string.photo_error_link)
+        _state.value = AddBillUiState.Idle
+        feedback.show(R.string.photo_error_link, retry = retry)
     }
 }
