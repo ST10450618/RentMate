@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sync_banner_offline">Awukho kwi-intanethi. Utshintsho luza kuvumelaniswa xa uphinda uqhagamshela.</string>
+    <plurals name="sync_banner_offline_pending">
+        <item quantity="one">Utshintsho olu-%d lulindile.</item>
+        <item quantity="other">Iinguqu ezi-%d zilindile.</item>
+    </plurals>
+    <plurals name="sync_banner_syncing">
+        <item quantity="one">Kuvumelaniswa utshintsho olu-%d…</item>
+        <item quantity="other">Kuvumelaniswa iinguqu ezi-%d…</item>
+    </plurals>
+    <plurals name="sync_banner_failed">
+        <item quantity="one">Asikwazanga ukuvumelanisa utshintsho olu-%d.</item>
+        <item quantity="other">Asikwazanga ukuvumelanisa iinguqu ezi-%d.</item>
+    </plurals>
+    <string name="sync_banner_synced">Lonke utshintsho luvumelanisiwe</string>
+
+    <string name="sync_rejected_not_allowed">Utshintsho owenze ungekho kwi-intanethi alugcinwanga. Awuvumelekanga ukulwenza.</string>
+    <string name="sync_rejected_gone">Utshintsho owenze ungekho kwi-intanethi alugcinwanga. Into leyo ayisekho.</string>
+    <string name="sync_rejected_not_saved">Utshintsho owenze ungekho kwi-intanethi alukwazanga ukugcinwa.</string>
+    <plurals name="sync_rejected_more">
+        <item quantity="one">Olunye utshintsho olu-%d alugcinwanga.</item>
+        <item quantity="other">Ezinye iinguqu ezi-%d azigcinwanga.</item>
+    </plurals>
+    <string name="sync_rejected_dismiss">Vala</string>
+</resources>
