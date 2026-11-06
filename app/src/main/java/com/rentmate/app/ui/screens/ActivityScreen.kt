@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rentmate.app.R
 import com.rentmate.app.data.activity.ActivityEvent
 import com.rentmate.app.data.activity.ActivityType
+import com.rentmate.app.ui.components.ErrorState
 import com.rentmate.app.ui.components.MemberAvatar
 import com.rentmate.app.ui.components.RentMateCard
 import com.rentmate.app.ui.components.ScreenHeader
@@ -57,11 +58,11 @@ import java.time.format.FormatStyle
 @Composable
 fun ActivityScreen(viewModel: ActivityViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
-    ActivityContent(state)
+    ActivityContent(state, onRetry = viewModel::retry)
 }
 
 @Composable
-private fun ActivityContent(state: ActivityUiState, now: Instant = Instant.now()) {
+private fun ActivityContent(state: ActivityUiState, now: Instant = Instant.now(), onRetry: () -> Unit = {}) {
     Column(modifier = Modifier.fillMaxSize()) {
         ScreenHeader(
             title = stringResource(R.string.activity_title),
@@ -69,13 +70,11 @@ private fun ActivityContent(state: ActivityUiState, now: Instant = Instant.now()
         )
         when (state) {
             ActivityUiState.Loading -> CenteredBox { CircularProgressIndicator() }
-            is ActivityUiState.Error -> CenteredBox {
-                Text(
-                    stringResource(R.string.activity_error),
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
-                )
-            }
+            // RM-0035: same retry error state as the other list screens.
+            is ActivityUiState.Error -> ErrorState(
+                message = stringResource(R.string.activity_error),
+                onRetry = onRetry
+            )
             is ActivityUiState.Events -> {
                 if (state.isSample) SampleDataBanner()
                 if (state.events.isEmpty()) ActivityEmpty() else ActivityList(state.events, now)
