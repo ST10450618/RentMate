@@ -31,16 +31,19 @@ jobs:
           KEY_ALIAS: ${{ secrets.RENTMATE_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.RENTMATE_KEY_PASSWORD }}
         run: |
+          # A copy of the repo without the signing secrets (for example the
+          # group's Classroom repo) skips the release instead of failing.
           missing=0
           for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
             if [ -z "${!name}" ]; then
-              echo "::error::Repository secret RENTMATE_${name} is empty or missing. Add it under Settings > Secrets and variables > Actions (see README section 12)."
+              echo "::notice::Repository secret RENTMATE_${name} is not set, so this run skips the signed release (see README section 12)."
               missing=1
             fi
           done
-          exit $missing
+          if [ "$missing" = 0 ]; then echo "SIGNING_READY=true" >> "$GITHUB_ENV"; else echo "SIGNING_READY=false" >> "$GITHUB_ENV"; fi
 
       - name: Decode the upload keystore
+        if: env.SIGNING_READY == 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.RENTMATE_KEYSTORE_BASE64 }}
         run: |
@@ -48,20 +51,24 @@ jobs:
           test -s "$RUNNER_TEMP/upload.jks"
 
       - name: Set up JDK 17
+        if: env.SIGNING_READY == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Gradle (with dependency caching)
+        if: env.SIGNING_READY == 'true'
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make gradlew executable
+        if: env.SIGNING_READY == 'true'
         run: chmod +x ./gradlew
 
       # Optional app config. android-ci.yml builds without these (they default
       # to empty); a real release needs them. Written only when set.
       - name: Write local.properties
+        if: env.SIGNING_READY == 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -74,6 +81,7 @@ jobs:
           true
 
       - name: Build signed release APK and AAB
+        if: env.SIGNING_READY == 'true'
         env:
           RENTMATE_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
           RENTMATE_KEYSTORE_PASSWORD: ${{ secrets.RENTMATE_KEYSTORE_PASSWORD }}
@@ -82,11 +90,13 @@ jobs:
         run: ./gradlew --no-daemon assembleRelease bundleRelease
 
       - name: Verify the APK signature
+        if: env.SIGNING_READY == 'true'
         run: |
           APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
           "$APKSIGNER" verify --print-certs app/build/outputs/apk/release/app-release.apk
 
       - name: Upload signed APK
+        if: env.SIGNING_READY == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: rentmate-${{ env.RELEASE_NAME }}-apk
@@ -95,6 +105,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload AAB
+        if: env.SIGNING_READY == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: rentmate-${{ env.RELEASE_NAME }}-aab
@@ -103,6 +114,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload R8 mapping file
+        if: env.SIGNING_READY == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: rentmate-${{ env.RELEASE_NAME }}-mapping
@@ -111,7 +123,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish the signed APK and AAB as a GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: env.SIGNING_READY == 'true' && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           name: RentMate ${{ env.RELEASE_NAME }}
