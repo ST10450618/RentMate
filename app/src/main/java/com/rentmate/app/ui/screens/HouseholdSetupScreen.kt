@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -70,7 +69,7 @@ fun HouseholdSetupScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(Spacing.xl),
+            .padding(Spacing.screen),
         verticalArrangement = Arrangement.Center
     ) {
         BrandMark(size = 72.dp, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -112,7 +111,7 @@ fun HouseholdSetupScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(Spacing.xl))
         SectionLabel(stringResource(R.string.household_join_existing))
         Spacer(Modifier.height(Spacing.sm))
 
@@ -138,7 +137,7 @@ fun HouseholdSetupScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(Spacing.lg))
         when (val s = state) {
             is HouseholdSetupUiState.Loading -> Row { CircularProgressIndicator() }
             is HouseholdSetupUiState.Created -> {
@@ -151,8 +150,8 @@ fun HouseholdSetupScreen(
                         letterSpacing = 4.sp
                     )
                 }
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.continue_label)) }
+                Spacer(Modifier.height(Spacing.lg))
+                PrimaryButton(stringResource(R.string.continue_label), onClick = onDone, modifier = Modifier.fillMaxWidth())
             }
             else -> {}
         }

@@ -97,7 +97,7 @@ fun LoginScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.xl, vertical = Spacing.xxl),
+                .padding(horizontal = Spacing.screen, vertical = Spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(Spacing.xxl))

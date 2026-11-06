@@ -54,7 +54,7 @@ fun LockScreen(failure: AuthFailure?, onRetry: () -> Unit, modifier: Modifier = 
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(Spacing.xxl),
+            modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.screen, vertical = Spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
