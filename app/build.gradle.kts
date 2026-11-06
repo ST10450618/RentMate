@@ -197,5 +197,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    // RM-0021: push notifications (FCM token and incoming messages).
+    implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
 }
