@@ -30,7 +30,9 @@ const val ATTACHMENTS_BUCKET = "attachments"
 
 /** The second folder of an object path; the bucket policy only accepts these. */
 enum class AttachmentKind(val folder: String) {
+    /** A photo of a maintenance fault. */
     MAINTENANCE("maintenance"),
+    /** A photo of a bill or receipt. */
     BILL("bill")
 }
 
@@ -40,14 +42,19 @@ fun attachmentPath(householdId: String, kind: AttachmentKind, id: String = UUID.
 
 /** What an upload flow emits: progress from 0 to 1, then the stored path. */
 sealed interface UploadProgress {
+    /** Part of the file is sent; [fraction] runs from 0 to 1. */
     data class Sending(val fraction: Float) : UploadProgress
+    /** The file is stored at [path] in [ATTACHMENTS_BUCKET]. */
     data class Done(val path: String) : UploadProgress
 }
 
 /** What a photo is attached to (RM-0029); public.attachments allows exactly one. */
 sealed interface AttachmentParent {
+    /** Server id of the parent row. */
     val id: String
+    /** The photo belongs to the maintenance request [id]. */
     data class Maintenance(override val id: String) : AttachmentParent
+    /** The photo belongs to the bill [id]. */
     data class Bill(override val id: String) : AttachmentParent
 }
 
@@ -105,6 +112,7 @@ interface AttachmentRepository {
     suspend fun signedUrls(paths: List<String>, expiresIn: Duration): Map<String, String>
 }
 
+/** Insert body for public.attachments; exactly one parent id is set. */
 @Serializable
 private data class AttachmentInsert(
     val household_id: String,
@@ -113,6 +121,7 @@ private data class AttachmentInsert(
     val bill_id: String? = null
 )
 
+/** The public.attachments columns [SupabaseAttachmentRepository.list] reads. */
 @Serializable
 private data class AttachmentRow(
     val storage_path: String,
@@ -120,7 +129,14 @@ private data class AttachmentRow(
     val bill_id: String? = null
 )
 
-/** Supabase Storage-backed [AttachmentRepository]. */
+/**
+ * Supabase Storage-backed [AttachmentRepository].
+ *
+ * Based on: Supabase Kotlin reference, Upload a file,
+ * https://supabase.com/docs/reference/kotlin/storage-from-upload (accessed 2026-11-06)
+ * Based on: Supabase Kotlin reference, Create signed URLs,
+ * https://supabase.com/docs/reference/kotlin/storage-from-createsignedurls (accessed 2026-11-06)
+ */
 @Singleton
 class SupabaseAttachmentRepository @Inject constructor(
     private val supabase: SupabaseClient,
@@ -129,9 +145,11 @@ class SupabaseAttachmentRepository @Inject constructor(
 
     private val bucket get() = supabase.storage.from(ATTACHMENTS_BUCKET)
 
+    /** Streams upload progress; `upsert = false` so a path can never overwrite another photo. */
     override fun upload(kind: AttachmentKind, jpeg: ByteArray): Flow<UploadProgress> = flow {
         val householdId = currentHousehold.id.first() ?: throw IllegalStateException("No household selected")
         val path = attachmentPath(householdId, kind)
+        Log.d(TAG, "upload start: ${kind.folder}, ${jpeg.size} bytes")
         val statuses = bucket.uploadAsFlow(path, jpeg) {
             upsert = false
             contentType = ContentType.Image.JPEG
@@ -141,18 +159,22 @@ class SupabaseAttachmentRepository @Inject constructor(
                 when (status) {
                     is UploadStatus.Progress ->
                         UploadProgress.Sending(uploadFraction(status.totalBytesSend, status.contentLength))
-                    is UploadStatus.Success -> UploadProgress.Done(path)
+                    is UploadStatus.Success -> UploadProgress.Done(path).also { Log.i(TAG, "upload done: ${kind.folder}") }
                 }
             }
         )
     }
 
+    /** Deletes the object from Storage. Any public.attachments row for it must be gone already. */
     override suspend fun delete(path: String) {
+        Log.d(TAG, "delete photo")
         bucket.delete(path)
     }
 
+    /** Inserts one public.attachments row per path, all in one request. */
     override suspend fun link(parent: AttachmentParent, paths: List<String>) {
         if (paths.isEmpty()) return
+        Log.d(TAG, "link ${paths.size} photo(s) to ${parent::class.simpleName}")
         val householdId = currentHousehold.id.first() ?: throw IllegalStateException("No household selected")
         supabase.from(ATTACHMENTS_TABLE).insert(
             paths.map { path ->
@@ -166,8 +188,10 @@ class SupabaseAttachmentRepository @Inject constructor(
         )
     }
 
+    /** Rows with neither parent id set are skipped; the table check should prevent them. */
     override suspend fun list(): List<Attachment> {
         val householdId = currentHousehold.id.first() ?: return emptyList()
+        Log.d(TAG, "list attachments")
         return supabase.from(ATTACHMENTS_TABLE)
             .select(columns = Columns.raw("storage_path, maintenance_request_id, bill_id")) {
                 filter { eq("household_id", householdId) }
@@ -180,6 +204,7 @@ class SupabaseAttachmentRepository @Inject constructor(
                     ?: return@mapNotNull null
                 Attachment(row.storage_path, parent)
             }
+            .also { Log.d(TAG, "list returned ${it.size} attachment(s)") }
     }
 
     /**
