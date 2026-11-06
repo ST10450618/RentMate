@@ -277,16 +277,11 @@
     <string name="home_title">Home</string>
     <string name="home_you_owe_label">You owe</string>
     <string name="home_owed_label">You\'re owed</string>
-    <string name="home_to">to %1$s</string>
-    <string name="home_to_by">to %1$s, by %2$s</string>
-    <string name="home_from">from %1$s</string>
     <string name="home_pay">Pay %1$s</string>
     <string name="home_open_money">Open Money</string>
     <string name="home_settled_body">Nobody owes anything right now.</string>
     <string name="home_this_week">This week</string>
     <string name="home_your_turn">Your turn: %1$s</string>
-    <string name="home_recent">Recent activity</string>
-    <string name="home_recent_empty">Nothing has happened in your household yet.</string>
     <string name="home_see_all">See all activity</string>
     <plurals name="home_also_owe">
         <item quantity="one">You also owe %d other housemate</item>
@@ -300,4 +295,11 @@
     <string name="nav_money">Money</string>
     <string name="nav_house">House</string>
     <string name="house_subtitle">Shopping and repairs</string>
+    <string name="home_owe_detail">%1$s · %2$s, due %3$s</string>
+    <string name="home_overdue">Overdue</string>
+    <string name="home_due_today">Today</string>
+    <plurals name="home_days_left">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
 </resources>

@@ -59,7 +59,7 @@ data class DashboardUiState(
 private const val TAG = "DashboardViewModel"
 
 /** How many events Home shows under "Recent activity". The Activity screen has the rest. */
-internal const val RECENT_ACTIVITY_LIMIT = 4
+internal const val RECENT_ACTIVITY_LIMIT = 3
 
 /** The Dashboard cards derived from cached bills and chores. */
 internal data class DashboardSummary(

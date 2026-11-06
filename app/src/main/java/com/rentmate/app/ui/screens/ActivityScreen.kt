@@ -137,8 +137,9 @@ private fun dayLabel(bucket: DayBucket): String = when (bucket) {
     is DayBucket.On -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(bucket.date)
 }
 
+/** The "5 min ago" label for an event. Home reuses it (RM-0056). */
 @Composable
-private fun relativeTimeLabel(time: RelativeTime): String = when (time) {
+internal fun relativeTimeLabel(time: RelativeTime): String = when (time) {
     RelativeTime.JustNow -> stringResource(R.string.activity_just_now)
     is RelativeTime.Minutes -> pluralStringResource(R.plurals.activity_minutes_ago, time.count, time.count)
     is RelativeTime.Hours -> pluralStringResource(R.plurals.activity_hours_ago, time.count, time.count)

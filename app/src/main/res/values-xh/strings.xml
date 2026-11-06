@@ -272,16 +272,11 @@
     <string name="home_title">Ikhaya</string>
     <string name="home_you_owe_label">Unetyala</string>
     <string name="home_owed_label">Uyatyalwa</string>
-    <string name="home_to">ku-%1$s</string>
-    <string name="home_to_by">ku-%1$s, ngomhla %2$s</string>
-    <string name="home_from">kwa-%1$s</string>
     <string name="home_pay">Hlawula u-%1$s</string>
     <string name="home_open_money">Vula iMali</string>
     <string name="home_settled_body">Akukho mntu unetyala ngoku.</string>
     <string name="home_this_week">Kule veki</string>
     <string name="home_your_turn">Ithuba lakho: %1$s</string>
-    <string name="home_recent">Imisebenzi yakutshanje</string>
-    <string name="home_recent_empty">Akukho nto yenzekileyo kwikhaya lakho okwangoku.</string>
     <string name="home_see_all">Bona yonke imisebenzi</string>
     <plurals name="home_also_owe">
         <item quantity="one">Ukwanetyala kumhlali o-%d omnye</item>
@@ -295,4 +290,11 @@
     <string name="nav_money">Imali</string>
     <string name="nav_house">Indlu</string>
     <string name="house_subtitle">Ukuthenga nokulungisa</string>
+    <string name="home_owe_detail">%1$s · %2$s, ihlawulwa ngomhla %3$s</string>
+    <string name="home_overdue">Iphelelwe lixesha</string>
+    <string name="home_due_today">Namhlanje</string>
+    <plurals name="home_days_left">
+        <item quantity="one">Usuku olu-%d</item>
+        <item quantity="other">Iintsuku ezi-%d</item>
+    </plurals>
 </resources>

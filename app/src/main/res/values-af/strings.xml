@@ -270,16 +270,11 @@
     <string name="home_title">Tuis</string>
     <string name="home_you_owe_label">Jy skuld</string>
     <string name="home_owed_label">Jy word geskuld</string>
-    <string name="home_to">aan %1$s</string>
-    <string name="home_to_by">aan %1$s, teen %2$s</string>
-    <string name="home_from">van %1$s</string>
     <string name="home_pay">Betaal %1$s</string>
     <string name="home_open_money">Maak Geld oop</string>
     <string name="home_settled_body">Niemand skuld nou iets nie.</string>
     <string name="home_this_week">Hierdie week</string>
     <string name="home_your_turn">Jou beurt: %1$s</string>
-    <string name="home_recent">Onlangse aktiwiteit</string>
-    <string name="home_recent_empty">Niks het nog in jou huishouding gebeur nie.</string>
     <string name="home_see_all">Sien alle aktiwiteit</string>
     <plurals name="home_also_owe">
         <item quantity="one">Jy skuld ook %d ander huismaat</item>
@@ -293,4 +288,11 @@
     <string name="nav_money">Geld</string>
     <string name="nav_house">Huis</string>
     <string name="house_subtitle">Inkopies en herstelwerk</string>
+    <string name="home_owe_detail">%1$s · %2$s, betaalbaar %3$s</string>
+    <string name="home_overdue">Agterstallig</string>
+    <string name="home_due_today">Vandag</string>
+    <plurals name="home_days_left">
+        <item quantity="one">%d dag</item>
+        <item quantity="other">%d dae</item>
+    </plurals>
 </resources>
