@@ -2,19 +2,20 @@ package com.rentmate.app.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rentmate.app.data.BillsRepository
 import com.rentmate.app.data.CurrentHousehold
+import com.rentmate.app.data.NewBill
 import com.rentmate.app.data.ProfileNameRow
 import com.rentmate.app.data.RepeatMode
 import com.rentmate.app.data.SplitMode
 import com.rentmate.app.data.SplitShare
-import com.rentmate.app.network.toRpcParams
+import com.rentmate.app.data.WriteResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -45,29 +46,13 @@ sealed interface AddBillUiState {
 @Serializable
 data class HouseholdMemberWithProfile(val user_id: String, val profiles: ProfileNameRow? = null)
 
-@Serializable
-private data class CreateBillShareParam(val user_id: String, val value: Double)
-
-@Serializable
-private data class CreateBillParams(
-    val household_id_in: String,
-    val title_in: String,
-    val amount_in: Double,
-    val due_date_in: String,
-    val split_method_in: String,
-    val shares_in: List<CreateBillShareParam>,
-    val repeat_in: String
-)
-
-@Serializable
-private data class CreatedBillRow(val id: String)
-
 @HiltViewModel
 class AddBillViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     private val attachments: AttachmentRepository,
-    private val activity: ActivityLogger
+    private val activity: ActivityLogger,
+    private val billsRepository: BillsRepository
 ) : ViewModel() {
     /**
      * Set once create_bill succeeded. If linking the photos then fails, Save
@@ -81,13 +66,17 @@ class AddBillViewModel @Inject constructor(
     val state: StateFlow<AddBillUiState> = _state
 
     init {
+        // RM-0017: members come from the Room roster, so the split works offline too.
         viewModelScope.launch {
-            val householdId = currentHousehold.id.first() ?: return@launch
-            runCatching {
-                supabase.from("household_members")
-                    .select(columns = Columns.raw("user_id, profiles(display_name)")) { filter { eq("household_id", householdId) } }
-                    .decodeList<HouseholdMemberWithProfile>()
-            }.onSuccess { _members.value = it }
+            billsRepository.members
+                .catch { Log.e(TAG, "could not read cached members", it) }
+                .collect { rows ->
+                    _members.value = rows.map { HouseholdMemberWithProfile(it.user_id, it.display_name?.let(::ProfileNameRow)) }
+                }
+        }
+        viewModelScope.launch {
+            runCatching { billsRepository.refreshMembers() }
+                .onFailure { Log.w(TAG, "members refresh failed, using the cached roster", it) }
         }
     }
 
@@ -98,6 +87,9 @@ class AddBillViewModel @Inject constructor(
      *
      * The screen validates first; these checks are a last guard so an invalid
      * bill never reaches Supabase even if the UI is bypassed (RM-0036).
+     *
+     * RM-0017: with no connection the bill and its shares are saved locally as
+     * pending and queued for upload. Photos cannot be linked to a queued bill.
      */
     fun createBill(
         title: String,
@@ -125,23 +117,28 @@ class AddBillViewModel @Inject constructor(
                     .onFailure { linkFailed(it) }
                 return@launch
             }
+            val userId = supabase.auth.currentUserOrNull()?.id
+            if (userId == null) {
+                _state.value = AddBillUiState.Error(R.string.error_session_expired)
+                return@launch
+            }
             runCatching {
-                val params = CreateBillParams(
-                    household_id_in = householdId,
-                    title_in = title,
-                    amount_in = amount.toDouble(),
-                    due_date_in = "${dueDate}T00:00:00Z",
-                    split_method_in = mode.wire,
-                    shares_in = shares.map { CreateBillShareParam(it.userId, it.value.toDouble()) },
-                    repeat_in = repeat.wire
-                )
-                supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<CreatedBillRow>()
-            }.onSuccess { bill ->
-                createdBillId = bill.id
-                activity.billAdded(title, amount.toDouble(), bill.id)
-                runCatching { attachments.link(AttachmentParent.Bill(bill.id), photoPaths) }
-                    .onSuccess { _state.value = AddBillUiState.Saved }
-                    .onFailure { linkFailed(it) }
+                billsRepository.createBill(NewBill(householdId, title, amount, dueDate, mode, shares, repeat, userId))
+            }.onSuccess { result ->
+                when (result) {
+                    is WriteResult.Sent -> {
+                        createdBillId = result.id
+                        activity.billAdded(title, amount.toDouble(), result.id)
+                        runCatching { attachments.link(AttachmentParent.Bill(result.id), photoPaths) }
+                            .onSuccess { _state.value = AddBillUiState.Saved }
+                            .onFailure { linkFailed(it) }
+                    }
+                    is WriteResult.Queued -> {
+                        // TODO(RM-0018): post the billAdded activity event (and link photos) after replay.
+                        Log.d(TAG, "bill queued offline: ${result.id}, photos=${photoPaths.size}")
+                        _state.value = AddBillUiState.Saved
+                    }
+                }
             }.onFailure { _state.value = AddBillUiState.Error(ErrorMapper.toMessage(it)) }
         }
     }

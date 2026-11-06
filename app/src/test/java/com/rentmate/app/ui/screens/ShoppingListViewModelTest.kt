@@ -5,6 +5,7 @@ import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.InMemoryHouseholdIdStore
 import com.rentmate.app.data.ShoppingItemRow
 import com.rentmate.app.data.ShoppingRepository
+import com.rentmate.app.data.WriteResult
 import com.rentmate.app.data.activity.NoOpActivityLogger
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -32,6 +33,8 @@ class ShoppingListViewModelTest {
         override suspend fun refresh() {
             if (offline) throw IOException("Unable to resolve host")
         }
+        override suspend fun addItem(householdId: String, name: String, addedByUserId: String) = WriteResult.Queued("x")
+        override suspend fun markPurchased(id: String, userId: String) = WriteResult.Queued(id)
     }
 
     // Never called on the refresh path; only the constructor needs a client.

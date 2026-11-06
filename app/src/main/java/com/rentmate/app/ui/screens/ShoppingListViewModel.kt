@@ -5,19 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.ShoppingItemRow
 import com.rentmate.app.data.ShoppingRepository
+import com.rentmate.app.data.WriteResult
 import android.util.Log
 import com.rentmate.app.data.activity.ActivityLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
@@ -61,22 +60,23 @@ class ShoppingListViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Marks an item bought. RM-0017: offline the change is queued and the row
+     * shows as pending; the repository refreshes the cache after an online save.
+     */
     fun purchase(id: String) {
         val name = _state.value.items.firstOrNull { it.id == id }?.name
         viewModelScope.launch {
             val userId = supabase.auth.currentUserOrNull()?.id ?: return@launch
-            runCatching {
-                supabase.from("shopping_items").update({
-                    set("is_purchased", true)
-                    set("purchased_by_user_id", userId)
-                    set("purchased_at", Instant.now().toString())
-                }) {
-                    filter { eq("id", id) }
+            runCatching { shoppingRepository.markPurchased(id, userId) }
+                .onSuccess { result ->
+                    when (result) {
+                        is WriteResult.Sent -> if (name != null) activity.shoppingBought(name, id)
+                        // TODO(RM-0018): post the shoppingBought activity event once the outbox replay succeeds.
+                        is WriteResult.Queued -> Log.d(TAG, "purchase of $id queued offline")
+                    }
                 }
-            }.onSuccess {
-                if (name != null) activity.shoppingBought(name, id)
-                refresh()
-            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
         }
     }
 }
