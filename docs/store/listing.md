@@ -63,14 +63,16 @@ Your household's data is visible only to the members of that household.
 
 Capture these on the physical device with demo data in the household, light theme, status bar clean (full battery, no notifications). Name the files in this order:
 
-1. `01-dashboard.png`: Dashboard with balance, next chore and household avatars
-2. `02-bills.png`: Bills list with paid and outstanding pills
-3. `03-settle-up.png`: the settle-up dialog showing the simplified payments
-4. `04-chores.png`: Chores with the four-week forecast and leaderboard
-5. `05-maintenance.png`: Maintenance request with photo and status timeline
-6. `06-offline.png`: offline banner with a pending item
-7. `07-afrikaans.png`: any main screen in Afrikaans or isiXhosa
-8. `08-login.png`: branded Login screen
+1. `01-home.png`: Home with what you owe, to whom and by when, and this week's activity
+2. `02-money.png`: Money with bills and settle-up on one screen
+3. `03-bill-detail.png`: a bill with each housemate's share and paid status
+4. `04-chores.png`: Chores with the next chore and the rotation
+5. `05-shopping.png`: the shared shopping list
+6. `06-repairs.png`: repairs with photos and status
+7. `07-offline.png`: the offline banner and the settle-up preview
+8. `08-login.png`: branded Login with Google SSO
+
+`09-settings.png` is an extra and is not uploaded, because Google Play takes at most 8 phone screenshots. All are 1080 × 2160 (2:1), captured on the test device with the signed release build.
 
 ## App content (Play Console declarations)
 
