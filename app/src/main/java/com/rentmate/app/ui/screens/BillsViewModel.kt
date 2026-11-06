@@ -23,6 +23,8 @@ import androidx.annotation.StringRes
 import com.rentmate.app.ui.error.ErrorMapper
 import android.util.Log
 import com.rentmate.app.data.activity.ActivityLogger
+import com.rentmate.app.R
+import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
 import com.rentmate.app.data.attachments.PhotoLink
@@ -62,7 +64,8 @@ class BillsViewModel @Inject constructor(
     private val currentHousehold: CurrentHousehold,
     private val attachments: AttachmentRepository,
     private val activity: ActivityLogger,
-    private val billsRepository: BillsRepository
+    private val billsRepository: BillsRepository,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
@@ -116,7 +119,13 @@ class BillsViewModel @Inject constructor(
                     activity.sharePaid(bill.title, share.amount_owed, share.profiles?.display_name, bill.id)
                 }
                 refresh()
-            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+            }.onFailure {
+                feedback.failure(
+                    it, R.string.feedback_mark_paid_failed,
+                    retry = { payShare(shareId) },
+                    notAllowedRes = R.string.feedback_mark_paid_not_allowed
+                )
+            }
         }
     }
 
@@ -126,7 +135,7 @@ class BillsViewModel @Inject constructor(
             runCatching {
                 supabase.postgrest.rpc("stop_bill_repeat", StopRepeatParams(billId).toRpcParams())
             }.onSuccess { refresh() }
-                .onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+                .onFailure { feedback.failure(it, R.string.feedback_stop_repeat_failed, retry = { stopRepeat(billId) }) }
         }
     }
 
@@ -138,7 +147,10 @@ class BillsViewModel @Inject constructor(
             runCatching {
                 supabase.postgrest.rpc("settle_up", SettleUpParams(householdId).toRpcParams()).decodeList<SettleUpRow>()
             }.onSuccess { _state.value = _state.value.copy(settleUpLoading = false, settleUp = it) }
-                .onFailure { _state.value = _state.value.copy(settleUpLoading = false, error = ErrorMapper.toMessage(it)) }
+                .onFailure {
+                    _state.value = _state.value.copy(settleUpLoading = false)
+                    feedback.failure(it, R.string.feedback_settle_up_failed, retry = ::loadSettleUp)
+                }
         }
     }
 
@@ -153,7 +165,13 @@ class BillsViewModel @Inject constructor(
                 activity.settlementConfirmed(fromName ?: "a housemate", amount)
                 _state.value = _state.value.copy(settleUp = null)
                 refresh()
-            }.onFailure { _state.value = _state.value.copy(error = ErrorMapper.toMessage(it)) }
+            }.onFailure {
+                // The dialog stays open; the snackbar is drawn in front of it (see BillsScreen).
+                feedback.failure(
+                    it, R.string.feedback_confirm_settlement_failed,
+                    retry = { confirmSettlement(fromUserId, amount) }
+                )
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.rentmate.app.ui.screens
 import com.rentmate.app.R
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.InMemoryHouseholdIdStore
+import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.data.ShoppingItemRow
 import com.rentmate.app.data.ShoppingRepository
 import com.rentmate.app.data.WriteResult
@@ -52,7 +53,7 @@ class ShoppingListViewModelTest {
     private fun viewModel(repository: ShoppingRepository): ShoppingListViewModel {
         val household = CurrentHousehold(InMemoryHouseholdIdStore(), Dispatchers.Unconfined)
         household.set("h1")
-        return ShoppingListViewModel(supabase, household, NoOpActivityLogger, repository)
+        return ShoppingListViewModel(supabase, household, NoOpActivityLogger, repository, FeedbackCenter())
     }
 
     @Test

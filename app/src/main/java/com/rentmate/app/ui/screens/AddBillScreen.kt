@@ -219,9 +219,5 @@ fun AddBillScreen(
             },
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)
         )
-
-        (state as? AddBillUiState.Error)?.let {
-            Text(stringResource(it.messageRes), color = MaterialTheme.colorScheme.error)
-        }
     }
 }

@@ -18,7 +18,7 @@ import com.rentmate.app.ui.validation.validateRequiredText
 import javax.inject.Inject
 import androidx.annotation.StringRes
 import com.rentmate.app.R
-import com.rentmate.app.ui.error.ErrorMapper
+import com.rentmate.app.ui.feedback.FeedbackCenter
 
 private const val TAG = "AddChoreViewModel"
 
@@ -26,7 +26,6 @@ sealed interface AddChoreUiState {
     data object Idle : AddChoreUiState
     data object Loading : AddChoreUiState
     data object Saved : AddChoreUiState
-    data class Error(@StringRes val messageRes: Int) : AddChoreUiState
 }
 
 @Serializable
@@ -44,7 +43,8 @@ private data class ChoreInsert(
 @HiltViewModel
 class AddChoreViewModel @Inject constructor(
     private val supabase: SupabaseClient,
-    private val currentHousehold: CurrentHousehold
+    private val currentHousehold: CurrentHousehold,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
     private val _members = MutableStateFlow<List<String>>(emptyList())
     val members: StateFlow<List<String>> = _members
@@ -81,7 +81,10 @@ class AddChoreViewModel @Inject constructor(
                     ChoreInsert(householdId, title, recurrence, pointValue, _members.value)
                 )
             }.onSuccess { _state.value = AddChoreUiState.Saved }
-                .onFailure { _state.value = AddChoreUiState.Error(ErrorMapper.toMessage(it)) }
+                .onFailure {
+                    _state.value = AddChoreUiState.Idle
+                    feedback.failure(it, R.string.feedback_add_chore_failed, retry = { create(title, recurrence, pointValue) })
+                }
         }
     }
 }

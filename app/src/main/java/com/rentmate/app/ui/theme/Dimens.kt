@@ -23,14 +23,32 @@ object Spacing {
     val card = 16.dp
 }
 
+/** Fixed sizes that are not spacing: touch targets, borders, avatars, thumbnails. */
+object Sizes {
+    /** Minimum touch target (WCAG 2.5.8, Android accessibility). */
+    val minTouch = 48.dp
+    val border = 1.dp
+    val stroke = 2.dp
+    val spinner = 18.dp
+
+    /** Avatar in a list row. */
+    val avatarRow = 24.dp
+
+    /** Avatar in a screen header. */
+    val avatarHeader = 40.dp
+    val thumbnail = 56.dp
+    val thumbnailLarge = 72.dp
+    val photoPreviewMax = 560.dp
+    val brandMark = 96.dp
+}
+
 /**
- * Corner radii. Cards and inputs share one radius; buttons are pill-shaped so
- * they read as actions rather than containers.
+ * Corner radii: 6 chips, 10 inputs, 14 cards, 18 sheets, full for buttons.
  */
 val RentMateShapes = Shapes(
     extraSmall = RoundedCornerShape(6.dp),
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(14.dp),
-    large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp)
+    large = RoundedCornerShape(18.dp),
+    extraLarge = RoundedCornerShape(percent = 50)
 )

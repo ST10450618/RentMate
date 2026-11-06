@@ -19,7 +19,8 @@ import com.rentmate.app.data.attachments.PhotoLink
 import com.rentmate.app.data.attachments.THUMBNAIL_URL_EXPIRY
 import com.rentmate.app.data.attachments.loadLinks
 import kotlinx.coroutines.CancellationException
-import com.rentmate.app.ui.error.AppError
+import com.rentmate.app.ui.feedback.FeedbackCenter
+import com.rentmate.app.ui.feedback.actionErrorRes
 import com.rentmate.app.ui.error.ErrorMapper
 import com.rentmate.app.ui.launchSafely
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -66,7 +67,8 @@ data class MaintenanceUiState(
 class MaintenanceViewModel @Inject constructor(
     private val repository: MaintenanceRepository,
     private val attachments: AttachmentRepository,
-    private val activity: ActivityLogger
+    private val activity: ActivityLogger,
+    private val feedback: FeedbackCenter
 ) : ViewModel() {
 
     /** A saved request whose photos still need linking, retried by [refresh]. */
@@ -162,7 +164,7 @@ class MaintenanceViewModel @Inject constructor(
     /** Called when no app on the phone can send email. */
     fun noEmailApp() {
         Log.w(TAG, "no app can handle mailto:")
-        _state.update { it.copy(error = MaintenanceError.NO_EMAIL_APP.messageRes) }
+        feedback.show(MaintenanceError.NO_EMAIL_APP.messageRes)
     }
 
     fun log(
@@ -226,10 +228,14 @@ class MaintenanceViewModel @Inject constructor(
             _state.update { it.copy(loading = false, error = MaintenanceError.LINK_PHOTOS.messageRes) }
             return
         }
-        val message = when (ErrorMapper.classify(cause)) {
-            AppError.NO_CONNECTION, AppError.GENERIC -> action.messageRes
-            else -> ErrorMapper.classify(cause).messageRes
+        if (action == MaintenanceError.LOAD) {
+            // A screen that cannot load keeps the error card with its Retry button.
+            val message = actionErrorRes(ErrorMapper.classify(cause), action.messageRes)
+            _state.update { it.copy(loading = false, error = message) }
+        } else {
+            // RM-0052: a failed tap (save, update, send) is a snackbar.
+            _state.update { it.copy(loading = false) }
+            feedback.failure(cause, action.messageRes)
         }
-        _state.update { it.copy(loading = false, error = message) }
     }
 }
