@@ -111,28 +111,51 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                     CircularProgressIndicator()
                 } else {
                     val suggestions = state.settleUp.orEmpty()
+                    val provisional = state.settleUpProvisional
+                    if (provisional) {
+                        // RM-0031: computed on this phone; the server plan replaces it after a sync.
+                        Text(
+                            stringResource(R.string.settle_up_preview_label),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = Spacing.xs)
+                        )
+                    }
                     if (suggestions.isEmpty()) {
                         Text(stringResource(R.string.settle_up_none))
                     } else {
+                        val fallback = stringResource(R.string.housemate_fallback)
                         Column {
                             suggestions.forEach { s ->
+                                val fromName = s.from_display_name.ifBlank { fallback }
+                                val toName = s.to_display_name.ifBlank { fallback }
                                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
-                                    Text(stringResource(R.string.settle_up_payment, s.from_display_name, s.to_display_name, formatRand(s.amount)))
+                                    Text(stringResource(R.string.settle_up_payment, fromName, toName, formatRand(s.amount)))
+                                    if (provisional) StatusPill(stringResource(R.string.settle_up_preview_pill), PillTone.Neutral)
                                     if (s.to_user_id == state.currentUserId) {
                                         // Only the person who is owed can confirm they received it (RM-0010).
+                                        // RM-0031: not from a preview, since the server has not checked it.
                                         SecondaryButton(
                                             stringResource(R.string.bills_confirm_received),
-                                            onClick = { viewModel.confirmSettlement(s.from_user_id, s.amount) }
+                                            onClick = { viewModel.confirmSettlement(s.from_user_id, s.amount) },
+                                            enabled = !provisional
                                         )
+                                        if (provisional) {
+                                            Text(
+                                                stringResource(R.string.settle_up_confirm_needs_sync),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     } else if (s.from_user_id == state.currentUserId) {
                                         Text(
-                                            stringResource(R.string.bills_ask_to_confirm, s.to_display_name),
+                                            stringResource(R.string.bills_ask_to_confirm, toName),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     } else {
                                         Text(
-                                            stringResource(R.string.bills_waiting_for, s.to_display_name),
+                                            stringResource(R.string.bills_waiting_for, toName),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
