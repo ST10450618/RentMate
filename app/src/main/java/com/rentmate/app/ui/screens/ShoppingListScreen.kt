@@ -104,6 +104,8 @@ private fun ShoppingItemRow(item: ShoppingItemRow, onToggle: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            // RM-0017: saved offline, not uploaded yet.
+            if (item.pending) StatusPill(stringResource(R.string.sync_pending), PillTone.Neutral, modifier = Modifier.padding(end = Spacing.xs))
             if (item.is_purchased) StatusPill(stringResource(R.string.shopping_bought), PillTone.Positive)
         }
     }

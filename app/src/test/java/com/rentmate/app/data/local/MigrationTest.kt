@@ -24,7 +24,8 @@ private const val TEST_DB = "migration-test.db"
 
 /**
  * RM-0016: the v1 -> v2 migration keeps every cached bill and share (including
- * offline edits) and turns Rand into exact cents.
+ * offline edits) and turns Rand into exact cents. RM-0017: v2 -> v3 keeps queued
+ * outbox entries and adds the replay fields and the member roster.
  *
  * Room's MigrationTestHelper reads schemas from APK assets, which Robolectric
  * unit tests do not get from the test source set. So this test builds the v1
@@ -52,9 +53,12 @@ class MigrationTest {
     }
 
     /** Creates a version 1 database exactly as the exported v1 schema describes it. */
-    private fun createVersion1(seed: SQLiteDatabase.() -> Unit) {
-        val schemaFile = File("schemas/com.rentmate.app.data.local.RentMateDatabase/1.json")
-        assertTrue("v1 schema not found at ${schemaFile.absolutePath}", schemaFile.isFile)
+    private fun createVersion1(seed: SQLiteDatabase.() -> Unit) = createVersion(1, seed)
+
+    /** Creates a database at [version] exactly as the exported schema file describes it. */
+    private fun createVersion(version: Int, seed: SQLiteDatabase.() -> Unit) {
+        val schemaFile = File("schemas/com.rentmate.app.data.local.RentMateDatabase/$version.json")
+        assertTrue("v$version schema not found at ${schemaFile.absolutePath}", schemaFile.isFile)
         val database = Json.parseToJsonElement(schemaFile.readText()).jsonObject.getValue("database").jsonObject
 
         val path = context.getDatabasePath(TEST_DB).apply { parentFile?.mkdirs() }
@@ -67,7 +71,7 @@ class MigrationTest {
                 }
             }
             for (query in database.getValue("setupQueries").jsonArray) db.execSQL(query.jsonPrimitive.content)
-            db.version = 1
+            db.version = version
             db.seed()
         }
     }
@@ -95,7 +99,7 @@ class MigrationTest {
         }
 
         val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
-            .addMigrations(MIGRATION_1_2).allowMainThreadQueries().build()
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
         room = db
 
         val bills = runBlocking { db.billDao().observeBills("h1").first() }.associateBy { it.bill.id }
@@ -128,7 +132,7 @@ class MigrationTest {
             )
         }
         val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
-            .addMigrations(MIGRATION_1_2).allowMainThreadQueries().build()
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
         room = db
 
         runBlocking {
@@ -136,5 +140,53 @@ class MigrationTest {
             db.billDao().upsertBills(listOf(BillEntity("b1", "h1", "Rent", 1_000L, "d", "EQUAL", "u1", "c", "u")))
             assertTrue(db.billDao().observeBills("h1").first().single().shares.isEmpty())
         }
+    }
+
+    @Test
+    fun migrate2To3_keepsOutboxEntriesAndRows() {
+        createVersion(2) {
+            execSQL(
+                "INSERT INTO outbox (op, tableName, payloadJson, createdAt) VALUES " +
+                    "('INSERT', 'shopping_items', '{\"name\":\"Milk\"}', 5)"
+            )
+            execSQL(
+                "INSERT INTO shopping_items (id, household_id, name, added_by_name, is_purchased, purchased_by_name, " +
+                    "purchased_at, converted_to_bill_id, created_at, syncState, updatedAt) VALUES " +
+                    "('i1', 'h1', 'Milk', NULL, 0, NULL, NULL, NULL, 'c', 'PENDING_CREATE', 1)"
+            )
+        }
+
+        val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
+        room = db
+
+        runBlocking {
+            val entry = db.outboxDao().getAllOldestFirst().single()
+            assertEquals("INSERT", entry.op)
+            assertEquals("{\"name\":\"Milk\"}", entry.payloadJson)
+            assertEquals("", entry.entityId)
+            assertEquals(0, entry.attemptCount)
+            assertEquals(null, entry.lastError)
+            assertEquals(SyncState.PENDING_CREATE, db.shoppingItemDao().getById("i1")?.syncState)
+
+            // The new roster table works.
+            db.memberDao().upsert(listOf(HouseholdMemberEntity("h1", "u1", "Sipho")))
+            assertEquals("Sipho", db.memberDao().getMember("h1", "u1")?.display_name)
+        }
+    }
+
+    @Test
+    fun migrate1To3_runsBothSteps() {
+        createVersion1 {
+            execSQL(
+                "INSERT INTO bills (id, household_id, title, amount, due_date, split_method, issued_by_user_id, " +
+                    "created_at, server_updated_at, syncState, updatedAt) VALUES " +
+                    "('b1', 'h1', 'Rent', 10.5, '2026-01-01', 'EQUAL', 'u1', 'c', 'u', 'SYNCED', 1)"
+            )
+        }
+        val db = Room.databaseBuilder(context, RentMateDatabase::class.java, TEST_DB)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3).allowMainThreadQueries().build()
+        room = db
+        assertEquals(1_050L, runBlocking { db.billDao().observeBills("h1").first() }.single().bill.amount_cents)
     }
 }

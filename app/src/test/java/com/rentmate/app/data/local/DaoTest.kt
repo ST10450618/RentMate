@@ -204,6 +204,23 @@ class DaoTest {
         assertEquals(listOf(newer), dao.getAllOldestFirst().map { it.id })
     }
 
+    /** RM-0017: the live count RM-0019 shows, and the failure bookkeeping RM-0018 uses. */
+    @Test
+    fun outbox_pendingCountAndRecordFailure() = runBlocking {
+        val dao = db.outboxDao()
+        assertEquals(0, dao.observePendingCount().first())
+        val id = dao.enqueue(OutboxEntry(op = OutboxOp.INSERT, tableName = "shopping_items", payloadJson = "{}",
+            createdAt = 1, entityId = "i1"))
+        assertEquals(1, dao.observePendingCount().first())
+
+        dao.recordFailure(id, "timeout")
+        dao.recordFailure(id, "500")
+        val entry = dao.getAllOldestFirst().single()
+        assertEquals(2, entry.attemptCount)
+        assertEquals("500", entry.lastError)
+        assertEquals("i1", entry.entityId)
+    }
+
     /** Sign-out (PRIVACY.md): nothing from the previous household may remain on the phone. */
     @Test
     fun localCache_clear_removesEveryTable() = runBlocking {

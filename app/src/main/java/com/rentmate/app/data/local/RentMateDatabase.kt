@@ -10,7 +10,8 @@ import androidx.room.TypeConverters
  * Schemas are exported to app/schemas. No destructive-migration fallback: the
  * cache holds unsynced offline edits, so a future schema change must ship a
  * real Migration rather than silently wipe them. v2 (RM-0016) stores money as
- * integer cents and adds the bill repeat columns; see [MIGRATION_1_2].
+ * integer cents and adds the bill repeat columns; see [MIGRATION_1_2]. v3
+ * (RM-0017) adds outbox replay fields and the member roster; see [MIGRATION_2_3].
  */
 @Database(
     entities = [
@@ -18,9 +19,10 @@ import androidx.room.TypeConverters
         BillShareEntity::class,
         ChoreEntity::class,
         ShoppingItemEntity::class,
-        OutboxEntry::class
+        OutboxEntry::class,
+        HouseholdMemberEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -36,4 +38,7 @@ abstract class RentMateDatabase : RoomDatabase() {
 
     /** DAO for the outbox queue. */
     abstract fun outboxDao(): OutboxDao
+
+    /** DAO for the cached household roster. */
+    abstract fun memberDao(): MemberDao
 }
