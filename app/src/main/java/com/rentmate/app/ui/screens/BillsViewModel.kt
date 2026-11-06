@@ -3,18 +3,19 @@ package com.rentmate.app.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentmate.app.data.BillWithSharesRow
+import com.rentmate.app.data.BillsRepository
 import com.rentmate.app.data.CurrentHousehold
 import com.rentmate.app.data.SettleUpRow
 import com.rentmate.app.network.toRpcParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
@@ -53,19 +54,26 @@ private data class MarkSharePaidParams(val share_id_in: String)
 @Serializable
 private data class ConfirmSettlementParams(val household_id_in: String, val from_user_id_in: String, val amount_in: Double)
 
-private val BILL_WITH_SHARES_COLUMNS = Columns.raw("*, bill_shares(*, profiles(display_name))")
+private const val TAG = "BillsViewModel"
 
 @HiltViewModel
 class BillsViewModel @Inject constructor(
     private val supabase: SupabaseClient,
     private val currentHousehold: CurrentHousehold,
     private val attachments: AttachmentRepository,
-    private val activity: ActivityLogger
+    private val activity: ActivityLogger,
+    private val billsRepository: BillsRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(BillsUiState(currentUserId = supabase.auth.currentUserOrNull()?.id))
     val state: StateFlow<BillsUiState> = _state
 
     init {
+        // RM-0016: the list always comes from the Room cache, so it survives a failed refresh.
+        viewModelScope.launch {
+            billsRepository.bills
+                .catch { Log.e(TAG, "could not read cached bills", it) }
+                .collect { bills -> _state.update { it.copy(bills = bills) } }
+        }
         refresh()
     }
 
@@ -73,12 +81,10 @@ class BillsViewModel @Inject constructor(
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching {
-                supabase.from("bills")
-                    .select(columns = BILL_WITH_SHARES_COLUMNS) { filter { eq("household_id", householdId) } }
-                    .decodeList<BillWithSharesRow>()
-            }.onSuccess { _state.value = _state.value.copy(loading = false, bills = it) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = ErrorMapper.toMessage(it)) }
+            Log.d(TAG, "refresh household=$householdId")
+            runCatching { billsRepository.refresh() }
+                .onSuccess { _state.update { it.copy(loading = false) } }
+                .onFailure { e -> _state.update { it.copy(loading = false, error = ErrorMapper.toMessage(e)) } }
             loadPhotos()
         }
     }
@@ -93,7 +99,7 @@ class BillsViewModel @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Log.w("BillsViewModel", "Could not load bill photos", e)
+            Log.w(TAG, "Could not load bill photos", e)
         }
     }
 

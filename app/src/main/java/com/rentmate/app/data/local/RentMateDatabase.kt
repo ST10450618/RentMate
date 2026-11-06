@@ -7,9 +7,10 @@ import androidx.room.TypeConverters
 /**
  * Local offline cache of household data plus the sync outbox.
  *
- * Schema v1 is exported to app/schemas. No destructive-migration fallback: the
+ * Schemas are exported to app/schemas. No destructive-migration fallback: the
  * cache holds unsynced offline edits, so a future schema change must ship a
- * real Migration rather than silently wipe them.
+ * real Migration rather than silently wipe them. v2 (RM-0016) stores money as
+ * integer cents and adds the bill repeat columns; see [MIGRATION_1_2].
  */
 @Database(
     entities = [
@@ -19,7 +20,7 @@ import androidx.room.TypeConverters
         ShoppingItemEntity::class,
         OutboxEntry::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

@@ -45,10 +45,13 @@ class AuthRepository @Inject constructor(
     /**
      * RM-0002: waits for Supabase to load the session saved on the device, then
      * picks the first screen. A saved session skips Login; the household is
-     * looked up again because [CurrentHousehold] only lives in memory.
+     * looked up again so a removed membership is noticed; offline, the household
+     * saved by [CurrentHousehold] is used instead.
      */
     override suspend fun restoreSession(): StartDestination {
         supabase.auth.awaitInitialization()
+        // RM-0016: load the saved household first, so an offline start still shows its cache.
+        currentHousehold.awaitRestored()
         if (supabase.auth.currentSessionOrNull() == null) {
             Log.d(TAG, "no saved session")
             return StartDestination.LOGIN
@@ -75,7 +78,10 @@ class AuthRepository @Inject constructor(
         val memberships = supabase.from("household_members")
             .select { filter { eq("user_id", userId) } }
             .decodeList<HouseholdMembershipRow>()
-        memberships.firstOrNull()?.let { currentHousehold.set(it.household_id) }
+        // RM-0016: keep the saved household if the user still belongs to it.
+        val saved = currentHousehold.id.value
+        (memberships.firstOrNull { it.household_id == saved } ?: memberships.firstOrNull())
+            ?.let { currentHousehold.set(it.household_id) }
         return memberships.isNotEmpty()
     }
 
