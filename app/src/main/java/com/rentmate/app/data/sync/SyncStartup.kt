@@ -35,6 +35,7 @@ class SyncStartup @Inject constructor(
     fun start() {
         if (started) return
         started = true
+        Log.d(TAG, "start")
         scope.launch {
             requestIfPending("app start")
             try {
@@ -50,6 +51,7 @@ class SyncStartup @Inject constructor(
         }
     }
 
+    /** Requests a sync only when the outbox holds entries; [why] goes in the log line. */
     private suspend fun requestIfPending(why: String) {
         try {
             val pending = outboxDao.count()

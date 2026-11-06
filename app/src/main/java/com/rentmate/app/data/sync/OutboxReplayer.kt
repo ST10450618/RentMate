@@ -77,6 +77,7 @@ class OutboxReplayer @Inject constructor(
      * Room failures are thrown; the worker treats them as a retry.
      */
     suspend fun run(): ReplayResult {
+        Log.d(TAG, "replay run started")
         status.started()
         currentHousehold.awaitRestored()
         val touched = mutableSetOf<String>()
@@ -116,13 +117,17 @@ class OutboxReplayer @Inject constructor(
         }
     }
 
+    /** Ends a run that emptied the queue: refreshes changed caches and records the sync time. */
     private suspend fun finish(touched: Set<String>): ReplayResult {
+        Log.d(TAG, "replay run done; refreshing ${touched.size} table(s)")
         refresh(touched)
         status.succeeded(now())
         return ReplayResult.DONE
     }
 
+    /** Ends a run early: refreshes what changed so far and records why it will retry. */
     private suspend fun stop(touched: Set<String>, reason: String?): ReplayResult {
+        Log.d(TAG, "replay run stopped: $reason")
         refresh(touched)
         status.failed(reason)
         return ReplayResult.RETRY
@@ -228,6 +233,7 @@ class OutboxReplayer @Inject constructor(
         }
     }
 
+    /** Builds the [SyncRejectionEntity] that tells RM-0019 which change was dropped and why. */
     private fun rejection(entry: OutboxEntry, reason: DropReason, message: String?, dependant: Boolean, at: Long) =
         SyncRejectionEntity(
             op = entry.op, tableName = entry.tableName, entityId = entry.entityId,
@@ -306,6 +312,7 @@ class OutboxReplayer @Inject constructor(
         if (SHOPPING_ITEMS in touched) refreshQuietly("shopping") { shoppingRepository.refresh() }
     }
 
+    /** Runs one cache refresh and logs a failure instead of throwing it. */
     private suspend fun refreshQuietly(what: String, block: suspend () -> Unit) {
         try {
             block()
@@ -323,6 +330,7 @@ class OutboxReplayer @Inject constructor(
         /** Upper bound on entries per run, so a bug can never loop forever. */
         const val MAX_ENTRIES_PER_RUN = 500
 
+        /** Lifetime of the signed URLs used only to check that photos still exist. */
         private val PHOTO_CHECK_EXPIRY = 1.minutes
     }
 }

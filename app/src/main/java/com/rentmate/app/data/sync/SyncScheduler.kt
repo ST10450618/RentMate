@@ -23,6 +23,7 @@ interface SyncScheduler {
 
     /** Does nothing. For tests and code paths without WorkManager. */
     object None : SyncScheduler {
+        /** Ignores the request. */
         override fun requestSync() = Unit
     }
 }
@@ -40,12 +41,18 @@ interface SyncScheduler {
  * When the network comes back, WorkManager starts waiting work within seconds,
  * which gives the "within a minute" target. A retry backs off exponentially
  * from [BACKOFF_SECONDS].
+ *
+ * Based on: Android Developers, Define work requests,
+ * https://developer.android.com/develop/background-work/background-tasks/persistent/getting-started/define-work (accessed 2026-11-06)
+ * Based on: Android Developers, Managing work,
+ * https://developer.android.com/develop/background-work/background-tasks/persistent/how-to/manage-work (accessed 2026-11-06)
  */
 @Singleton
 class WorkManagerSyncScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SyncScheduler {
 
+    /** Enqueues [SyncWorker] as unique work; a sync already waiting or running is kept. */
     override fun requestSync() {
         try {
             WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, buildRequest())
