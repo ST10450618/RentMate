@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +32,10 @@ import com.rentmate.app.data.SplitResult
 import com.rentmate.app.data.attachments.AttachmentKind
 import com.rentmate.app.ui.components.DatePickerField
 import com.rentmate.app.ui.components.PhotoAttachmentPicker
-import com.rentmate.app.ui.components.ChipRow
+import com.rentmate.app.ui.components.ChoiceChips
+import com.rentmate.app.ui.components.ListHeading
 import com.rentmate.app.ui.components.PrimaryButton
 import com.rentmate.app.ui.components.ScreenHeader
-import com.rentmate.app.ui.components.SectionLabel
 import com.rentmate.app.ui.components.ValidatedTextField
 import com.rentmate.app.ui.components.formatRand
 import com.rentmate.app.ui.theme.Spacing
@@ -126,27 +125,23 @@ fun AddBillScreen(
                     showErrors = true
                 )
 
-                // Split mode (RM-0010)
-                SectionLabel(stringResource(R.string.split_mode_label), modifier = Modifier.padding(top = Spacing.sm))
-                ChipRow {
-                    FilterChip(selected = mode == SplitMode.Equal, onClick = { mode = SplitMode.Equal },
-                        label = { Text(stringResource(R.string.split_equal)) })
-                    FilterChip(selected = mode == SplitMode.Percentage, onClick = { mode = SplitMode.Percentage },
-                        label = { Text(stringResource(R.string.split_percentage)) })
-                    FilterChip(selected = mode == SplitMode.ExactAmount, onClick = { mode = SplitMode.ExactAmount },
-                        label = { Text(stringResource(R.string.split_exact)) })
-                }
+                // Split mode (RM-0010). RM-0056: the shared chips, as in the New bill mockup.
+                ListHeading(stringResource(R.string.split_mode_label), modifier = Modifier.padding(top = Spacing.sm))
+                ChoiceChips(
+                    options = SplitMode.entries,
+                    selected = mode,
+                    onSelect = { mode = it },
+                    label = { stringResource(it.labelRes) }
+                )
 
                 // Repeat (RM-0049)
-                SectionLabel(stringResource(R.string.repeat_label), modifier = Modifier.padding(top = Spacing.sm))
-                ChipRow {
-                    FilterChip(selected = repeat == RepeatMode.Never, onClick = { repeat = RepeatMode.Never },
-                        label = { Text(stringResource(R.string.repeat_never)) })
-                    FilterChip(selected = repeat == RepeatMode.Weekly, onClick = { repeat = RepeatMode.Weekly },
-                        label = { Text(stringResource(R.string.repeat_weekly)) })
-                    FilterChip(selected = repeat == RepeatMode.Monthly, onClick = { repeat = RepeatMode.Monthly },
-                        label = { Text(stringResource(R.string.repeat_monthly)) })
-                }
+                ListHeading(stringResource(R.string.repeat_label), modifier = Modifier.padding(top = Spacing.sm))
+                ChoiceChips(
+                    options = RepeatMode.entries,
+                    selected = repeat,
+                    onSelect = { repeat = it },
+                    label = { stringResource(it.labelRes) }
+                )
 
                 when {
                     members.isEmpty() -> Text(
@@ -195,7 +190,7 @@ fun AddBillScreen(
                 }
 
                 // RM-0029: a photo of the bill or slip, e.g. the municipal account.
-                SectionLabel(stringResource(R.string.photo_section_bill), modifier = Modifier.padding(top = Spacing.sm))
+                ListHeading(stringResource(R.string.photo_section_bill), modifier = Modifier.padding(top = Spacing.sm))
                 PhotoAttachmentPicker(
                     photos = photos,
                     onPicked = { photosViewModel.add(it, AttachmentKind.BILL) },
@@ -211,9 +206,11 @@ fun AddBillScreen(
                     )
                 }
 
+                // RM-0056: Save bill stays disabled (faded) until the form is valid,
+                // and each field says how to fix its value underneath.
                 PrimaryButton(
-                    text = stringResource(R.string.save),
-                    enabled = !photosBusy,
+                    text = stringResource(R.string.save_bill),
+                    enabled = formValid && !photosBusy,
                     loading = state is AddBillUiState.Loading,
                     onClick = {
                         submitted = true
@@ -228,3 +225,17 @@ fun AddBillScreen(
         }
     }
 }
+
+private val SplitMode.labelRes: Int
+    get() = when (this) {
+        SplitMode.Equal -> R.string.split_equal
+        SplitMode.Percentage -> R.string.split_percentage
+        SplitMode.ExactAmount -> R.string.split_exact
+    }
+
+private val RepeatMode.labelRes: Int
+    get() = when (this) {
+        RepeatMode.Never -> R.string.repeat_never
+        RepeatMode.Weekly -> R.string.repeat_weekly
+        RepeatMode.Monthly -> R.string.repeat_monthly
+    }

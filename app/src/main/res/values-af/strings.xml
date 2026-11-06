@@ -31,13 +31,13 @@
     <string name="login_error">Ons kon jou nie aanmeld nie. Gaan jou verbinding na en probeer weer.</string>
     <string name="login_privacy_note">Ons gebruik net jou Google-naam en -e-posadres om jou profiel op te stel.</string>
     <!-- Form validation (RM-0036) -->
-    <string name="error_required">Hierdie veld is verpligtend</string>
-    <string name="error_too_short">Te kort</string>
-    <string name="error_too_long">Te lank, maak dit asseblief korter</string>
-    <string name="error_not_a_number">Voer \'n getal in, bv. 1250.50</string>
-    <string name="error_must_be_positive">Moet meer as nul wees</string>
-    <string name="error_amount_too_large">Die bedrag kan nie meer as R999,999.99 wees nie</string>
-    <string name="error_too_many_decimals">Gebruik hoogstens 2 desimale plekke</string>
+    <string name="error_required">Vul hierdie veld in.</string>
+    <string name="error_too_short">Te kort. Voeg nog ’n paar karakters by.</string>
+    <string name="error_too_long">Te lank. Maak dit korter sodat dit pas.</string>
+    <string name="error_not_a_number">Voer ’n getal in, byvoorbeeld 1 250,50.</string>
+    <string name="error_must_be_positive">Voer ’n bedrag meer as R 0 in.</string>
+    <string name="error_amount_too_large">Voer R 999 999,99 of minder in.</string>
+    <string name="error_too_many_decimals">Gebruik hoogstens 2 desimale plekke, byvoorbeeld 1 200,50.</string>
     <string name="error_points_range">Punte moet \'n heelgetal van 1 tot 100 wees</string>
     <string name="error_date_past">Die datum kan nie meer as \'n jaar gelede wees nie</string>
     <string name="error_date_future">Die datum kan nie meer as twee jaar vooruit wees nie</string>
@@ -46,8 +46,8 @@
     <string name="pick_date">Kies \'n datum</string>
     <string name="save">Stoor</string>
 
-    <string name="add_bill_title">Voeg rekening by</string>
-    <string name="add_bill_name">Waarvoor is die rekening?</string>
+    <string name="add_bill_title">Nuwe rekening</string>
+    <string name="add_bill_name">Waarvoor is dit?</string>
     <string name="add_bill_amount">Bedrag (R)</string>
     <string name="add_bill_due">Vervaldatum</string>
     <plurals name="add_bill_split">
@@ -152,8 +152,8 @@
     <string name="housemate_fallback">Huisgenoot</string>
     <string name="split_mode_label">Verdeel</string>
     <string name="split_equal">Gelykop</string>
-    <string name="split_percentage">Persentasie</string>
-    <string name="split_exact">Presiese bedrag</string>
+    <string name="split_percentage">Volgens %</string>
+    <string name="split_exact">Presiese bedrae</string>
     <string name="split_percent_for">%1$s (%%)</string>
     <string name="split_amount_for">%1$s (R)</string>
     <string name="split_unknown_member">Lid</string>
@@ -307,4 +307,5 @@
     <string name="money_pays">%1$s betaal %2$s</string>
     <string name="money_tap_received">Tik sodra jy dit ontvang het</string>
     <string name="undo_marked_received">%1$s as ontvang gemerk</string>
+    <string name="save_bill">Stoor rekening</string>
 </resources>
