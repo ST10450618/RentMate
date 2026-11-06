@@ -375,6 +375,13 @@ supabase migration list        # compare local and remote history
 supabase db push               # apply new migrations
 ```
 
+Edge Function secrets (set with `supabase secrets set`, never committed):
+
+| Secret | Used for |
+|---|---|
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase service-account JSON, so the push Edge Function can call FCM HTTP v1 |
+| `FIREBASE_PROJECT_ID` | `rentmate-b120f` |
+
 ## 11. Testing
 
 ```bash
