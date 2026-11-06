@@ -9,6 +9,7 @@
     <string name="notif_maintenance">Maintenance updates</string>
 
     <string name="section_language">Language</string>
+    <string name="language_translation_disclaimer">Afrikaans and isiXhosa are machine-translated, similar to Google Translate, and may contain mistakes.</string>
     <!-- RM-0026: each language is shown in its own name, whatever language the
          app is in now, so these are not translated. -->
     <string name="lang_english" translatable="false">English</string>
@@ -240,6 +241,8 @@
     </plurals>
     <string name="shopping_added_by">Added by %1$s</string>
     <string name="shopping_bought">Bought</string>
+    <!-- RM-0017: shown on a bill or item saved offline that is not uploaded yet. -->
+    <string name="sync_pending">Waiting to sync</string>
 
     <string name="household_setup_title">Set up your household</string>
     <string name="household_setup_body">Create a new home or join your housemates with their invite code.</string>
