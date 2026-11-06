@@ -76,6 +76,11 @@ class OutboxWritesTest {
             failWrite()
             purchases += id to update
         }
+
+        override suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int = error("not used here")
+
+        override suspend fun findMatchingBill(params: CreateBillParams, issuerId: String?, createdAtOrAfterIso: String): String? =
+            error("not used here")
     }
 
     private lateinit var db: RentMateDatabase

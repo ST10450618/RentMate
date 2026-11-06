@@ -23,6 +23,14 @@ interface BillsRemoteSource {
 
     /** Calls create_bill and returns the new bill's server id. */
     suspend fun createBill(params: CreateBillParams): String
+
+    /**
+     * RM-0018: id of a bill in [CreateBillParams.household_id_in] with the same
+     * title, amount and due date (and issuer, when [issuerId] is given) that the
+     * server created at or after [createdAtOrAfterIso], or null. Used by the sync
+     * worker's duplicate guard.
+     */
+    suspend fun findMatchingBill(params: CreateBillParams, issuerId: String?, createdAtOrAfterIso: String): String?
 }
 
 /** Network reads for chores. */
@@ -41,6 +49,13 @@ interface ShoppingRemoteSource {
 
     /** Marks the item [id] purchased. */
     suspend fun markPurchased(id: String, update: ShoppingItemPurchase)
+
+    /**
+     * RM-0018: marks item [id] purchased and returns how many rows changed. 0
+     * means the row no longer exists (or RLS hides it), so the sync worker can
+     * tell a lost target apart from a success.
+     */
+    suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int
 }
 
 private val MEMBER_COLUMNS = Columns.raw("user_id, profiles(display_name)")
@@ -76,6 +91,26 @@ class SupabaseBillsRemoteSource @Inject constructor(
 
     override suspend fun createBill(params: CreateBillParams): String =
         supabase.postgrest.rpc("create_bill", params.toRpcParams()).decodeAs<IdRow>().id
+
+    override suspend fun findMatchingBill(
+        params: CreateBillParams,
+        issuerId: String?,
+        createdAtOrAfterIso: String
+    ): String? =
+        supabase.from("bills")
+            .select(columns = Columns.raw("id")) {
+                filter {
+                    eq("household_id", params.household_id_in)
+                    eq("title", params.title_in)
+                    eq("amount", params.amount_in)
+                    eq("due_date", params.due_date_in)
+                    if (issuerId != null) eq("issued_by_user_id", issuerId)
+                    gte("created_at", createdAtOrAfterIso)
+                }
+                limit(1)
+            }
+            .decodeList<IdRow>()
+            .firstOrNull()?.id
 }
 
 /** Supabase [ChoresRemoteSource]. */
@@ -103,4 +138,13 @@ class SupabaseShoppingRemoteSource @Inject constructor(
     override suspend fun markPurchased(id: String, update: ShoppingItemPurchase) {
         supabase.from("shopping_items").update(update) { filter { eq("id", id) } }
     }
+
+    override suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int =
+        supabase.from("shopping_items")
+            .update(update) {
+                select(Columns.raw("id"))
+                filter { eq("id", id) }
+            }
+            .decodeList<IdRow>()
+            .size
 }

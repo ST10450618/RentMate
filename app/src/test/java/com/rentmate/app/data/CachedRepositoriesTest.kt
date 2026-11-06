@@ -49,6 +49,9 @@ class CachedRepositoriesTest {
         override suspend fun createBill(params: CreateBillParams): String = error("not used here")
         override suspend fun insertItem(insert: ShoppingItemInsert): String = error("not used here")
         override suspend fun markPurchased(id: String, update: ShoppingItemPurchase) = error("not used here")
+        override suspend fun replayPurchase(id: String, update: ShoppingItemPurchase): Int = error("not used here")
+        override suspend fun findMatchingBill(params: CreateBillParams, issuerId: String?, createdAtOrAfterIso: String): String? =
+            error("not used here")
     }
 
     private lateinit var db: RentMateDatabase
