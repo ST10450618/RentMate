@@ -90,7 +90,8 @@ class SettingsViewModel @Inject constructor(
             withTimeoutOrNull(5_000) { deviceTokenRegistrar.unregisterCurrent() }
             runCatching { supabase.auth.signOut() }
                 .onFailure { Log.w(TAG, "sign-out failed: ${it.message}") }
-            currentHousehold.clear()
+            // RM-0016: also removes the saved household id from disk.
+            currentHousehold.forget()
             // PRIVACY.md: the cached household data is removed on sign-out.
             runCatching { localCache.clear() }
                 .onFailure { Log.e(TAG, "could not clear local cache on sign-out", it) }

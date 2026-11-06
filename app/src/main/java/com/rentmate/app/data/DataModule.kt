@@ -26,4 +26,9 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindPhotoCompressor(impl: AndroidPhotoCompressor): PhotoCompressor
+
+    /** RM-0016: saved household selection. */
+    @Binds
+    @Singleton
+    abstract fun bindHouseholdIdStore(impl: DataStoreHouseholdIdStore): HouseholdIdStore
 }

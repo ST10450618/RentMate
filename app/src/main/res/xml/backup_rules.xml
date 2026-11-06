@@ -6,10 +6,13 @@
    com.rentmate.app_preferences.xml holds the saved Supabase session (access and
    refresh tokens, written by supabase-kt via multiplatform-settings). Restoring it
    on another phone would sign that phone in without Google, so it is excluded too.
+   datastore/rentmate_household.preferences_pb holds the selected household id
+   (RM-0016). It belongs to this sign-in only, so it is excluded as well.
 -->
 <full-backup-content>
     <exclude domain="database" path="rentmate.db" />
     <exclude domain="database" path="rentmate.db-wal" />
     <exclude domain="database" path="rentmate.db-shm" />
     <exclude domain="sharedpref" path="com.rentmate.app_preferences.xml" />
+    <exclude domain="file" path="datastore/rentmate_household.preferences_pb" />
 </full-backup-content>
