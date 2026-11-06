@@ -28,6 +28,7 @@ import com.rentmate.app.ui.feedback.FeedbackCenter
 import com.rentmate.app.ui.feedback.UndoQueue
 import com.rentmate.app.ui.feedback.UndoableAction
 import com.rentmate.app.ui.feedback.UserMessage
+import com.rentmate.app.ui.components.formatRandShort
 import com.rentmate.app.data.attachments.AttachmentParent
 import com.rentmate.app.data.attachments.AttachmentRepository
 import com.rentmate.app.data.attachments.PhotoLink
@@ -49,7 +50,14 @@ data class BillsUiState(
      * RM-0056: shares marked paid that are still inside their Undo window. The
      * screen shows them as paid; the server call runs when the window closes.
      */
-    val pendingPaidShares: Set<String> = emptySet()
+    val pendingPaidShares: Set<String> = emptySet(),
+    /** RM-0056: the selected filter chip on Money. */
+    val filter: BillFilter = BillFilter.Open,
+    /**
+     * RM-0056: payers whose payment the user marked received, still inside the
+     * Undo window. Their settle-up row is hidden until the window closes.
+     */
+    val pendingReceived: Set<String> = emptySet()
 ) {
     /** True when [shareId] is paid on the server or waiting to be marked paid. */
     fun isShownPaid(shareId: String, isPaid: Boolean): Boolean = isPaid || shareId in pendingPaidShares
@@ -100,6 +108,8 @@ class BillsViewModel @Inject constructor(
             runCatching { billsRepository.refresh() }
                 .onSuccess { _state.update { it.copy(loading = false) } }
                 .onFailure { e -> _state.update { it.copy(loading = false, error = ErrorMapper.toMessage(e)) } }
+            // RM-0056: settle-up sits on the Money screen, so it loads with the bills.
+            loadSettleUp(quiet = true)
             loadPhotos()
         }
     }
@@ -163,8 +173,19 @@ class BillsViewModel @Inject constructor(
         }
     }
 
-    /** US-11: the smallest set of payments that would settle the household right now. */
-    fun loadSettleUp() {
+    /** RM-0056: selects a filter chip on Money. */
+    fun setFilter(filter: BillFilter) {
+        Log.d(TAG, "filter -> $filter")
+        _state.update { it.copy(filter = filter) }
+    }
+
+    /**
+     * US-11: the smallest set of payments that would settle the household right now.
+     *
+     * @param quiet true when it runs as part of [refresh]: a failure then shows
+     *   no snackbar, because the refresh already reports being offline.
+     */
+    fun loadSettleUp(quiet: Boolean = false) {
         viewModelScope.launch {
             val householdId = currentHousehold.id.first() ?: return@launch
             _state.value = _state.value.copy(settleUpLoading = true)
@@ -173,33 +194,45 @@ class BillsViewModel @Inject constructor(
             }.onSuccess { _state.value = _state.value.copy(settleUpLoading = false, settleUp = it) }
                 .onFailure {
                     _state.value = _state.value.copy(settleUpLoading = false)
-                    feedback.failure(it, R.string.feedback_settle_up_failed, retry = ::loadSettleUp)
+                    if (!quiet) feedback.failure(it, R.string.feedback_settle_up_failed, retry = { loadSettleUp() })
                 }
         }
     }
 
-    /** RM-0010: only the creditor confirms; [fromUserId] is the person who paid the caller. */
+    /**
+     * RM-0010: only the creditor confirms; [fromUserId] is the person who paid the caller.
+     *
+     * RM-0056: the row disappears at once and a snackbar ("Marked R 300 as
+     * received") offers Undo for 5 s. confirm_settlement runs only after that,
+     * so Undo needs no server call. See [UndoQueue].
+     */
     fun confirmSettlement(fromUserId: String, amount: Double) {
-        viewModelScope.launch {
-            val householdId = currentHousehold.id.first() ?: return@launch
-            runCatching {
-                supabase.postgrest.rpc("confirm_settlement", ConfirmSettlementParams(householdId, fromUserId, amount).toRpcParams())
-            }.onSuccess {
-                val fromName = _state.value.settleUp?.firstOrNull { it.from_user_id == fromUserId }?.from_display_name
-                activity.settlementConfirmed(fromName ?: "a housemate", amount)
-                _state.value = _state.value.copy(settleUp = null)
-                refresh()
-            }.onFailure {
-                // The dialog stays open; the snackbar is drawn in front of it (see BillsScreen).
-                feedback.failure(
-                    it, R.string.feedback_confirm_settlement_failed,
-                    retry = { confirmSettlement(fromUserId, amount) }
-                )
-            }
-        }
+        val fromName = _state.value.settleUp?.firstOrNull { it.from_user_id == fromUserId }?.from_display_name
+        Log.d(TAG, "confirmSettlement from=$fromUserId, waiting for Undo")
+        undoQueue.submit(
+            UserMessage(R.string.undo_marked_received, formatArgs = listOf(formatRandShort(amount))),
+            UndoableAction(
+                key = "received:$fromUserId",
+                hide = { _state.update { it.copy(pendingReceived = it.pendingReceived + fromUserId) } },
+                restore = { _state.update { it.copy(pendingReceived = it.pendingReceived - fromUserId) } },
+                commit = {
+                    val householdId = currentHousehold.id.first() ?: error("no household")
+                    supabase.postgrest.rpc(
+                        "confirm_settlement",
+                        ConfirmSettlementParams(householdId, fromUserId, amount).toRpcParams()
+                    )
+                    activity.settlementConfirmed(fromName ?: "a housemate", amount)
+                    _state.update { it.copy(pendingReceived = it.pendingReceived - fromUserId) }
+                    refresh()
+                },
+                onCommitFailed = {
+                    feedback.failure(
+                        it, R.string.feedback_confirm_settlement_failed,
+                        retry = { confirmSettlement(fromUserId, amount) }
+                    )
+                }
+            )
+        )
     }
 
-    fun dismissSettleUp() {
-        _state.value = _state.value.copy(settleUp = null)
-    }
 }

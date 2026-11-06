@@ -302,4 +302,16 @@
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>
     </plurals>
+    <string name="money_filter_open">Open</string>
+    <string name="money_filter_paid">Paid</string>
+    <string name="money_filter_repeating">Repeating</string>
+    <string name="money_no_bills_in_filter">No bills here.</string>
+    <string name="money_split_equally">split equally</string>
+    <string name="money_split_percent">split by percentage</string>
+    <string name="money_split_exact">exact amounts</string>
+    <string name="money_you_pay">You pay %1$s</string>
+    <string name="money_pays_you">%1$s pays you</string>
+    <string name="money_pays">%1$s pays %2$s</string>
+    <string name="money_tap_received">Tap when you have received it</string>
+    <string name="undo_marked_received">Marked %1$s as received</string>
 </resources>

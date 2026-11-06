@@ -1,80 +1,89 @@
 package com.rentmate.app.ui.screens
 
-import androidx.compose.ui.res.pluralStringResource
 import android.util.Log
-import androidx.compose.ui.res.stringResource
-import com.rentmate.app.R
-import com.rentmate.app.data.RepeatMode
-import com.rentmate.app.data.isRepeating
-import com.rentmate.app.ui.components.EmptyState
-import com.rentmate.app.ui.components.ErrorState
-import com.rentmate.app.ui.components.InlineError
-import com.rentmate.app.ui.components.LoadingState
-import com.rentmate.app.ui.components.RefreshingIndicator
-import com.rentmate.app.ui.components.rememberHasStartedLoading
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentmate.app.R
 import com.rentmate.app.data.BillWithSharesRow
+import com.rentmate.app.data.RepeatMode
+import com.rentmate.app.data.SettleUpRow
+import com.rentmate.app.data.SplitMode
 import com.rentmate.app.data.attachments.PhotoLink
+import com.rentmate.app.data.isRepeating
+import com.rentmate.app.ui.components.AdaptiveList
 import com.rentmate.app.ui.components.AttachmentThumbnails
+import com.rentmate.app.ui.components.ChoiceChips
+import com.rentmate.app.ui.components.EmptyState
+import com.rentmate.app.ui.components.ErrorState
+import com.rentmate.app.ui.components.InlineError
+import com.rentmate.app.ui.components.ListAmount
+import com.rentmate.app.ui.components.ListDivider
+import com.rentmate.app.ui.components.ListGroup
+import com.rentmate.app.ui.components.ListHeading
+import com.rentmate.app.ui.components.ListRow
+import com.rentmate.app.ui.components.LoadingState
 import com.rentmate.app.ui.components.MemberAvatar
-import androidx.compose.material3.SnackbarHost
-import com.rentmate.app.ui.feedback.LocalSnackbarHostState
 import com.rentmate.app.ui.components.PillTone
-import com.rentmate.app.ui.components.PrimaryButton
-import com.rentmate.app.ui.components.RentMateCard
+import com.rentmate.app.ui.components.RefreshingIndicator
 import com.rentmate.app.ui.components.ScreenHeader
 import com.rentmate.app.ui.components.SecondaryButton
 import com.rentmate.app.ui.components.StatusPill
-import com.rentmate.app.ui.components.formatRand
-import com.rentmate.app.ui.theme.tabular
-import com.rentmate.app.ui.theme.Sizes
-import com.rentmate.app.ui.components.ChipRow
-import com.rentmate.app.ui.components.AdaptiveList
+import com.rentmate.app.ui.components.formatRandShort
+import com.rentmate.app.ui.components.fullWidthItem
+import com.rentmate.app.ui.components.rememberHasStartedLoading
 import com.rentmate.app.ui.theme.Spacing
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 private const val TAG = "BillsScreen"
 
-// S4 - bills by status, with settle-up (US-6, US-11).
+/**
+ * S4 - Money (US-6, US-11). RM-0056: bills and settle-up on one screen, as
+ * rows instead of cards, like the redesign mockup.
+ *
+ * Filter chips (Open, Paid, Repeating) pick the bills. Each bill is one row:
+ * title, a muted line such as "Monthly · split equally · 4", and the amount.
+ * Tapping a bill opens its shares under it, where the person owed marks a
+ * share paid. "Settle up" lists the payments that would settle the household,
+ * one row each. The person paid taps theirs to mark it received; a snackbar
+ * offers Undo for 5 s. There is no settle-up dialog any more.
+ *
+ * At 600 dp and wider the bills and settle-up sit side by side.
+ */
 @Composable
 fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     Scaffold(
-        topBar = { ScreenHeader(title = stringResource(R.string.nav_bills), subtitle = pluralStringResource(R.plurals.bills_count, state.bills.size, state.bills.size)) },
+        topBar = { ScreenHeader(title = stringResource(R.string.nav_money)) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddBill) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_bill_title))
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(Spacing.screen)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                PrimaryButton(stringResource(R.string.settle_up), onClick = { viewModel.loadSettleUp() })
-            }
-
+        Column(modifier = Modifier.fillMaxWidth().padding(padding).padding(horizontal = Spacing.screen)) {
             val hasStarted = rememberHasStartedLoading(state.loading)
             LaunchedEffect(state.error) { state.error?.let { Log.w(TAG, "Load failed: $it") } }
             val genericError = state.error?.let { stringResource(it) } ?: stringResource(R.string.state_error_generic)
@@ -89,143 +98,193 @@ fun BillsScreen(onAddBill: () -> Unit, viewModel: BillsViewModel = hiltViewModel
                     actionLabel = stringResource(R.string.empty_bills_action),
                     onAction = onAddBill
                 )
-                else -> {
-                    if (state.loading) RefreshingIndicator()
-                    if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
-                    // RM-0056: two columns of bills at 600 dp and wider.
-                    AdaptiveList(modifier = Modifier.padding(top = Spacing.md)) {
-                        items(state.bills, key = { it.id }) { bill -> BillRow(bill, photos = state.photos[bill.id].orEmpty(), canMarkPaid = bill.issued_by_user_id == state.currentUserId && !bill.pending, onPay = viewModel::payShare, onStopRepeat = viewModel::stopRepeat, isPaid = state::isShownPaid) }
-                    }
-                }
+                else -> MoneyContent(state, genericError, viewModel)
             }
         }
-    }
-
-    if (state.settleUp != null || state.settleUpLoading) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissSettleUp() },
-            title = { Text(stringResource(R.string.settle_up)) },
-            text = {
-              Column {
-                if (state.settleUpLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    val suggestions = state.settleUp.orEmpty()
-                    if (suggestions.isEmpty()) {
-                        Text(stringResource(R.string.settle_up_none))
-                    } else {
-                        Column {
-                            suggestions.forEach { s ->
-                                Column(modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs)) {
-                                    Text(stringResource(R.string.settle_up_payment, s.from_display_name, s.to_display_name, formatRand(s.amount)))
-                                    if (s.to_user_id == state.currentUserId) {
-                                        // Only the person who is owed can confirm they received it (RM-0010).
-                                        SecondaryButton(
-                                            stringResource(R.string.bills_confirm_received),
-                                            onClick = { viewModel.confirmSettlement(s.from_user_id, s.amount) }
-                                        )
-                                    } else if (s.from_user_id == state.currentUserId) {
-                                        Text(
-                                            stringResource(R.string.bills_ask_to_confirm, s.to_display_name),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    } else {
-                                        Text(
-                                            stringResource(R.string.bills_waiting_for, s.to_display_name),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                // RM-0052: the dialog is its own window, so the app's snackbar would be
-                // hidden behind it. Show the same snackbar state here, in front.
-                SnackbarHost(LocalSnackbarHostState.current)
-              }
-            },
-            confirmButton = {
-                PrimaryButton(stringResource(R.string.close), onClick = { viewModel.dismissSettleUp() })
-            }
-        )
     }
 }
 
 @Composable
+private fun MoneyContent(state: BillsUiState, genericError: String, viewModel: BillsViewModel) {
+    var expandedBill by remember { mutableStateOf<String?>(null) }
+    val shown = filterBills(state.bills, state.filter, state::isShownPaid)
+    // RM-0056: one column on a phone; bills and settle-up side by side from 600 dp.
+    AdaptiveList(contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = Spacing.xxl + Spacing.xxl)) {
+        fullWidthItem(key = "top") {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                if (state.loading) RefreshingIndicator()
+                if (state.error != null) InlineError(message = genericError, onRetry = viewModel::refresh)
+                ChoiceChips(
+                    options = BillFilter.entries,
+                    selected = state.filter,
+                    onSelect = viewModel::setFilter,
+                    label = { stringResource(it.labelRes) }
+                )
+            }
+        }
+        item(key = "bills") {
+            if (shown.isEmpty()) {
+                Text(
+                    stringResource(R.string.money_no_bills_in_filter),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                ListGroup {
+                    shown.forEachIndexed { index, bill ->
+                        if (index > 0) ListDivider()
+                        BillRow(
+                            bill = bill,
+                            expanded = expandedBill == bill.id,
+                            onToggle = { expandedBill = if (expandedBill == bill.id) null else bill.id },
+                            photos = state.photos[bill.id].orEmpty(),
+                            canMarkPaid = bill.issued_by_user_id == state.currentUserId && !bill.pending,
+                            onPay = viewModel::payShare,
+                            onStopRepeat = viewModel::stopRepeat,
+                            isPaid = state::isShownPaid
+                        )
+                    }
+                }
+            }
+        }
+        item(key = "settle") {
+            SettleUpSection(state, onReceived = viewModel::confirmSettlement)
+        }
+    }
+}
+
+private val BillFilter.labelRes: Int
+    get() = when (this) {
+        BillFilter.Open -> R.string.money_filter_open
+        BillFilter.Paid -> R.string.money_filter_paid
+        BillFilter.Repeating -> R.string.money_filter_repeating
+    }
+
+/** The muted second line of a bill row: "Monthly · split equally · 4" or "Due 30 Nov · Sipho". */
+@Composable
+private fun billSummary(bill: BillWithSharesRow, issuerName: String?): String {
+    val parts = mutableListOf<String>()
+    if (isRepeating(bill.repeat, bill.repeat_stopped)) {
+        parts += stringResource(if (RepeatMode.fromWire(bill.repeat) == RepeatMode.Weekly) R.string.repeat_weekly else R.string.repeat_monthly)
+        parts += stringResource(
+            when (bill.split_method) {
+                SplitMode.Percentage.wire -> R.string.money_split_percent
+                SplitMode.ExactAmount.wire -> R.string.money_split_exact
+                else -> R.string.money_split_equally
+            }
+        )
+        parts += bill.bill_shares.size.toString()
+    } else {
+        parts += stringResource(R.string.bills_due, shortDate(bill.due_date))
+        issuerName?.let { parts += it }
+    }
+    if (bill.pending) parts += stringResource(R.string.sync_pending)
+    return parts.joinToString(" · ")
+}
+
+/** "30 Nov" in the app language, or the raw date if it cannot be read. */
+@Composable
+private fun shortDate(isoDate: String): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(isoDate, locale) {
+        runCatching { LocalDate.parse(isoDate.take(10)).format(DateTimeFormatter.ofPattern("d MMM", locale)) }.getOrDefault(isoDate.take(10))
+    }
+}
+
 /**
- * One bill card. Only the bill's creator (the person owed) may mark shares paid (RM-0010).
- * RM-0017: a bill saved offline shows "Waiting to sync" and no server actions until it is uploaded.
+ * One bill row. Tapping it shows the shares under it. Only the bill's creator
+ * (the person owed) may mark shares paid (RM-0010). RM-0017: a bill saved
+ * offline says "Waiting to sync" and offers no server actions until it uploads.
  */
+@Composable
 private fun BillRow(
     bill: BillWithSharesRow,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     photos: List<PhotoLink>,
     canMarkPaid: Boolean,
     onPay: (String) -> Unit,
     onStopRepeat: (String) -> Unit,
-    isPaid: (shareId: String, isPaid: Boolean) -> Boolean = { _, paid -> paid }
+    isPaid: (shareId: String, isPaid: Boolean) -> Boolean
 ) {
-    val allPaid = bill.bill_shares.isNotEmpty() && bill.bill_shares.all { isPaid(it.id, it.is_paid) }
-    RentMateCard {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(bill.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            Text(formatRand(bill.amount), style = MaterialTheme.typography.titleMedium.tabular())
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                stringResource(R.string.bills_due, bill.due_date.take(10)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f)
-            )
-            // Wraps the pills under each other at large font sizes instead of clipping them.
-            ChipRow(spacing = Spacing.xs) {
-                if (bill.pending) StatusPill(stringResource(R.string.sync_pending), PillTone.Neutral)
-                if (allPaid) StatusPill(stringResource(R.string.bills_paid), PillTone.Positive) else StatusPill(stringResource(R.string.bills_outstanding), PillTone.Attention)
-            }
-        }
-        if (isRepeating(bill.repeat, bill.repeat_stopped)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    stringResource(if (RepeatMode.fromWire(bill.repeat) == RepeatMode.Weekly) R.string.bills_repeats_weekly else R.string.bills_repeats_monthly),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (canMarkPaid) SecondaryButton(stringResource(R.string.bills_stop_repeat), onClick = { onStopRepeat(bill.id) })
-            }
-        }
-        if (photos.isNotEmpty()) AttachmentThumbnails(photos, modifier = Modifier.padding(top = Spacing.xs))
-        bill.bill_shares.forEach { share ->
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val name = share.profiles?.display_name ?: stringResource(R.string.housemate_fallback)
-                MemberAvatar(name, size = Sizes.avatarRow, userId = share.user_id)
-                Text(
-                    stringResource(R.string.bills_share, name, formatRand(share.amount_owed)),
-                    style = MaterialTheme.typography.bodyMedium.tabular(),
-                    modifier = Modifier.weight(1f).padding(start = Spacing.sm)
-                )
-                if (isPaid(share.id, share.is_paid)) {
-                    StatusPill(stringResource(R.string.bills_paid), PillTone.Positive)
-                } else if (canMarkPaid) {
-                    SecondaryButton(stringResource(R.string.bills_mark_paid), onClick = { onPay(share.id) })
-                } else {
-                    StatusPill(stringResource(R.string.bills_owes), PillTone.Attention)
+    val issuer = bill.bill_shares.firstOrNull { it.user_id == bill.issued_by_user_id }?.profiles?.display_name
+    ListRow(
+        title = bill.title,
+        supporting = billSummary(bill, issuer),
+        emphasised = true,
+        trailing = { ListAmount(formatRandShort(bill.amount)) },
+        onClick = onToggle
+    )
+    if (!expanded) return
+    val housemate = stringResource(R.string.housemate_fallback)
+    bill.bill_shares.forEach { share ->
+        ListDivider()
+        val name = share.profiles?.display_name ?: housemate
+        ListRow(
+            title = stringResource(R.string.bills_share, name, formatRandShort(share.amount_owed)),
+            leading = { MemberAvatar(name, userId = share.user_id) },
+            trailing = {
+                when {
+                    isPaid(share.id, share.is_paid) -> StatusPill(stringResource(R.string.bills_paid), PillTone.Positive)
+                    canMarkPaid -> SecondaryButton(stringResource(R.string.bills_mark_paid), onClick = { onPay(share.id) })
+                    else -> StatusPill(stringResource(R.string.bills_owes), PillTone.Attention)
                 }
             }
+        )
+    }
+    if (photos.isNotEmpty()) {
+        AttachmentThumbnails(photos, modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm))
+    }
+    if (canMarkPaid && isRepeating(bill.repeat, bill.repeat_stopped)) {
+        SecondaryButton(
+            stringResource(R.string.bills_stop_repeat),
+            onClick = { onStopRepeat(bill.id) },
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)
+        )
+    }
+}
+
+/**
+ * "Settle up": one row per payment. "You pay Sipho" says who must confirm it;
+ * "Thandi pays you" can be tapped to mark it received, with Undo.
+ */
+@Composable
+private fun SettleUpSection(state: BillsUiState, onReceived: (fromUserId: String, amount: Double) -> Unit) {
+    val me = state.currentUserId
+    val rows = visibleSettleUp(state.settleUp.orEmpty(), me, state.pendingReceived)
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        ListHeading(stringResource(R.string.settle_up))
+        when {
+            state.settleUp == null && state.settleUpLoading -> RefreshingIndicator()
+            rows.isEmpty() -> ListGroup { ListRow(title = stringResource(R.string.settle_up_none)) }
+            else -> ListGroup(rows) { row -> SettleRow(row, settleRole(row, me), onReceived) }
         }
+    }
+}
+
+@Composable
+private fun SettleRow(row: SettleUpRow, role: SettleRole, onReceived: (String, Double) -> Unit) {
+    val amount: @Composable () -> Unit = { ListAmount(formatRandShort(row.amount)) }
+    when (role) {
+        SettleRole.YouPay -> ListRow(
+            title = stringResource(R.string.money_you_pay, row.to_display_name),
+            supporting = stringResource(R.string.bills_ask_to_confirm, row.to_display_name),
+            leading = { MemberAvatar(row.from_display_name, userId = row.from_user_id) },
+            trailing = amount
+        )
+        SettleRole.PaysYou -> ListRow(
+            title = stringResource(R.string.money_pays_you, row.from_display_name),
+            supporting = stringResource(R.string.money_tap_received),
+            leading = { MemberAvatar(row.from_display_name, userId = row.from_user_id) },
+            trailing = amount,
+            // Only the person who is owed can confirm they received it (RM-0010).
+            onClick = { onReceived(row.from_user_id, row.amount) }
+        )
+        SettleRole.Between -> ListRow(
+            title = stringResource(R.string.money_pays, row.from_display_name, row.to_display_name),
+            supporting = stringResource(R.string.bills_waiting_for, row.to_display_name),
+            leading = { MemberAvatar(row.from_display_name, userId = row.from_user_id) },
+            trailing = amount
+        )
     }
 }

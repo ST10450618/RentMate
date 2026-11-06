@@ -297,4 +297,16 @@
         <item quantity="one">Usuku olu-%d</item>
         <item quantity="other">Iintsuku ezi-%d</item>
     </plurals>
+    <string name="money_filter_open">Ezivulekileyo</string>
+    <string name="money_filter_paid">Ezihlawuliweyo</string>
+    <string name="money_filter_repeating">Eziphindayo</string>
+    <string name="money_no_bills_in_filter">Akukho zibhatalo apha.</string>
+    <string name="money_split_equally">zahlulwe ngokulinganayo</string>
+    <string name="money_split_percent">zahlulwe ngepesenti</string>
+    <string name="money_split_exact">izixa ezichanekileyo</string>
+    <string name="money_you_pay">Uhlawula u-%1$s</string>
+    <string name="money_pays_you">U-%1$s uyakuhlawula</string>
+    <string name="money_pays">U-%1$s uhlawula u-%2$s</string>
+    <string name="money_tap_received">Cofa xa uyifumene</string>
+    <string name="undo_marked_received">U-%1$s uphawulwe njengofunyenweyo</string>
 </resources>
