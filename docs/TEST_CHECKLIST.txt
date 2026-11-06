@@ -1,0 +1,112 @@
+RENTMATE DEVICE TEST CHECKLIST
+==============================
+Tickets: RM-0047 (James's work), plus Michael's RM-0001 to RM-0004
+Tester: Ali (tablet)          Date: ____________
+
+SETUP
+-----
+[ ] Build from part-3-staging after PR #6 is merged (or from part-3-james before that).
+[ ] Live database is up to date: migrations 0001-0011 are applied (done 2026-11-06).
+[ ] Two test accounts in the SAME household:
+      Account A: ______________________   Account B: ______________________
+[ ] Second device for the two-device checks: ______________________
+[ ] Tablet Android version: ______   Older phone (Android 12 or lower, if possible): ______
+
+Mark each line: [x] pass   [!] fail (write what happened under it)
+
+
+1. NUMBER KEYPAD AND NO USER IDS (RM-0011)
+------------------------------------------
+[ ] Add Bill: the amount field opens a number keypad with a decimal point.
+[ ] Add Chore: the points field opens a number keypad.
+[ ] Chores, Bills and Shopping: every person is shown by name, never a long ID
+    like 3f2a9c1e-....
+[ ] A housemate with no display name shows as "Housemate", not an ID.
+
+
+2. SETTINGS FOLLOW THE USER (RM-0005)
+-------------------------------------
+[ ] Device 1, account A: open Settings and turn OFF "Chores assigned to me".
+[ ] Device 2: sign in as account A. "Chores assigned to me" is OFF there too.
+[ ] Repeat with "Show points leaderboard": it matches on both devices.
+[ ] Change the language on device 1, then sign in on device 2: same language.
+
+
+3. LANDLORD EMAIL AND STATUS RULES (RM-0009)
+--------------------------------------------
+[ ] Account A: log two maintenance requests.
+[ ] Tap "Send to landlord". The first time, it asks for the landlord's email.
+    Enter one and save.
+[ ] An email app opens with:
+      [ ] subject "Maintenance request - <household name>"
+      [ ] both faults numbered, each with category, urgency, date and description
+[ ] Back in the app, both requests now show "Sent".
+[ ] Tap Send again: it does NOT ask for the email again.
+[ ] Account B (did not log or send): the requests show "Only the housemate who
+    logged or sent this request can update it." and no status button.
+[ ] Account A: "Mark as acknowledged", then "Mark as resolved" both work.
+[ ] Enter an invalid email (e.g. "abc"): an error shows and nothing is saved.
+
+
+4. LANGUAGE PICKER (RM-0026)
+----------------------------
+[ ] Settings > Language shows English, Afrikaans, isiXhosa (each in its own name).
+[ ] Pick Afrikaans: every screen changes at once, including the bottom nav bar.
+[ ] Pick isiXhosa: same.
+[ ] Force-stop the app (Settings > Apps > RentMate > Force stop), reopen:
+    still the language you picked.
+[ ] Switching language does NOT make the fingerprint lock ask a second time.
+[ ] The app looks the same as before: colours, status bar, splash screen.
+[ ] Android 13+ only: phone Settings > Apps > RentMate > Language shows the
+    same language as the app.
+[ ] Repeat the force-stop check on the older phone, if you have one.
+
+
+5. PHOTO ATTACHMENTS (RM-0027, RM-0028, RM-0029)
+-----------------------------------------------
+[ ] New maintenance request > "Choose photo": pick a big photo.
+      [ ] a progress bar moves
+      [ ] it says "Uploaded (... KB)" with a number under 1000
+[ ] "Take photo": take a photo holding the device upright. It stays upright.
+[ ] Turn on airplane mode, start an upload: a failure message and "Retry" show.
+    Turn airplane mode off, tap Retry: it uploads.
+[ ] "Log request" is disabled while a photo is still uploading.
+[ ] The saved request shows a thumbnail. Tapping it opens the photo full size.
+[ ] Add Bill: attach a photo, save. The bill shows the thumbnail.
+[ ] Account B on the other device sees the same thumbnails.
+[ ] "Send to landlord": the email lists a photo link under each fault.
+[ ] Open a photo link in a browser where you are NOT logged in: the photo opens.
+
+
+6. MICHAEL'S PART 2 FIXES (RM-0001 to RM-0004)
+---------------------------------------------
+[ ] RM-0001: with airplane mode on, open every screen (Dashboard, Bills,
+    Chores, Shopping, Maintenance, Settings). Each shows a friendly error,
+    and nothing crashes.
+[ ] RM-0002: sign in, swipe the app away (kill it), reopen: lands on the
+    Dashboard without signing in again.
+[ ] RM-0003: on the Dashboard, press Back: the app closes. It never goes back
+    to Login or loops.
+[ ] RM-0004: no screen ever shows raw error text (e.g. "HttpRequestException",
+    "PGRST", stack traces) - only plain messages.
+
+
+7. TRANSLATION REVIEW (RM-0025) - for a native speaker, not Ali
+---------------------------------------------------------------
+[ ] Afrikaans speaker reads every screen in Afrikaans.
+      Reviewer: ______________________   Date: ____________
+[ ] isiXhosa speaker reads every screen in isiXhosa (check plurals like
+    "iiyure ezi-5" closely).
+      Reviewer: ______________________   Date: ____________
+Write wrong wording here (screen, what it says, what it should say):
+
+
+
+
+
+WHEN DONE
+---------
+Send the failures to James and Michael. If everything passes:
+  ajiya ticket done RM-0047 --test
+  ajiya ticket done RM-0001 --test   (and RM-0002, RM-0003, RM-0004; Michael's call)
+  ajiya ticket done RM-0025 --test   (after both reviewers sign; names go in README)
