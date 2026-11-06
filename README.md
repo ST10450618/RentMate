@@ -164,7 +164,16 @@ The validators are covered by unit tests, including a fuzz test that feeds them 
 
 **Server-side truth.** Anything housemates must agree on is computed once in Postgres, not separately on each phone: chore rotation, debt simplification and permission checks.
 
-**Localisation.** All UI text lives in string resources with plural forms, translated into Afrikaans (`values-af`) and isiXhosa (`values-xh`), two official South African languages.
+**Localisation.** All UI text lives in string resources with plural forms, translated into Afrikaans (`values-af`) and isiXhosa (`values-xh`), two official South African languages. The language is picked in Settings, where each language is shown in its own name. The switch applies at once through Android's per-app language support (`AppCompatDelegate.setApplicationLocales`), is kept after a restart, and is saved to the user's profile so it follows them to a new phone. `TranslationCompletenessTest` and lint's `MissingTranslation` check fail the build if a key is missing from either language.
+
+### Translation review
+
+Each translation must be checked by a first-language speaker before the final release. The reviewer fills in their name and the date below.
+
+| Language | Folder | Status | Reviewer | Date reviewed |
+|---|---|---|---|---|
+| Afrikaans | `values-af` | Machine-drafted, needs review by an Afrikaans speaker | TBD | TBD |
+| isiXhosa | `values-xh` | Machine-drafted, needs review by an isiXhosa speaker | TBD | TBD |
 
 **Privacy.** Data is scoped to a household by Row Level Security. Biometric data never leaves the device. See [PRIVACY.md](PRIVACY.md).
 
@@ -376,7 +385,8 @@ cd RentMate.Api && dotnet test # reference API tests
 |---|---|
 | `FormValidationTest` | Every input rule, plus a 5,000-input fuzz test that no validator throws |
 | `MaintenanceRequestTest` | Maintenance status transitions and title validation |
-| `AppLanguageTest` | Language selection mapping |
+| `AppLanguageTest` | Language selection mapping, including locale list to language |
+| `TranslationCompletenessTest` | Every translatable key is in `values-af` and `values-xh`, with the same format arguments |
 | `RentMate.Api.Tests` | Debt simplification and chore rotation algorithms (reference implementation) |
 
 Every feature is also checked on a physical device against its ticket's "Done when" check in `ajiya/`.

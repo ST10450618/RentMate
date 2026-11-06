@@ -12,13 +12,12 @@ android {
     namespace = "com.rentmate.app"
     compileSdk = 36
     lint {
-        // Afrikaans and isiXhosa cover the Settings screen; remaining screens are
-        // translated for the final POE, where multi-language support is assessed.
         warningsAsErrors = false
-        disable += "MissingTranslation"
         // RM-0024: every UI string lives in strings.xml. Compose text is guarded by
         // NoHardcodedUiStringsTest, which lint cannot see.
-        error += setOf("HardcodedText", "SetTextI18n")
+        // RM-0025: values-af and values-xh must translate every key
+        // (also checked by TranslationCompletenessTest).
+        error += setOf("HardcodedText", "SetTextI18n", "MissingTranslation", "ExtraTranslation")
     }
     defaultConfig {
         applicationId = "com.rentmate.app"
